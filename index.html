@@ -101,37 +101,6 @@
             opacity: 0.9;
         }
 
-        /* 이미지 선택기 */
-        .image-selector {
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .image-selector label {
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .image-selector select {
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            font-family: 'Pretendard', sans-serif;
-            border: none;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            cursor: pointer;
-            min-width: 150px;
-        }
-
-        .image-selector select:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
-        }
-
         /* 메인 컨테이너 */
         .main-container {
             background: white;
@@ -378,16 +347,6 @@
                 font-size: 0.75rem;
             }
 
-            .image-selector {
-                flex-direction: column;
-                gap: 4px;
-            }
-
-            .image-selector select {
-                min-width: 120px;
-                font-size: 0.8rem;
-            }
-
             .color-btn {
                 width: 28px;
                 height: 28px;
@@ -408,11 +367,6 @@
     <header class="header">
         <h1>🎨 색칠 공부</h1>
         <p>색상을 선택하고 영역을 클릭하여 색칠하세요!</p>
-        <!-- 이미지 선택 -->
-        <div class="image-selector">
-            <label for="imageSelect">🖼️ 이미지 선택:</label>
-            <select id="imageSelect"></select>
-        </div>
     </header>
 
     <main class="main-container">
@@ -500,8 +454,6 @@
         const resetBtn = document.getElementById('resetBtn');
         const saveBtn = document.getElementById('saveBtn');
         const statusMessage = document.getElementById('statusMessage');
-        const imageSelect = document.getElementById('imageSelect');
-
         // ============================================
         // 초기화
         // ============================================
@@ -509,31 +461,9 @@
             // 랜덤 이미지 선택
             state.currentImageIndex = Math.floor(Math.random() * IMAGES.length);
 
-            createImageSelector();
             createColorPalette();
             loadSvg(IMAGES[state.currentImageIndex].file);
             setupEventListeners();
-        }
-
-        // 이미지 선택 드롭다운 생성
-        function createImageSelector() {
-            IMAGES.forEach((img, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = img.name;
-                imageSelect.appendChild(option);
-            });
-
-            // 랜덤 선택된 이미지를 드롭다운에 반영
-            imageSelect.value = state.currentImageIndex;
-
-            imageSelect.addEventListener('change', (e) => {
-                const index = parseInt(e.target.value);
-                state.currentImageIndex = index;
-                state.history = [];  // 히스토리 초기화
-                updateUndoButton();
-                loadSvg(IMAGES[index].file);
-            });
         }
 
         // 컬러 팔레트 생성
