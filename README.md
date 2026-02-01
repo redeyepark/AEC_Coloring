@@ -29,7 +29,11 @@ AEC_BG/
 ├── _AEC/
 │   ├── DavidHockney.svg    # David Hockney 스타일
 │   ├── FridaKahlo.svg      # Frida Kahlo 스타일
-│   └── VincentvanGogh.svg  # Vincent van Gogh 스타일
+│   ├── VincentvanGogh.svg  # Vincent van Gogh 스타일
+│   ├── Bane.svg            # Bane 스타일
+│   ├── Batman.svg          # Batman 스타일
+│   ├── DoctorStrange.svg   # Doctor Strange 스타일
+│   └── Joker.svg           # Joker 스타일
 ├── .moai/
 │   ├── project/            # 프로젝트 문서
 │   └── specs/
