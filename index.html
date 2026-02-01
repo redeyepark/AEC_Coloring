@@ -766,14 +766,6 @@
                 }
                 ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
 
-                // 달력 영역 구분선
-                ctx.strokeStyle = '#e0e0e0';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(0, imageHeight);
-                ctx.lineTo(phoneWidth, imageHeight);
-                ctx.stroke();
-
                 // 달력 그리기
                 drawCalendar(ctx, 0, imageHeight, phoneWidth, calendarHeight);
 
@@ -808,15 +800,15 @@
             ctx.fillRect(x, y, width, height);
 
             const padding = 40;
-            const headerHeight = 120;
+            const headerHeight = 100;
             const dayHeight = (height - headerHeight - padding * 2) / 7;
             const dayWidth = (width - padding * 2) / 7;
 
             // 월 타이틀 (영문)
             ctx.fillStyle = '#333333';
-            ctx.font = 'bold 64px Pretendard, sans-serif';
+            ctx.font = 'bold 48px Pretendard, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(monthNames[month] + ' ' + year, x + width / 2, y + padding + 60);
+            ctx.fillText(monthNames[month] + ' ' + year, x + width / 2, y + padding + 45);
 
             // 요일 헤더 (영문)
             const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
