@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>색칠 공부 - SVG Coloring Book</title>
+    <style>
+        /* Pretendard 폰트 */
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Thin.woff2') format('woff2');
+            font-weight: 100;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-ExtraLight.woff2') format('woff2');
+            font-weight: 200;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Light.woff2') format('woff2');
+            font-weight: 300;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2') format('woff2');
+            font-weight: 500;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-SemiBold.woff2') format('woff2');
+            font-weight: 600;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-ExtraBold.woff2') format('woff2');
+            font-weight: 800;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Pretendard';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Black.woff2') format('woff2');
+            font-weight: 900;
+            font-display: swap;
+        }
+
+        /* 전역 스타일 초기화 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
+
+        /* 헤더 스타일 */
+        .header {
+            text-align: center;
+            margin-bottom: 8px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2px;
+        }
+
+        .header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* 메인 컨테이너 */
+        .main-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            max-width: 95vw;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* SVG 영역 - 폴라로이드 스타일 */
+        .svg-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            overflow: hidden;
+            min-height: 0;
+            min-width: 0;
+        }
+
+        .polaroid-frame {
+            position: relative;
+            background: #ffffff;
+            padding: 10px 10px 40px 10px;
+            box-shadow:
+                0 4px 6px rgba(0, 0, 0, 0.1),
+                0 15px 40px rgba(0, 0, 0, 0.25),
+                inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        .polaroid-frame::after {
+            content: '🎨 My Coloring';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Pretendard', cursive;
+            font-size: 13px;
+            font-weight: 600;
+            color: #888;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        #coloringSvg {
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            background: #fefefe;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #coloringSvg svg {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* SVG path 스타일 - 클릭 가능한 영역 */
+        #coloringSvg path {
+            cursor: pointer;
+            transition: opacity 0.1s ease;
+        }
+
+        #coloringSvg path:hover {
+            opacity: 0.8;
+        }
+
+        /* 컬러 팔레트 */
+        .palette-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+
+        .palette-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .palette-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .selected-color-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .selected-color-preview {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 3px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .selected-color-text {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .color-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .color-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .color-btn.selected {
+            border-color: #495057;
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 흰색 버튼 특별 스타일 */
+        .color-btn[data-color="#FFFFFF"] {
+            border: 3px solid #dee2e6;
+        }
+
+        /* 컨트롤 버튼 */
+        .controls {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .control-btn {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .reset-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .reset-btn:hover {
+            background: #5a6268;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .save-btn:hover {
+            background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+        }
+
+        /* 상태 메시지 */
+        .status-bar {
+            text-align: center;
+            padding: 4px;
+            font-size: 0.8rem;
+            color: #6c757d;
+            flex-shrink: 0;
+        }
+
+        /* 반응형 */
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            .header p {
+                font-size: 0.75rem;
+            }
+
+            .color-btn {
+                width: 28px;
+                height: 28px;
+            }
+
+            .control-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+
+            .main-container {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🎨 색칠 공부</h1>
+        <p>색상을 선택하고 영역을 클릭하여 색칠하세요!</p>
+    </header>
+
+    <main class="main-container">
+        <!-- SVG 영역 - 폴라로이드 스타일 -->
+        <div class="svg-container">
+            <div class="polaroid-frame">
+                <div id="coloringSvg">로딩 중...</div>
+            </div>
+        </div>
+
+        <!-- 컬러 팔레트 -->
+        <section class="palette-section">
+            <div class="palette-header">
+                <span class="palette-title">🎨 색상 팔레트</span>
+                <div class="selected-color-display">
+                    <div id="selectedColorPreview" class="selected-color-preview" style="background-color: #FF0000;"></div>
+                    <span id="selectedColorText" class="selected-color-text">빨강</span>
+                </div>
+            </div>
+            <div id="colorPalette" class="color-palette"></div>
+        </section>
+
+        <!-- 컨트롤 버튼 -->
+        <div class="controls">
+            <button id="resetBtn" class="control-btn reset-btn">
+                🔄 처음으로
+            </button>
+            <button id="saveBtn" class="control-btn save-btn">
+                💾 저장하기
+            </button>
+        </div>
+
+        <!-- 상태 메시지 -->
+        <div id="statusMessage" class="status-bar">이미지 로딩 중...</div>
+    </main>
+
+    <script>
+        // ============================================
+        // 색상 팔레트 정의
+        // ============================================
+        const COLORS = [
+            { hex: '#FF0000', name: '빨강' },
+            { hex: '#FFA500', name: '주황' },
+            { hex: '#FFFF00', name: '노랑' },
+            { hex: '#008000', name: '초록' },
+            { hex: '#0000FF', name: '파랑' },
+            { hex: '#000080', name: '남색' },
+            { hex: '#800080', name: '보라' },
+            { hex: '#FFC0CB', name: '분홍' },
+            { hex: '#8B4513', name: '갈색' },
+            { hex: '#F5DEB3', name: '베이지' },
+            { hex: '#87CEEB', name: '하늘색' },
+            { hex: '#808080', name: '회색' },
+            { hex: '#FFFFFF', name: '지우개' },
+            { hex: '#000000', name: '검정' }
+        ];
+
+        // 상태 관리
+        const state = {
+            selectedColor: COLORS[0].hex,
+            originalSvgContent: null
+        };
+
+        // DOM 요소
+        const svgContainer = document.getElementById('coloringSvg');
+        const colorPalette = document.getElementById('colorPalette');
+        const selectedColorPreview = document.getElementById('selectedColorPreview');
+        const selectedColorText = document.getElementById('selectedColorText');
+        const resetBtn = document.getElementById('resetBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const statusMessage = document.getElementById('statusMessage');
+
+        // ============================================
+        // 초기화
+        // ============================================
+        function init() {
+            createColorPalette();
+            loadSvg();
+            setupEventListeners();
+        }
+
+        // 컬러 팔레트 생성
+        function createColorPalette() {
+            COLORS.forEach((color, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'color-btn' + (index === 0 ? ' selected' : '');
+                btn.style.backgroundColor = color.hex;
+                btn.dataset.color = color.hex;
+                btn.dataset.name = color.name;
+                btn.title = color.name;
+
+                btn.addEventListener('click', () => selectColor(color.hex, color.name, btn));
+                colorPalette.appendChild(btn);
+            });
+        }
+
+        // SVG 파일 로드
+        function loadSvg() {
+            fetch('_AEC/sketch1760709136233 1 1 1.svg')
+                .then(response => {
+                    if (!response.ok) throw new Error('SVG 파일을 찾을 수 없습니다.');
+                    return response.text();
+                })
+                .then(svgText => {
+                    // SVG 삽입
+                    svgContainer.innerHTML = svgText;
+
+                    // SVG 요소 찾기
+                    const svg = svgContainer.querySelector('svg');
+                    if (svg) {
+                        svg.id = 'mainSvg';
+
+                        // SVG가 컨테이너에 맞게 전체 보이도록 설정
+                        svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                        svg.style.width = '100%';
+                        svg.style.height = '100%';
+
+                        // 원본 저장
+                        state.originalSvgContent = svgContainer.innerHTML;
+
+                        // 모든 path에 클릭 이벤트 추가
+                        setupPathClickHandlers();
+
+                        showStatus('로드 완료! 색상을 선택하고 영역을 클릭하세요.');
+                    }
+                })
+                .catch(error => {
+                    console.error('SVG 로드 오류:', error);
+                    svgContainer.innerHTML = '<p style="color: red;">SVG 파일 로드 실패<br><small>' + error.message + '</small></p>';
+                    showStatus('오류: SVG 파일을 로드할 수 없습니다.');
+                });
+        }
+
+        // Path 클릭 핸들러 설정
+        function setupPathClickHandlers() {
+            const paths = svgContainer.querySelectorAll('path');
+            let colorableCount = 0;
+
+            paths.forEach((path, index) => {
+                // 현재 fill 색상 확인
+                const currentFill = path.getAttribute('fill') ||
+                                   window.getComputedStyle(path).fill;
+
+                // fill이 없거나 none이 아닌 경우에만 클릭 가능
+                // 검정색 라인(stroke)은 제외
+                const stroke = path.getAttribute('stroke');
+
+                // 클릭 이벤트 추가
+                path.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    fillPath(path);
+                });
+
+                // 초기 fill이 없으면 흰색으로 설정 (색칠 가능 영역)
+                if (!path.getAttribute('fill') || path.getAttribute('fill') === 'none') {
+                    path.setAttribute('fill', '#FFFFFF');
+                }
+
+                colorableCount++;
+            });
+
+            console.log('색칠 가능한 영역:', colorableCount);
+        }
+
+        // Path 색칠
+        function fillPath(path) {
+            const currentFill = path.getAttribute('fill');
+
+            // 검정색(라인)은 색칠하지 않음
+            if (currentFill === '#000000' || currentFill === 'black' ||
+                currentFill === 'rgb(0, 0, 0)') {
+                showStatus('검정색 라인은 색칠할 수 없습니다.');
+                return;
+            }
+
+            // 선택한 색상으로 채우기
+            path.setAttribute('fill', state.selectedColor);
+            showStatus('색칠 완료! (' + getColorName(state.selectedColor) + ')');
+        }
+
+        // 색상 이름 가져오기
+        function getColorName(hex) {
+            const color = COLORS.find(c => c.hex === hex);
+            return color ? color.name : hex;
+        }
+
+        // 색상 선택
+        function selectColor(hex, name, btn) {
+            state.selectedColor = hex;
+
+            // 버튼 선택 상태 업데이트
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+
+            // 선택 표시 업데이트
+            selectedColorPreview.style.backgroundColor = hex;
+            selectedColorText.textContent = name;
+
+            showStatus(name + ' 색상이 선택되었습니다.');
+        }
+
+        // 이벤트 리스너 설정
+        function setupEventListeners() {
+            resetBtn.addEventListener('click', resetSvg);
+            saveBtn.addEventListener('click', saveSvg);
+        }
+
+        // SVG 초기화
+        function resetSvg() {
+            if (state.originalSvgContent) {
+                svgContainer.innerHTML = state.originalSvgContent;
+                setupPathClickHandlers();
+                showStatus('처음 상태로 되돌렸습니다.');
+            }
+        }
+
+        // SVG 저장 (PNG로 변환)
+        function saveSvg() {
+            const svg = svgContainer.querySelector('svg');
+            if (!svg) {
+                showStatus('저장할 이미지가 없습니다.');
+                return;
+            }
+
+            showStatus('이미지 저장 중...');
+
+            // SVG를 문자열로 변환
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const svgUrl = URL.createObjectURL(svgBlob);
+
+            // 이미지로 변환
+            const img = new Image();
+            img.onload = function() {
+                // Canvas 생성
+                const canvas = document.createElement('canvas');
+                canvas.width = svg.viewBox.baseVal.width || 1773;
+                canvas.height = svg.viewBox.baseVal.height || 1773;
+
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+
+                // PNG로 다운로드
+                const pngUrl = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+                downloadLink.href = pngUrl;
+                downloadLink.download = 'coloring_' + Date.now() + '.png';
+                downloadLink.click();
+
+                URL.revokeObjectURL(svgUrl);
+                showStatus('이미지가 저장되었습니다!');
+            };
+
+            img.onerror = function() {
+                // SVG 직접 다운로드
+                const downloadLink = document.createElement('a');
+                downloadLink.href = svgUrl;
+                downloadLink.download = 'coloring_' + Date.now() + '.svg';
+                downloadLink.click();
+
+                URL.revokeObjectURL(svgUrl);
+                showStatus('SVG 파일로 저장되었습니다!');
+            };
+
+            img.src = svgUrl;
+        }
+
+        // 상태 메시지 표시
+        function showStatus(message) {
+            statusMessage.textContent = message;
+        }
+
+        // 앱 시작
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
