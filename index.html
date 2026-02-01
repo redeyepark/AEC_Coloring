@@ -82,25 +82,6 @@
             padding: 10px;
         }
 
-        /* 헤더 스타일 */
-        .header {
-            text-align: center;
-            margin-bottom: 8px;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        .header h1 {
-            font-size: 1.5rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            margin-bottom: 2px;
-        }
-
-        .header p {
-            font-size: 0.85rem;
-            opacity: 0.9;
-        }
-
         /* 메인 컨테이너 */
         .main-container {
             background: white;
@@ -328,33 +309,43 @@
             background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
         }
 
-        /* 상태 메시지 */
-        .status-bar {
-            text-align: center;
-            padding: 4px;
-            font-size: 0.8rem;
-            color: #6c757d;
-            flex-shrink: 0;
+        .next-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .next-btn:hover {
+            background: #218838;
+        }
+
+        .calendar-btn {
+            background: #fd7e14;
+            color: white;
+        }
+
+        .calendar-btn:hover {
+            background: #e56b0a;
+        }
+
+        .wallpaper-btn {
+            background: #e83e8c;
+            color: white;
+        }
+
+        .wallpaper-btn:hover {
+            background: #d63384;
         }
 
         /* 반응형 */
         @media (max-width: 600px) {
-            .header h1 {
-                font-size: 1.2rem;
-            }
-
-            .header p {
-                font-size: 0.75rem;
-            }
-
             .color-btn {
                 width: 28px;
                 height: 28px;
             }
 
             .control-btn {
-                padding: 6px 12px;
-                font-size: 0.8rem;
+                padding: 6px 10px;
+                font-size: 0.75rem;
             }
 
             .main-container {
@@ -364,11 +355,6 @@
     </style>
 </head>
 <body>
-    <header class="header">
-        <h1>🎨 색칠 공부</h1>
-        <p>색상을 선택하고 영역을 클릭하여 색칠하세요!</p>
-    </header>
-
     <main class="main-container">
         <!-- SVG 영역 - 폴라로이드 스타일 -->
         <div class="svg-container">
@@ -400,10 +386,16 @@
             <button id="saveBtn" class="control-btn save-btn">
                 💾 저장하기
             </button>
+            <button id="nextBtn" class="control-btn next-btn">
+                ➡️ 다음페이지
+            </button>
+            <button id="calendarBtn" class="control-btn calendar-btn">
+                📅 달력저장
+            </button>
+            <button id="wallpaperBtn" class="control-btn wallpaper-btn">
+                🖼️ 배경화면
+            </button>
         </div>
-
-        <!-- 상태 메시지 -->
-        <div id="statusMessage" class="status-bar">이미지 로딩 중...</div>
     </main>
 
     <script>
@@ -453,7 +445,9 @@
         const undoBtn = document.getElementById('undoBtn');
         const resetBtn = document.getElementById('resetBtn');
         const saveBtn = document.getElementById('saveBtn');
-        const statusMessage = document.getElementById('statusMessage');
+        const nextBtn = document.getElementById('nextBtn');
+        const calendarBtn = document.getElementById('calendarBtn');
+        const wallpaperBtn = document.getElementById('wallpaperBtn');
         // ============================================
         // 초기화
         // ============================================
@@ -697,6 +691,9 @@
             undoBtn.addEventListener('click', undoLastAction);
             resetBtn.addEventListener('click', resetSvg);
             saveBtn.addEventListener('click', saveSvg);
+            nextBtn.addEventListener('click', nextImage);
+            calendarBtn.addEventListener('click', saveAsCalendar);
+            wallpaperBtn.addEventListener('click', saveAsWallpaper);
         }
 
         // 뒤로가기 버튼 상태 업데이트
@@ -801,9 +798,215 @@
             img.src = svgUrl;
         }
 
-        // 상태 메시지 표시
+        // 상태 메시지 표시 (콘솔에만 출력)
         function showStatus(message) {
-            statusMessage.textContent = message;
+            console.log('[상태]', message);
+        }
+
+        // 다음 이미지로 이동
+        function nextImage() {
+            state.currentImageIndex = (state.currentImageIndex + 1) % IMAGES.length;
+            loadSvg(IMAGES[state.currentImageIndex].file);
+        }
+
+        // 달력으로 저장 (폰 해상도 1080x1920)
+        function saveAsCalendar() {
+            const svg = svgContainer.querySelector('svg');
+            if (!svg) {
+                alert('저장할 이미지가 없습니다.');
+                return;
+            }
+
+            // 폰 해상도 설정
+            const phoneWidth = 1080;
+            const phoneHeight = 1920;
+            const imageHeight = Math.floor(phoneHeight * 0.55); // 이미지 55%
+            const calendarHeight = phoneHeight - imageHeight; // 달력 45%
+
+            // SVG를 이미지로 변환
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const svgUrl = URL.createObjectURL(svgBlob);
+
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = phoneWidth;
+                canvas.height = phoneHeight;
+                const ctx = canvas.getContext('2d');
+
+                // 흰색 배경
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, phoneWidth, phoneHeight);
+
+                // 이미지 그리기 (상단)
+                const imgAspect = img.width / img.height;
+                let drawWidth, drawHeight, drawX, drawY;
+
+                if (imgAspect > phoneWidth / imageHeight) {
+                    drawWidth = phoneWidth;
+                    drawHeight = phoneWidth / imgAspect;
+                    drawX = 0;
+                    drawY = (imageHeight - drawHeight) / 2;
+                } else {
+                    drawHeight = imageHeight;
+                    drawWidth = imageHeight * imgAspect;
+                    drawX = (phoneWidth - drawWidth) / 2;
+                    drawY = 0;
+                }
+                ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+
+                // 달력 영역 구분선
+                ctx.strokeStyle = '#e0e0e0';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, imageHeight);
+                ctx.lineTo(phoneWidth, imageHeight);
+                ctx.stroke();
+
+                // 달력 그리기
+                drawCalendar(ctx, 0, imageHeight, phoneWidth, calendarHeight);
+
+                // 다운로드
+                const pngUrl = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = pngUrl;
+                const imageName = IMAGES[state.currentImageIndex].name.replace(/\s/g, '_');
+                const now = new Date();
+                link.download = 'calendar_' + imageName + '_' + (now.getMonth() + 1) + '월_' + Date.now() + '.png';
+                link.click();
+
+                URL.revokeObjectURL(svgUrl);
+            };
+
+            img.src = svgUrl;
+        }
+
+        // 달력 그리기 함수
+        function drawCalendar(ctx, x, y, width, height) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const today = now.getDate();
+
+            // 달력 배경
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(x, y, width, height);
+
+            const padding = 40;
+            const headerHeight = 100;
+            const dayHeight = (height - headerHeight - padding * 2) / 7;
+            const dayWidth = (width - padding * 2) / 7;
+
+            // 월 타이틀
+            ctx.fillStyle = '#333333';
+            ctx.font = 'bold 60px Pretendard, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(year + '년 ' + (month + 1) + '월', x + width / 2, y + padding + 50);
+
+            // 요일 헤더
+            const days = ['일', '월', '화', '수', '목', '금', '토'];
+            ctx.font = 'bold 32px Pretendard, sans-serif';
+            const headerY = y + headerHeight + padding;
+
+            days.forEach((day, i) => {
+                ctx.fillStyle = i === 0 ? '#e74c3c' : (i === 6 ? '#3498db' : '#666666');
+                ctx.fillText(day, x + padding + dayWidth * i + dayWidth / 2, headerY);
+            });
+
+            // 날짜 계산
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDate = new Date(year, month + 1, 0).getDate();
+
+            // 날짜 그리기
+            ctx.font = '36px Pretendard, sans-serif';
+            let date = 1;
+            for (let row = 0; row < 6 && date <= lastDate; row++) {
+                for (let col = 0; col < 7 && date <= lastDate; col++) {
+                    if (row === 0 && col < firstDay) continue;
+
+                    const cellX = x + padding + dayWidth * col + dayWidth / 2;
+                    const cellY = headerY + dayHeight * (row + 1) + 10;
+
+                    // 오늘 날짜 강조
+                    if (date === today) {
+                        ctx.fillStyle = '#667eea';
+                        ctx.beginPath();
+                        ctx.arc(cellX, cellY - 10, 28, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#FFFFFF';
+                    } else {
+                        ctx.fillStyle = col === 0 ? '#e74c3c' : (col === 6 ? '#3498db' : '#333333');
+                    }
+
+                    ctx.fillText(date.toString(), cellX, cellY);
+                    date++;
+                }
+            }
+        }
+
+        // 배경화면으로 저장 (폰 해상도 1080x1920, 가로 크롭)
+        function saveAsWallpaper() {
+            const svg = svgContainer.querySelector('svg');
+            if (!svg) {
+                alert('저장할 이미지가 없습니다.');
+                return;
+            }
+
+            // 폰 해상도 설정
+            const phoneWidth = 1080;
+            const phoneHeight = 1920;
+
+            // SVG를 이미지로 변환
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const svgUrl = URL.createObjectURL(svgBlob);
+
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = phoneWidth;
+                canvas.height = phoneHeight;
+                const ctx = canvas.getContext('2d');
+
+                // 흰색 배경
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, phoneWidth, phoneHeight);
+
+                // 이미지 가로 기준으로 크롭하여 중앙 배치
+                const imgAspect = img.width / img.height;
+                const phoneAspect = phoneWidth / phoneHeight;
+
+                let srcX, srcY, srcWidth, srcHeight;
+
+                // 가로 길이 기준으로 크롭 (세로가 잘림)
+                srcWidth = img.width;
+                srcHeight = img.width / phoneAspect;
+                srcX = 0;
+                srcY = (img.height - srcHeight) / 2;
+
+                // 이미지가 세로로 더 길 경우 크롭 적용
+                if (srcHeight > img.height) {
+                    srcHeight = img.height;
+                    srcWidth = img.height * phoneAspect;
+                    srcX = (img.width - srcWidth) / 2;
+                    srcY = 0;
+                }
+
+                ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, 0, 0, phoneWidth, phoneHeight);
+
+                // 다운로드
+                const pngUrl = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = pngUrl;
+                const imageName = IMAGES[state.currentImageIndex].name.replace(/\s/g, '_');
+                link.download = 'wallpaper_' + imageName + '_' + Date.now() + '.png';
+                link.click();
+
+                URL.revokeObjectURL(svgUrl);
+            };
+
+            img.src = svgUrl;
         }
 
         // 앱 시작
