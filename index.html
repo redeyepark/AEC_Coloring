@@ -300,15 +300,6 @@
             background: #5a6268;
         }
 
-        .save-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .save-btn:hover {
-            background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
-        }
-
         .next-btn {
             background: #28a745;
             color: white;
@@ -381,10 +372,7 @@
                 ↩️ 뒤로가기
             </button>
             <button id="resetBtn" class="control-btn reset-btn">
-                🔄 처음으로
-            </button>
-            <button id="saveBtn" class="control-btn save-btn">
-                💾 저장하기
+                🔄 리셋
             </button>
             <button id="nextBtn" class="control-btn next-btn">
                 ➡️ 다음페이지
@@ -444,7 +432,6 @@
         const selectedColorText = document.getElementById('selectedColorText');
         const undoBtn = document.getElementById('undoBtn');
         const resetBtn = document.getElementById('resetBtn');
-        const saveBtn = document.getElementById('saveBtn');
         const nextBtn = document.getElementById('nextBtn');
         const calendarBtn = document.getElementById('calendarBtn');
         const wallpaperBtn = document.getElementById('wallpaperBtn');
@@ -690,7 +677,6 @@
         function setupEventListeners() {
             undoBtn.addEventListener('click', undoLastAction);
             resetBtn.addEventListener('click', resetSvg);
-            saveBtn.addEventListener('click', saveSvg);
             nextBtn.addEventListener('click', nextImage);
             calendarBtn.addEventListener('click', saveAsCalendar);
             wallpaperBtn.addEventListener('click', saveAsWallpaper);
@@ -741,61 +727,6 @@
                 // 원본이 없으면 다시 로드
                 loadSvg(IMAGES[state.currentImageIndex].file);
             }
-        }
-
-        // SVG 저장 (PNG로 변환)
-        function saveSvg() {
-            const svg = svgContainer.querySelector('svg');
-            if (!svg) {
-                showStatus('저장할 이미지가 없습니다.');
-                return;
-            }
-
-            showStatus('이미지 저장 중...');
-
-            // SVG를 문자열로 변환
-            const svgData = new XMLSerializer().serializeToString(svg);
-            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-            const svgUrl = URL.createObjectURL(svgBlob);
-
-            // 이미지로 변환
-            const img = new Image();
-            img.onload = function() {
-                // Canvas 생성
-                const canvas = document.createElement('canvas');
-                canvas.width = svg.viewBox.baseVal.width || 1773;
-                canvas.height = svg.viewBox.baseVal.height || 1773;
-
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 0, 0);
-
-                // PNG로 다운로드
-                const pngUrl = canvas.toDataURL('image/png');
-                const downloadLink = document.createElement('a');
-                downloadLink.href = pngUrl;
-                const imageName = IMAGES[state.currentImageIndex].name.replace(/\s/g, '_');
-                downloadLink.download = 'coloring_' + imageName + '_' + Date.now() + '.png';
-                downloadLink.click();
-
-                URL.revokeObjectURL(svgUrl);
-                showStatus('이미지가 저장되었습니다!');
-            };
-
-            img.onerror = function() {
-                // SVG 직접 다운로드
-                const downloadLink = document.createElement('a');
-                downloadLink.href = svgUrl;
-                const imageName = IMAGES[state.currentImageIndex].name.replace(/\s/g, '_');
-                downloadLink.download = 'coloring_' + imageName + '_' + Date.now() + '.svg';
-                downloadLink.click();
-
-                URL.revokeObjectURL(svgUrl);
-                showStatus('SVG 파일로 저장되었습니다!');
-            };
-
-            img.src = svgUrl;
         }
 
         // 상태 메시지 표시 (콘솔에만 출력)
@@ -887,7 +818,6 @@
             const now = new Date();
             const year = now.getFullYear();
             const month = now.getMonth();
-            const today = now.getDate();
 
             // 달력 배경
             ctx.fillStyle = '#FFFFFF';
@@ -928,17 +858,8 @@
                     const cellX = x + padding + dayWidth * col + dayWidth / 2;
                     const cellY = headerY + dayHeight * (row + 1) + 10;
 
-                    // 오늘 날짜 강조
-                    if (date === today) {
-                        ctx.fillStyle = '#667eea';
-                        ctx.beginPath();
-                        ctx.arc(cellX, cellY - 10, 28, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.fillStyle = '#FFFFFF';
-                    } else {
-                        ctx.fillStyle = col === 0 ? '#e74c3c' : (col === 6 ? '#3498db' : '#333333');
-                    }
-
+                    // 요일별 색상 (일요일: 빨강, 토요일: 파랑)
+                    ctx.fillStyle = col === 0 ? '#e74c3c' : (col === 6 ? '#3498db' : '#333333');
                     ctx.fillText(date.toString(), cellX, cellY);
                     date++;
                 }
