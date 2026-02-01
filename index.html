@@ -101,6 +101,37 @@
             opacity: 0.9;
         }
 
+        /* 이미지 선택기 */
+        .image-selector {
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .image-selector label {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .image-selector select {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-family: 'Pretendard', sans-serif;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .image-selector select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+
         /* 메인 컨테이너 */
         .main-container {
             background: white;
@@ -181,6 +212,14 @@
         }
 
         /* SVG path 스타일 - 클릭 가능한 영역 */
+        #coloringSvg svg {
+            pointer-events: all !important;
+        }
+
+        #coloringSvg svg * {
+            pointer-events: all !important;
+        }
+
         #coloringSvg path {
             cursor: pointer;
             transition: opacity 0.1s ease;
@@ -188,6 +227,14 @@
 
         #coloringSvg path:hover {
             opacity: 0.8;
+        }
+
+        /* 검정색 라인은 클릭 불가 */
+        #coloringSvg path[fill="black"],
+        #coloringSvg path[fill="#000000"],
+        #coloringSvg path[fill="#000"] {
+            pointer-events: none !important;
+            cursor: not-allowed !important;
         }
 
         /* 컬러 팔레트 */
@@ -291,6 +338,22 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
+        .undo-btn {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .undo-btn:hover:not(:disabled) {
+            background: #138496;
+        }
+
+        .undo-btn:disabled {
+            background: #6c757d;
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .reset-btn {
             background: #6c757d;
             color: white;
@@ -328,6 +391,16 @@
                 font-size: 0.75rem;
             }
 
+            .image-selector {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .image-selector select {
+                min-width: 120px;
+                font-size: 0.8rem;
+            }
+
             .color-btn {
                 width: 28px;
                 height: 28px;
@@ -348,6 +421,11 @@
     <header class="header">
         <h1>🎨 색칠 공부</h1>
         <p>색상을 선택하고 영역을 클릭하여 색칠하세요!</p>
+        <!-- 이미지 선택 -->
+        <div class="image-selector">
+            <label for="imageSelect">🖼️ 이미지 선택:</label>
+            <select id="imageSelect"></select>
+        </div>
     </header>
 
     <main class="main-container">
@@ -372,6 +450,9 @@
 
         <!-- 컨트롤 버튼 -->
         <div class="controls">
+            <button id="undoBtn" class="control-btn undo-btn" disabled>
+                ↩️ 뒤로가기
+            </button>
             <button id="resetBtn" class="control-btn reset-btn">
                 🔄 처음으로
             </button>
@@ -385,6 +466,15 @@
     </main>
 
     <script>
+        // ============================================
+        // 이미지 목록 정의
+        // ============================================
+        const IMAGES = [
+            { file: '25__01 1 (1).svg', name: '그림 1' },
+            { file: '25__02 1 (1).svg', name: '그림 2' },
+            { file: '25__02-1 1.svg', name: '그림 3' }
+        ];
+
         // ============================================
         // 색상 팔레트 정의
         // ============================================
@@ -408,7 +498,10 @@
         // 상태 관리
         const state = {
             selectedColor: COLORS[0].hex,
-            originalSvgContent: null
+            originalSvgContent: null,
+            currentImageIndex: 0,
+            history: [],  // 색칠 히스토리 (뒤로가기용)
+            maxHistory: 50  // 최대 히스토리 개수
         };
 
         // DOM 요소
@@ -416,17 +509,44 @@
         const colorPalette = document.getElementById('colorPalette');
         const selectedColorPreview = document.getElementById('selectedColorPreview');
         const selectedColorText = document.getElementById('selectedColorText');
+        const undoBtn = document.getElementById('undoBtn');
         const resetBtn = document.getElementById('resetBtn');
         const saveBtn = document.getElementById('saveBtn');
         const statusMessage = document.getElementById('statusMessage');
+        const imageSelect = document.getElementById('imageSelect');
 
         // ============================================
         // 초기화
         // ============================================
         function init() {
+            // 랜덤 이미지 선택
+            state.currentImageIndex = Math.floor(Math.random() * IMAGES.length);
+
+            createImageSelector();
             createColorPalette();
-            loadSvg();
+            loadSvg(IMAGES[state.currentImageIndex].file);
             setupEventListeners();
+        }
+
+        // 이미지 선택 드롭다운 생성
+        function createImageSelector() {
+            IMAGES.forEach((img, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = img.name;
+                imageSelect.appendChild(option);
+            });
+
+            // 랜덤 선택된 이미지를 드롭다운에 반영
+            imageSelect.value = state.currentImageIndex;
+
+            imageSelect.addEventListener('change', (e) => {
+                const index = parseInt(e.target.value);
+                state.currentImageIndex = index;
+                state.history = [];  // 히스토리 초기화
+                updateUndoButton();
+                loadSvg(IMAGES[index].file);
+            });
         }
 
         // 컬러 팔레트 생성
@@ -445,8 +565,15 @@
         }
 
         // SVG 파일 로드
-        function loadSvg() {
-            fetch('_AEC/sketch1760709136233 1 1 1.svg')
+        function loadSvg(filename) {
+            svgContainer.innerHTML = '로딩 중...';
+            showStatus('이미지 로딩 중...');
+
+            // 히스토리 초기화
+            state.history = [];
+            if (undoBtn) updateUndoButton();
+
+            fetch('_AEC/' + filename)
                 .then(response => {
                     if (!response.ok) throw new Error('SVG 파일을 찾을 수 없습니다.');
                     return response.text();
@@ -471,7 +598,8 @@
                         // 모든 path에 클릭 이벤트 추가
                         setupPathClickHandlers();
 
-                        showStatus('로드 완료! 색상을 선택하고 영역을 클릭하세요.');
+                        const currentImage = IMAGES[state.currentImageIndex];
+                        showStatus(currentImage.name + ' 로드 완료! 색상을 선택하고 영역을 클릭하세요.');
                     }
                 })
                 .catch(error => {
@@ -481,50 +609,148 @@
                 });
         }
 
+        // 검정색인지 확인하는 헬퍼 함수
+        function isBlackColor(color) {
+            if (!color) return false;
+            const c = color.toLowerCase().trim();
+            if (c === 'black' || c === '#000000' || c === '#000') return true;
+            // rgb(0, 0, 0) 형식 체크
+            const rgbMatch = c.match(/rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
+            if (rgbMatch) {
+                const r = parseInt(rgbMatch[1]);
+                const g = parseInt(rgbMatch[2]);
+                const b = parseInt(rgbMatch[3]);
+                // 어두운 색상 (밝기 < 50)은 라인으로 간주
+                const brightness = (r + g + b) / 3;
+                return brightness < 50;
+            }
+            return false;
+        }
+
         // Path 클릭 핸들러 설정
         function setupPathClickHandlers() {
-            const paths = svgContainer.querySelectorAll('path');
+            // SVG 요소 가져오기
+            const svg = svgContainer.querySelector('svg');
+            if (!svg) {
+                console.error('SVG 요소를 찾을 수 없습니다!');
+                showStatus('오류: SVG를 찾을 수 없습니다.');
+                return;
+            }
+
+            // SVG와 모든 하위 요소에 pointer-events 설정
+            svg.style.pointerEvents = 'all';
+            svg.setAttribute('pointer-events', 'all');
+
+            // g 요소들도 pointer-events 설정
+            svg.querySelectorAll('g').forEach(g => {
+                g.style.pointerEvents = 'all';
+            });
+
+            // path만 선택 (rect 배경 제외 - 전체 색칠 방지)
+            const paths = svg.querySelectorAll('path');
             let colorableCount = 0;
+            let blackCount = 0;
 
-            paths.forEach((path, index) => {
-                // 현재 fill 색상 확인
-                const currentFill = path.getAttribute('fill') ||
-                                   window.getComputedStyle(path).fill;
+            console.log('=== 클릭 핸들러 설정 시작 ===');
+            console.log('찾은 path 개수:', paths.length);
 
-                // fill이 없거나 none이 아닌 경우에만 클릭 가능
-                // 검정색 라인(stroke)은 제외
-                const stroke = path.getAttribute('stroke');
+            paths.forEach((elem, index) => {
+                const currentFill = elem.getAttribute('fill');
+                console.log('Path', index, '- fill:', currentFill);
 
-                // 클릭 이벤트 추가
-                path.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    fillPath(path);
-                });
+                // 검정색 라인은 색칠 불가로 표시
+                if (isBlackColor(currentFill)) {
+                    elem.style.cursor = 'not-allowed';
+                    elem.style.pointerEvents = 'none';
+                    elem.dataset.colorable = 'false';
+                    blackCount++;
+                    return;  // 검정색은 이벤트 추가하지 않음
+                }
 
-                // 초기 fill이 없으면 흰색으로 설정 (색칠 가능 영역)
-                if (!path.getAttribute('fill') || path.getAttribute('fill') === 'none') {
-                    path.setAttribute('fill', '#FFFFFF');
+                // 클릭 가능하도록 설정
+                elem.style.pointerEvents = 'all';
+                elem.style.cursor = 'pointer';
+                elem.dataset.colorable = 'true';
+                elem.dataset.index = index;
+
+                // 초기 fill이 없으면 흰색으로 설정
+                if (!currentFill || currentFill === 'none') {
+                    elem.setAttribute('fill', '#FFFFFF');
                 }
 
                 colorableCount++;
             });
 
-            console.log('색칠 가능한 영역:', colorableCount);
+            // 이벤트 위임 방식으로 SVG 전체에 클릭 핸들러 추가
+            svg.onclick = function(e) {
+                const target = e.target;
+
+                // path 요소가 아니면 무시
+                if (target.tagName.toLowerCase() !== 'path') {
+                    console.log('클릭된 요소가 path가 아님:', target.tagName);
+                    return;
+                }
+
+                // 색칠 불가능한 영역(검정색)이면 무시
+                if (target.dataset.colorable === 'false' || isBlackColor(target.getAttribute('fill'))) {
+                    console.log('검정색 라인 클릭됨 - 무시');
+                    showStatus('검정색 라인은 색칠할 수 없습니다.');
+                    return;
+                }
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                const previousFill = target.getAttribute('fill');
+                console.log('색칠 시작! Path 인덱스:', target.dataset.index);
+                console.log('현재 fill:', previousFill);
+                console.log('선택한 색상:', state.selectedColor);
+
+                // 같은 색상이면 무시
+                if (previousFill === state.selectedColor) {
+                    showStatus('이미 같은 색상입니다.');
+                    return;
+                }
+
+                // 히스토리에 이전 상태 저장
+                state.history.push({
+                    element: target,
+                    previousColor: previousFill
+                });
+
+                // 히스토리 개수 제한
+                if (state.history.length > state.maxHistory) {
+                    state.history.shift();
+                }
+
+                // 선택한 색상으로 변경
+                target.setAttribute('fill', state.selectedColor);
+
+                // 뒤로가기 버튼 활성화
+                updateUndoButton();
+
+                console.log('변경 후 fill:', target.getAttribute('fill'));
+                showStatus('색칠 완료! (' + getColorName(state.selectedColor) + ')');
+            };
+
+            console.log('=== 설정 완료 ===');
+            console.log('전체 path:', paths.length, '색칠 가능:', colorableCount, '라인:', blackCount);
+            showStatus('로드 완료! 색칠 가능 영역: ' + colorableCount + '개');
         }
 
         // Path 색칠
-        function fillPath(path) {
-            const currentFill = path.getAttribute('fill');
+        function fillPath(elem) {
+            const currentFill = elem.getAttribute('fill');
+            console.log('클릭된 요소:', elem.tagName, '현재 fill:', currentFill, '선택 색상:', state.selectedColor);
 
             // 검정색(라인)은 색칠하지 않음
-            if (currentFill === '#000000' || currentFill === 'black' ||
-                currentFill === 'rgb(0, 0, 0)') {
+            if (isBlackColor(currentFill)) {
                 showStatus('검정색 라인은 색칠할 수 없습니다.');
                 return;
             }
 
             // 선택한 색상으로 채우기
-            path.setAttribute('fill', state.selectedColor);
+            elem.setAttribute('fill', state.selectedColor);
             showStatus('색칠 완료! (' + getColorName(state.selectedColor) + ')');
         }
 
@@ -551,16 +777,55 @@
 
         // 이벤트 리스너 설정
         function setupEventListeners() {
+            undoBtn.addEventListener('click', undoLastAction);
             resetBtn.addEventListener('click', resetSvg);
             saveBtn.addEventListener('click', saveSvg);
+        }
+
+        // 뒤로가기 버튼 상태 업데이트
+        function updateUndoButton() {
+            if (state.history.length > 0) {
+                undoBtn.disabled = false;
+                undoBtn.title = '뒤로가기 (' + state.history.length + '개)';
+            } else {
+                undoBtn.disabled = true;
+                undoBtn.title = '뒤로갈 수 있는 작업이 없습니다';
+            }
+        }
+
+        // 마지막 색칠 취소
+        function undoLastAction() {
+            if (state.history.length === 0) {
+                showStatus('뒤로갈 수 있는 작업이 없습니다.');
+                return;
+            }
+
+            // 마지막 히스토리 가져오기
+            const lastAction = state.history.pop();
+
+            // 이전 색상으로 복원
+            if (lastAction.element && lastAction.element.parentNode) {
+                lastAction.element.setAttribute('fill', lastAction.previousColor);
+                showStatus('색칠을 취소했습니다. (남은 작업: ' + state.history.length + '개)');
+            } else {
+                showStatus('해당 요소를 찾을 수 없습니다.');
+            }
+
+            // 버튼 상태 업데이트
+            updateUndoButton();
         }
 
         // SVG 초기화
         function resetSvg() {
             if (state.originalSvgContent) {
                 svgContainer.innerHTML = state.originalSvgContent;
+                state.history = [];  // 히스토리 초기화
+                updateUndoButton();
                 setupPathClickHandlers();
                 showStatus('처음 상태로 되돌렸습니다.');
+            } else {
+                // 원본이 없으면 다시 로드
+                loadSvg(IMAGES[state.currentImageIndex].file);
             }
         }
 
@@ -596,7 +861,8 @@
                 const pngUrl = canvas.toDataURL('image/png');
                 const downloadLink = document.createElement('a');
                 downloadLink.href = pngUrl;
-                downloadLink.download = 'coloring_' + Date.now() + '.png';
+                const imageName = IMAGES[state.currentImageIndex].name.replace(/\s/g, '_');
+                downloadLink.download = 'coloring_' + imageName + '_' + Date.now() + '.png';
                 downloadLink.click();
 
                 URL.revokeObjectURL(svgUrl);
@@ -607,7 +873,8 @@
                 // SVG 직접 다운로드
                 const downloadLink = document.createElement('a');
                 downloadLink.href = svgUrl;
-                downloadLink.download = 'coloring_' + Date.now() + '.svg';
+                const imageName = IMAGES[state.currentImageIndex].name.replace(/\s/g, '_');
+                downloadLink.download = 'coloring_' + imageName + '_' + Date.now() + '.svg';
                 downloadLink.click();
 
                 URL.revokeObjectURL(svgUrl);
