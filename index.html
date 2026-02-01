@@ -838,8 +838,8 @@
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(x, y, width, height);
 
-            const padding = 40;
-            const headerHeight = 100;
+            const padding = 20;
+            const headerHeight = 50;
             const dayHeight = (height - headerHeight - padding * 2) / 7;
             const dayWidth = (width - padding * 2) / 7;
 
@@ -847,7 +847,7 @@
             ctx.fillStyle = '#333333';
             ctx.font = 'bold 48px Pretendard, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(monthNames[month] + ' ' + year, x + width / 2, y + padding + 45);
+            ctx.fillText(monthNames[month] + ' ' + year, x + width / 2, y + padding + 35);
 
             // 요일 헤더 (영문)
             const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
