@@ -719,7 +719,7 @@
             console.log('[상태]', message);
         }
 
-        // 달력으로 저장 (폰 해상도 1080x1920)
+        // 달력으로 저장 (폰 해상도 1080x2340)
         function saveAsCalendar() {
             const svg = svgContainer.querySelector('svg');
             if (!svg) {
@@ -729,7 +729,7 @@
 
             // 폰 해상도 설정
             const phoneWidth = 1080;
-            const phoneHeight = 1920;
+            const phoneHeight = 2340;
             const imageHeight = Math.floor(phoneHeight * 0.55); // 이미지 55%
             const calendarHeight = phoneHeight - imageHeight; // 달력 45%
 
@@ -783,7 +783,8 @@
                 link.href = pngUrl;
                 const imageName = IMAGES[state.currentImageIndex].name.replace(/\s/g, '_');
                 const now = new Date();
-                link.download = 'calendar_' + imageName + '_' + (now.getMonth() + 1) + '월_' + Date.now() + '.png';
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                link.download = 'calendar_' + imageName + '_' + monthNames[now.getMonth()] + '_' + Date.now() + '.png';
                 link.click();
 
                 URL.revokeObjectURL(svgUrl);
@@ -798,24 +799,28 @@
             const year = now.getFullYear();
             const month = now.getMonth();
 
+            // 영문 월 이름
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+
             // 달력 배경
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(x, y, width, height);
 
             const padding = 40;
-            const headerHeight = 100;
+            const headerHeight = 120;
             const dayHeight = (height - headerHeight - padding * 2) / 7;
             const dayWidth = (width - padding * 2) / 7;
 
-            // 월 타이틀
+            // 월 타이틀 (영문)
             ctx.fillStyle = '#333333';
-            ctx.font = 'bold 60px Pretendard, sans-serif';
+            ctx.font = 'bold 64px Pretendard, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(year + '년 ' + (month + 1) + '월', x + width / 2, y + padding + 50);
+            ctx.fillText(monthNames[month] + ' ' + year, x + width / 2, y + padding + 60);
 
-            // 요일 헤더
-            const days = ['일', '월', '화', '수', '목', '금', '토'];
-            ctx.font = 'bold 32px Pretendard, sans-serif';
+            // 요일 헤더 (영문)
+            const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+            ctx.font = 'bold 28px Pretendard, sans-serif';
             const headerY = y + headerHeight + padding;
 
             days.forEach((day, i) => {
@@ -828,14 +833,14 @@
             const lastDate = new Date(year, month + 1, 0).getDate();
 
             // 날짜 그리기
-            ctx.font = '36px Pretendard, sans-serif';
+            ctx.font = '40px Pretendard, sans-serif';
             let date = 1;
             for (let row = 0; row < 6 && date <= lastDate; row++) {
                 for (let col = 0; col < 7 && date <= lastDate; col++) {
                     if (row === 0 && col < firstDay) continue;
 
                     const cellX = x + padding + dayWidth * col + dayWidth / 2;
-                    const cellY = headerY + dayHeight * (row + 1) + 10;
+                    const cellY = headerY + dayHeight * (row + 1) + 15;
 
                     // 요일별 색상 (일요일: 빨강, 토요일: 파랑)
                     ctx.fillStyle = col === 0 ? '#e74c3c' : (col === 6 ? '#3498db' : '#333333');
@@ -845,7 +850,7 @@
             }
         }
 
-        // 배경화면으로 저장 (폰 해상도 1080x1920, 가로 크롭)
+        // 배경화면으로 저장 (폰 해상도 1080x2340, 가로 크롭)
         function saveAsWallpaper() {
             const svg = svgContainer.querySelector('svg');
             if (!svg) {
@@ -855,7 +860,7 @@
 
             // 폰 해상도 설정
             const phoneWidth = 1080;
-            const phoneHeight = 1920;
+            const phoneHeight = 2340;
 
             // SVG를 이미지로 변환
             const svgData = new XMLSerializer().serializeToString(svg);
