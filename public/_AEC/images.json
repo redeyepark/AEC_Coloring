@@ -1,0 +1,25 @@
+{
+  "images": [
+    {
+      "file": "DavidHockney.svg",
+      "name": "DavidHockney"
+    },
+    {
+      "file": "FridaKahlo.svg",
+      "name": "FridaKahlo"
+    },
+    {
+      "file": "VincentvanGogh.svg",
+      "name": "VincentvanGogh"
+    },
+    {
+      "file": "20260202_01.svg",
+      "name": "20260202_01"
+    },
+    {
+      "file": "20260202_02.svg",
+      "name": "20260202_02"
+    }
+  ],
+  "lastUpdated": "2026-02-02"
+}

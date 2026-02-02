@@ -1,0 +1,118 @@
+/* 팔레트 섹션 - flex:1로 남은 공간 차지 */
+.paletteSection {
+  background: var(--tds-background);
+  border-radius: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.paletteHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.paletteTitle {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--tds-text-primary);
+}
+
+.selectedColorDisplay {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.selectedColorPreview {
+  width: clamp(24px, 5vmin, 40px);
+  height: clamp(24px, 5vmin, 40px);
+  border-radius: var(--spacing-xs);
+  border: 2px solid var(--tds-border);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.selectedColorText {
+  font-size: var(--font-xs);
+  font-weight: 500;
+  color: var(--tds-text-secondary);
+}
+
+/* 색상 팔레트 - CSS Grid로 자동 맞춤 */
+.colorPalette {
+  display: grid;
+  /* 세로 모드: 10열 고정, 버튼 크기 자동 조정 */
+  grid-template-columns: repeat(10, 1fr);
+  gap: min(4px, 1vmin);
+  flex: 1;
+  align-content: start;
+  overflow: hidden;
+}
+
+.colorBtn {
+  aspect-ratio: 1;
+  width: 100%;
+  border-radius: min(6px, 1.5vmin);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.colorBtn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 1;
+}
+
+.colorBtn:active {
+  transform: scale(0.95);
+}
+
+.colorBtn.selected {
+  border-color: var(--tds-primary);
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(49, 130, 246, 0.4);
+  z-index: 2;
+}
+
+.colorBtn[data-color="#FFFFFF"] {
+  border: 1.5px solid var(--tds-border);
+}
+
+/* 가로 모드 - 8열로 조정 */
+@media (orientation: landscape) {
+  .colorPalette {
+    grid-template-columns: repeat(8, 1fr);
+  }
+
+  .selectedColorText {
+    display: none;
+  }
+}
+
+/* 매우 작은 화면 - 색상명 숨기기 */
+@media (max-width: 360px), (max-height: 500px) {
+  .selectedColorText {
+    display: none;
+  }
+
+  .paletteHeader {
+    margin-bottom: 2px;
+  }
+
+  .paletteSection {
+    padding: 4px;
+  }
+
+  .colorPalette {
+    gap: 2px;
+  }
+}
