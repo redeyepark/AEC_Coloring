@@ -7,6 +7,10 @@ const GALLERY_IMAGES = [
   '/gallery/20260202_03.jpg',
   '/gallery/20260202_04.jpeg',
   '/gallery/20260202_06.jpeg',
+  '/gallery/20260204_01.png',
+  '/gallery/20260204_02.jpg',
+  '/gallery/20260204_03.jpeg',
+  '/gallery/20260204_04.jpeg',
 ];
 
 interface IntroPageProps {
