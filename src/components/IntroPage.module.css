@@ -11,10 +11,12 @@
 .imageContainer {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: var(--spacing-md);
   min-height: 0;
+  gap: var(--spacing-sm);
 }
 
 .galleryImage {
@@ -23,6 +25,16 @@
   object-fit: contain;
   border-radius: var(--spacing-sm);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.fortuneMessage {
+  font-size: clamp(16px, 4vmin, 19px);
+  color: var(--tds-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  padding: 10px 16px;
+  text-align: center;
+  max-width: 90%;
 }
 
 .startHint {

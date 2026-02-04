@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getRandomFortune } from '../constants/fortunes';
 import styles from './IntroPage.module.css';
 
 // gallery 폴더의 이미지 목록
@@ -19,11 +20,16 @@ interface IntroPageProps {
 
 export function IntroPage({ onStart }: IntroPageProps) {
   const [currentImage, setCurrentImage] = useState('');
+  const [fortuneMessage, setFortuneMessage] = useState('');
 
   useEffect(() => {
     // 랜덤 이미지 선택
     const randomIndex = Math.floor(Math.random() * GALLERY_IMAGES.length);
     setCurrentImage(GALLERY_IMAGES[randomIndex]);
+
+    // 랜덤 포춘 메시지 선택
+    const { message } = getRandomFortune();
+    setFortuneMessage(message);
   }, []);
 
   return (
@@ -35,6 +41,9 @@ export function IntroPage({ onStart }: IntroPageProps) {
             alt="컬러링 예시"
             className={styles.galleryImage}
           />
+        )}
+        {fortuneMessage && (
+          <p className={styles.fortuneMessage}>{fortuneMessage}</p>
         )}
       </div>
       <div className={styles.startHint}>
