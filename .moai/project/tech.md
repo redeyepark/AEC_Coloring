@@ -8,8 +8,8 @@
 |------|-----|
 | 프로젝트명 | AEC 컬러링북 |
 | 문서 유형 | 기술 스택 문서 |
-| 버전 | 6.0.0 |
-| 최종 업데이트 | 2026-02-02 |
+| 버전 | 7.0.0 |
+| 최종 업데이트 | 2026-02-05 |
 
 ---
 
@@ -325,86 +325,98 @@ import { Button } from '@toss/tds-mobile';
 외부 상태 관리 라이브러리 없이 React 훅으로 상태를 관리합니다.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         App.tsx                              │
-│  ┌─────────────────┐  ┌─────────────────┐                   │
-│  │  useColoring()  │  │   useImages()   │                   │
-│  │  - selectedColor│  │  - images[]     │                   │
-│  │  - colorState   │  │  - currentImage │                   │
-│  │  - history[]    │  │  - svgContent   │                   │
-│  │  - undo()       │  │  - loadImage()  │                   │
-│  │  - reset()      │  │  - isLoading    │                   │
-│  └────────┬────────┘  └────────┬────────┘                   │
-│           │                    │                             │
-│           ▼                    ▼                             │
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │              Props로 자식 컴포넌트에 전달                 ││
-│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐                 ││
-│  │  │ Canvas   │ │ Palette  │ │ Controls │                 ││
-│  │  └──────────┘ └──────────┘ └──────────┘                 ││
-│  └─────────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                              App.tsx                                 │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │                    앱 플로우 상태 관리                         │    │
+│  │  - isStarted: boolean     (인트로 → 색칠 전환)                │    │
+│  │  - isCompleted: boolean   (색칠 → 결과 전환)                  │    │
+│  │  - currentImage: ImageInfo | null                            │    │
+│  └─────────────────────────────────────────────────────────────┘    │
+│                                                                      │
+│  ┌─────────────────┐  ┌─────────────────┐                           │
+│  │  useColoring()  │  │   useImages()   │                           │
+│  │  - selectedColor│  │  - images[]     │                           │
+│  │  - history[]    │  │  - isLoading    │                           │
+│  │  - redoStack[]  │  │  - error        │                           │
+│  │  - undo()       │  │                 │                           │
+│  │  - redo()       │  │                 │                           │
+│  │  - canUndo      │  │                 │                           │
+│  │  - canRedo      │  │                 │                           │
+│  └────────┬────────┘  └────────┬────────┘                           │
+│           │                    │                                     │
+│           ▼                    ▼                                     │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │                Props로 자식 컴포넌트에 전달                    │    │
+│  │  ┌───────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐       │    │
+│  │  │ IntroPage │ │ Canvas   │ │ Palette  │ │ ResultPage│       │    │
+│  │  └───────────┘ └──────────┘ └──────────┘ └──────────┘       │    │
+│  └─────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-### 3.2 useColoring 훅 상세
+### 3.2 앱 플로우 상태 관리
+
+App.tsx에서 3단계 플로우를 관리합니다.
+
+| 상태 | 타입 | 설명 |
+|------|------|------|
+| isStarted | boolean | 인트로 완료 여부 (false: 인트로, true: 색칠/결과) |
+| isCompleted | boolean | 색칠 완료 여부 (true: 결과 페이지 표시) |
+| currentImage | ImageInfo \| null | 현재 선택된 이미지 |
+
+| 핸들러 | 설명 |
+|--------|------|
+| handleStart | 인트로에서 시작 버튼 클릭 시 호출 |
+| handleComplete | 색칠 완료 버튼 클릭 시 호출 |
+| handleRestart | 새로 시작하기 버튼 클릭 시 호출 |
+| handleReset | 현재 이미지 색칠 초기화 |
+
+### 3.3 useColoring 훅 상세
+
+색칠 상태, 히스토리, Redo 스택을 관리하는 커스텀 훅입니다.
+
+#### 상태 및 Ref
+
+| 상태/Ref | 타입 | 설명 |
+|----------|------|------|
+| selectedColor | ColorInfo | 현재 선택된 색상 객체 |
+| history | PathHistoryItem[] | Undo 히스토리 스택 (최대 50개) |
+| redoStack | PathHistoryItem[] | Redo 스택 |
+| historyRef | Ref | 최신 히스토리 접근용 Ref |
+| redoStackRef | Ref | 최신 Redo 스택 접근용 Ref |
+| svgContainerRef | Ref | SVG 컨테이너 DOM 참조 |
+| onSvgSyncRef | Ref | SVG 동기화 콜백 참조 |
+
+#### 주요 함수
+
+| 함수 | 설명 |
+|------|------|
+| fillPath(element) | path 요소에 색상 적용, 히스토리 저장, Redo 스택 초기화 |
+| undo() | 마지막 작업 취소, Redo 스택에 추가, SVG 동기화 |
+| redo() | 취소한 작업 복원, 히스토리에 다시 추가, SVG 동기화 |
+| clearHistory() | 히스토리와 Redo 스택 모두 초기화 |
+| isBlackColor(color) | 검정색 여부 판별 (#000000, black, rgb(0,0,0)) |
+| setSvgContainer(container) | SVG 컨테이너 DOM 설정 |
+| setOnSvgSync(callback) | SVG 동기화 콜백 설정 |
+
+#### 반환 값
 
 ```typescript
-// src/hooks/useColoring.ts
-
-export function useColoring(initialColor: string = '#EF5350') {
-    const [selectedColor, setSelectedColor] = useState(initialColor);
-    const [colorState, setColorState] = useState<ColorState>(new Map());
-    const [history, setHistory] = useState<HistoryItem[]>([]);
-    const maxHistory = 50;
-
-    const fillPath = useCallback((pathId: string, color: string) => {
-        const previousColor = colorState.get(pathId) || null;
-
-        // 히스토리 추가
-        setHistory(prev => {
-            const newHistory = [...prev, { pathId, previousColor }];
-            return newHistory.slice(-maxHistory);
-        });
-
-        // 색상 상태 업데이트
-        setColorState(prev => new Map(prev).set(pathId, color));
-    }, [colorState]);
-
-    const undo = useCallback(() => {
-        if (history.length === 0) return;
-
-        const lastAction = history[history.length - 1];
-        setHistory(prev => prev.slice(0, -1));
-
-        if (lastAction.previousColor) {
-            setColorState(prev =>
-                new Map(prev).set(lastAction.pathId, lastAction.previousColor!)
-            );
-        } else {
-            setColorState(prev => {
-                const newState = new Map(prev);
-                newState.delete(lastAction.pathId);
-                return newState;
-            });
-        }
-    }, [history]);
-
-    const reset = useCallback(() => {
-        setColorState(new Map());
-        setHistory([]);
-    }, []);
-
-    return {
-        selectedColor,
-        setColor: setSelectedColor,
-        colorState,
-        history,
-        fillPath,
-        undo,
-        reset,
-        canUndo: history.length > 0,
-    };
-}
+return {
+    selectedColor,      // 현재 선택된 색상
+    setSelectedColor,   // 색상 선택 함수
+    history,            // 히스토리 배열
+    fillPath,           // 색칠 함수
+    undo,               // 실행 취소
+    redo,               // 다시 실행
+    clearHistory,       // 히스토리 초기화
+    isBlackColor,       // 검정색 판별
+    canUndo,            // history.length > 0
+    canRedo,            // redoStack.length > 0
+    setSvgContainer,    // SVG 컨테이너 설정
+    setOnSvgSync        // 동기화 콜백 설정
+};
 ```
 
 ---
@@ -808,3 +820,4 @@ const loadSvg = async (filename: string) => {
 | 4.0.0 | 2026-02-02 | manager-docs | 반응형 UI: CSS clamp() 기반 동적 크기 변수, 40% 패널 레이아웃, 고해상도 디바이스 최적화 |
 | 5.0.0 | 2026-02-02 | manager-docs | 색상 팔레트 60색 확장, isBlackColor 함수 로직 변경 (brightness 기준 -> 순수 검정색만 판별), selectedColorRef 추가로 클로저 캡처 버그 수정 |
 | 6.0.0 | 2026-02-02 | manager-docs | Apps-in-Toss 출시 준비: React 19→18.3.1 다운그레이드, TDS Button 컴포넌트 적용, @emotion/react 추가, 64색 팔레트 확장 |
+| 7.0.0 | 2026-02-05 | manager-docs | 3단계 플로우 아키텍처: isStarted/isCompleted 상태 관리, useColoring 훅 redo 기능 추가 (redoStack, canRedo), saveAsImage 함수 추가, SVG 동기화 콜백 패턴 추가 |

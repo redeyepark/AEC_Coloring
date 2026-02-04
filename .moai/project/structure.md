@@ -8,8 +8,8 @@
 |------|-----|
 | 프로젝트명 | AEC 컬러링북 |
 | 문서 유형 | 프로젝트 구조 문서 |
-| 버전 | 6.0.0 |
-| 최종 업데이트 | 2026-02-02 |
+| 버전 | 7.0.0 |
+| 최종 업데이트 | 2026-02-05 |
 | 아키텍처 | React 18 + TypeScript + Vite + TDS |
 | 배포 플랫폼 | Apps-in-Toss (토스 미니앱) |
 
@@ -39,12 +39,16 @@ JWY_BG/
 │   ├── vite-env.d.ts             # Vite 타입 선언
 │   │
 │   ├── components/               # React 컴포넌트
+│   │   ├── IntroPage.tsx             # 인트로 페이지 (갤러리 이미지, 포춘쿠키)
+│   │   ├── IntroPage.module.css      # 인트로 스타일
 │   │   ├── ColoringCanvas.tsx        # SVG 렌더링 및 클릭 핸들링
 │   │   ├── ColoringCanvas.module.css # 캔버스 스타일 (CSS Modules)
 │   │   ├── Palette.tsx               # 색상 팔레트 컴포넌트
 │   │   ├── Palette.module.css        # 팔레트 스타일
 │   │   ├── Controls.tsx              # 컨트롤 버튼 컴포넌트
-│   │   └── Controls.module.css       # 컨트롤 스타일
+│   │   ├── Controls.module.css       # 컨트롤 스타일
+│   │   ├── ResultPage.tsx            # 결과 페이지 (미리보기, 저장 옵션)
+│   │   └── ResultPage.module.css     # 결과 페이지 스타일
 │   │
 │   ├── hooks/                    # 커스텀 React 훅
 │   │   ├── useColoring.ts            # 색칠 상태 및 히스토리 관리
@@ -58,11 +62,15 @@ JWY_BG/
 │   │   └── index.ts                  # 공유 타입 정의
 │   │
 │   └── constants/                # 상수 정의
-│       └── colors.ts                 # 60색 팔레트 상수
+│       ├── colors.ts                 # 64색 팔레트 상수
+│       └── fortunes.ts               # 포춘쿠키 메시지 (50개)
 │
 ├── _AEC/                         # SVG 이미지 에셋 디렉토리
-│   ├── images.json               # 이미지 매니페스트 (NEW)
+│   ├── images.json               # 이미지 매니페스트
 │   └── *.svg                     # SVG 라인아트 이미지
+│
+├── gallery/                      # 인트로 페이지 갤러리 이미지
+│   └── *.png, *.jpg, *.jpeg      # 예시 이미지 8개
 │
 ├── dist/                         # 프로덕션 빌드 출력 (gitignore)
 │
@@ -134,6 +142,31 @@ React 애플리케이션의 진입점입니다.
 
 ### 2.2 React 컴포넌트
 
+#### src/components/IntroPage.tsx
+
+인트로 화면을 담당하는 컴포넌트입니다.
+
+| 기능 | 설명 |
+|------|------|
+| 갤러리 이미지 | 8개 이미지 중 랜덤 표시 |
+| 포춘쿠키 메시지 | 50개 메시지 중 랜덤 선택 |
+| 시작 안내 | "화면을 터치하여 시작" 표시 |
+| 클릭 핸들링 | 화면 터치/클릭 시 색칠 화면 전환 |
+
+#### src/components/ResultPage.tsx
+
+결과 화면을 담당하는 컴포넌트입니다.
+
+| 기능 | 설명 |
+|------|------|
+| SVG 미리보기 | 완성된 색칠 결과 표시 |
+| 이미지 저장 | TDS Button - 원본 이미지 PNG 저장 |
+| 달력 저장 | TDS Button - 달력 형식으로 저장 |
+| 배경화면 저장 | TDS Button - 배경화면 형식으로 저장 |
+| 저장 상태 표시 | 저장 완료 시 버튼 비활성화 |
+| 토스트 메시지 | 저장 결과 피드백 |
+| 새로 시작하기 | 인트로 화면으로 돌아가기 |
+
 #### src/components/ColoringCanvas.tsx
 
 SVG 렌더링과 클릭 색칠을 담당하는 메인 컴포넌트입니다.
@@ -175,12 +208,18 @@ SVG 렌더링과 클릭 색칠을 담당하는 메인 컴포넌트입니다.
 | 상태/함수 | 설명 |
 |-----------|------|
 | selectedColor | 현재 선택된 색상 |
-| colorState | Map<pathId, color> 형태의 색칠 상태 |
 | history | 히스토리 스택 (최대 50개) |
-| setColor | 색상 선택 함수 |
+| redoStack | Redo 스택 |
+| setSelectedColor | 색상 선택 함수 |
 | fillPath | path 색칠 및 히스토리 추가 |
 | undo | 마지막 작업 취소 |
-| reset | 전체 초기화 |
+| redo | 취소한 작업 복원 |
+| clearHistory | 전체 히스토리 초기화 |
+| isBlackColor | 검정색 판별 함수 |
+| canUndo | Undo 가능 여부 |
+| canRedo | Redo 가능 여부 |
+| setSvgContainer | SVG 컨테이너 설정 |
+| setOnSvgSync | SVG 동기화 콜백 설정 |
 
 #### src/hooks/useImages.ts
 
@@ -214,10 +253,12 @@ SVG 렌더링과 클릭 색칠을 담당하는 메인 컴포넌트입니다.
 
 | 함수 | 설명 |
 |------|------|
+| saveAsImage | 색칠한 이미지 원본 PNG 저장 |
 | saveAsCalendar | 달력 이미지 생성 및 다운로드 |
+| saveAsDailyCalendar | 일력 이미지 생성 및 다운로드 |
 | saveAsWallpaper | 배경화면 이미지 생성 및 다운로드 |
-| svgToCanvas | SVG를 Canvas로 변환 |
-| downloadImage | DataURL을 PNG로 다운로드 |
+| isTossEnvironment | 토스 환경 체크 |
+| saveImage | Toss/브라우저 환경별 이미지 저장 |
 
 ### 2.5 타입 정의
 
@@ -249,7 +290,7 @@ export type ColorState = Map<string, string>;
 
 #### src/constants/colors.ts
 
-60색 팔레트 상수를 정의합니다.
+64색 팔레트 상수를 정의합니다.
 
 | 계열 | 색상 수 |
 |------|---------|
@@ -257,6 +298,7 @@ export type ColorState = Map<string, string>;
 | 주황 | 5색 |
 | 노랑 | 6색 |
 | 초록 | 5색 |
+| 시안 | 4색 |
 | 파랑 | 5색 |
 | 보라 | 5색 |
 | 핑크 | 5색 |
@@ -264,6 +306,21 @@ export type ColorState = Map<string, string>;
 | 피부색 | 4색 |
 | 머터리얼 | 8색 |
 | 무채색 | 5색 |
+
+#### src/constants/fortunes.ts
+
+포춘쿠키 메시지 상수를 정의합니다.
+
+| 카테고리 | 메시지 수 | 설명 |
+|----------|-----------|------|
+| 일상 응원 | 10개 | 일상에서의 응원 메시지 |
+| 동기부여 | 10개 | 동기부여 메시지 |
+| 위로와 힐링 | 10개 | 위로와 힐링 메시지 |
+| 행운과 축복 | 10개 | 행운과 축복 메시지 |
+| 자기 사랑 | 10개 | 자기 사랑 메시지 |
+
+주요 함수:
+- `getRandomFortune(previousIndex)`: 중복 방지 랜덤 메시지 선택
 
 ### 2.7 _AEC/ 디렉토리
 
@@ -290,6 +347,25 @@ SVG 라인아트 이미지 에셋을 저장하는 디렉토리입니다.
 - 라인: 검정색 (#000000) path로 경계 구분
 - 영역: fill 속성이 없거나 흰색인 path가 색칠 가능 영역
 - viewBox: 가변 (이미지마다 다름)
+
+### 2.8 gallery/ 디렉토리
+
+인트로 페이지에 표시되는 예시 갤러리 이미지를 저장하는 디렉토리입니다.
+
+#### 이미지 목록
+
+| 파일명 | 형식 | 용도 |
+|--------|------|------|
+| 20260202_02.png | PNG | 갤러리 예시 이미지 |
+| 20260202_03.jpg | JPG | 갤러리 예시 이미지 |
+| 20260202_04.jpeg | JPEG | 갤러리 예시 이미지 |
+| 20260202_06.jpeg | JPEG | 갤러리 예시 이미지 |
+| 20260204_01.png | PNG | 갤러리 예시 이미지 |
+| 20260204_02.jpg | JPG | 갤러리 예시 이미지 |
+| 20260204_03.jpeg | JPEG | 갤러리 예시 이미지 |
+| 20260204_04.jpeg | JPEG | 갤러리 예시 이미지 |
+
+총 8개의 이미지 중 인트로 페이지에서 랜덤으로 1개가 표시됩니다.
 
 ### 2.8 설정 파일
 
@@ -432,20 +508,29 @@ MoAI 에이전트 정의 파일을 저장합니다.
 ```
 src/main.tsx
 ├── src/App.tsx
+│   ├── src/components/IntroPage.tsx
+│   │   ├── [CSS Module] IntroPage.module.css
+│   │   └── src/constants/fortunes.ts
 │   ├── src/components/ColoringCanvas.tsx
 │   │   └── [CSS Module] ColoringCanvas.module.css
 │   ├── src/components/Palette.tsx
 │   │   └── [CSS Module] Palette.module.css
 │   ├── src/components/Controls.tsx
 │   │   └── [CSS Module] Controls.module.css
+│   ├── src/components/ResultPage.tsx
+│   │   ├── [CSS Module] ResultPage.module.css
+│   │   └── [npm] @toss/tds-mobile (Button)
 │   ├── src/hooks/useColoring.ts
 │   ├── src/hooks/useImages.ts
 │   │   └── [Fetch] _AEC/images.json
 │   │       └── [Fetch] _AEC/*.svg
 │   ├── src/hooks/useDeviceResolution.ts
 │   ├── src/utils/saveImage.ts
+│   │   └── [npm] @apps-in-toss/web-framework (saveBase64Data)
 │   ├── src/constants/colors.ts
+│   ├── src/constants/fortunes.ts
 │   └── src/types/index.ts
+├── [Static] gallery/*.png, *.jpg, *.jpeg
 ├── [CDN] @toss/tds-mobile
 └── [CDN] @apps-in-toss/web-framework
 ```
@@ -583,3 +668,4 @@ export function useNewFeature() {
 | 4.0.0 | 2026-02-02 | manager-docs | 반응형 UI 반영: CSS clamp() 변수, 40% 패널 레이아웃, 고해상도 디바이스 최적화 |
 | 5.0.0 | 2026-02-02 | manager-docs | 색상 팔레트 60색 확장: 피부색 4색, 머터리얼 8색, 갈색 2색, 크림, 차콜 추가, 검정색 판별 기준 변경 |
 | 6.0.0 | 2026-02-02 | manager-docs | Apps-in-Toss 출시 준비: React 18.3.1 다운그레이드, TDS Button 적용, @emotion/react 추가, 64색 팔레트 |
+| 7.0.0 | 2026-02-05 | manager-docs | 3단계 플로우 구조: IntroPage.tsx, ResultPage.tsx 추가, fortunes.ts 추가 (포춘쿠키 50개), gallery/ 디렉토리 추가 (예시 이미지 8개), useColoring.ts에 redo/canRedo 추가, saveImage.ts에 saveAsImage 함수 추가 |
