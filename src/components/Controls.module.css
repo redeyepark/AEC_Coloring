@@ -46,7 +46,8 @@
 }
 
 .completeBtn {
-  flex: 1;
+  flex: none;
+  width: 66%;
   padding: clamp(8px, 2vmin, 12px) clamp(12px, 3vmin, 16px);
   font-size: clamp(12px, 3vmin, 14px);
   font-weight: 600;

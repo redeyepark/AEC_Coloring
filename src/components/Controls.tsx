@@ -60,7 +60,7 @@ export function Controls({
     <div className={styles.controls}>
       <button
         className={`${styles.iconBtn} ${!canUndo ? styles.disabled : ''}`}
-        onClick={onUndo}
+        onClick={() => canUndo && onUndo()}
         disabled={!canUndo}
         title="되돌리기"
       >

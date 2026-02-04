@@ -8,7 +8,8 @@
 |------|-----|
 | 프로젝트명 | AEC 컬러링북 |
 | 문서 유형 | 기술 스택 문서 |
-| 최종 업데이트 | 2026-02-01 |
+| 버전 | 6.0.0 |
+| 최종 업데이트 | 2026-02-02 |
 
 ---
 
@@ -17,48 +18,66 @@
 ### 1.1 아키텍처 요약
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        사용자 브라우저                        │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │                    index.html                        │   │
-│  │  ┌───────────┐  ┌───────────┐  ┌───────────────┐   │   │
-│  │  │   HTML5   │  │   CSS3    │  │   JavaScript  │   │   │
-│  │  │ (구조)    │  │ (스타일)  │  │   (ES6+)     │   │   │
-│  │  └───────────┘  └───────────┘  └───────────────┘   │   │
-│  └─────────────────────────────────────────────────────┘   │
-│                            │                               │
-│                            ▼                               │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │                     SVG 엔진                         │   │
-│  │  - DOM 조작 (path 요소)                              │   │
-│  │  - 이벤트 위임 (클릭 핸들링)                          │   │
-│  │  - fill 속성 변경 (색칠)                             │   │
-│  └─────────────────────────────────────────────────────┘   │
-│                            │                               │
-│                            ▼                               │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │                    Canvas API                        │   │
-│  │  - SVG → Canvas 렌더링                               │   │
-│  │  - PNG 이미지 생성 (toDataURL)                       │   │
-│  └─────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  Cloudflare Workers                         │
-│  - 정적 파일 서빙 (index.html, _AEC/*.svg)                  │
-│  - 글로벌 CDN 배포                                          │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           사용자 브라우저                                │
+├─────────────────────────────────────────────────────────────────────────┤
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │                     React 18 Application                          │  │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐   │  │
+│  │  │    Vite     │  │ TypeScript  │  │    CSS Modules + TDS    │   │  │
+│  │  │  (빌드툴)   │  │ (타입 안전) │  │   (스코프드 스타일링)   │   │  │
+│  │  └─────────────┘  └─────────────┘  └─────────────────────────┘   │  │
+│  │                                                                   │  │
+│  │  ┌─────────────────────────────────────────────────────────────┐ │  │
+│  │  │                    Component Layer                           │ │  │
+│  │  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────┐   │ │  │
+│  │  │  │    App.tsx   │ │ColoringCanvas│ │ Palette │ Controls│   │ │  │
+│  │  │  └─────────────┘ └─────────────┘ └─────────────────────┘   │ │  │
+│  │  └─────────────────────────────────────────────────────────────┘ │  │
+│  │                                │                                  │  │
+│  │  ┌─────────────────────────────────────────────────────────────┐ │  │
+│  │  │                     Hooks Layer                              │ │  │
+│  │  │  ┌─────────────┐ ┌─────────────┐ ┌───────────────────────┐ │ │  │
+│  │  │  │ useColoring │ │  useImages  │ │ useDeviceResolution   │ │ │  │
+│  │  │  └─────────────┘ └─────────────┘ └───────────────────────┘ │ │  │
+│  │  └─────────────────────────────────────────────────────────────┘ │  │
+│  │                                │                                  │  │
+│  │                                ▼                                  │  │
+│  │  ┌─────────────────────────────────────────────────────────────┐ │  │
+│  │  │                      SVG Engine                              │ │  │
+│  │  │  - dangerouslySetInnerHTML (SVG 삽입)                       │ │  │
+│  │  │  - 이벤트 위임 (path 클릭 핸들링)                            │ │  │
+│  │  │  - fill 속성 동적 변경                                       │ │  │
+│  │  └─────────────────────────────────────────────────────────────┘ │  │
+│  │                                │                                  │  │
+│  │                                ▼                                  │  │
+│  │  ┌─────────────────────────────────────────────────────────────┐ │  │
+│  │  │                     Canvas API                               │ │  │
+│  │  │  - SVG → Canvas 렌더링 (달력/배경화면 저장)                  │ │  │
+│  │  │  - PNG 이미지 생성 (toDataURL)                               │ │  │
+│  │  └─────────────────────────────────────────────────────────────┘ │  │
+│  └───────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        Cloudflare Workers                               │
+│  - 정적 파일 서빙 (dist/*, _AEC/*.svg)                                  │
+│  - 글로벌 CDN 배포                                                      │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 1.2 기술 스택 요약표
 
-| 레이어 | 기술 | 버전/사양 | 용도 |
-|--------|------|-----------|------|
-| 마크업 | HTML5 | - | 문서 구조, 시맨틱 태그 |
-| 스타일 | CSS3 | - | 레이아웃, 애니메이션 |
-| 로직 | JavaScript | ES6+ | 애플리케이션 로직 |
+| 레이어 | 기술 | 버전 | 용도 |
+|--------|------|------|------|
+| UI 프레임워크 | React | 18.3.1 | 컴포넌트 기반 UI (토스 SDK 호환) |
+| 언어 | TypeScript | 5.9.3 | 타입 안전성, 개발 생산성 |
+| 빌드 도구 | Vite | 7.3.1 | 빠른 개발 서버, 번들링 |
+| 스타일링 | CSS Modules | - | 스코프드 스타일링 |
+| 디자인 시스템 | @toss/tds-mobile | 2.2.1 | Toss Design System (Button 컴포넌트) |
+| 프레임워크 | @apps-in-toss/web-framework | 1.9.1 | Apps-in-Toss 웹 프레임워크 |
+| 스타일링 엔진 | @emotion/react | 11.14.0 | TDS 런타임 스타일링 |
 | 그래픽 | SVG | 1.1 | 벡터 이미지, 색칠 영역 |
 | 이미지 처리 | Canvas API | HTML5 | PNG 생성, 이미지 변환 |
 | 폰트 | Pretendard | CDN | 한글 웹폰트 |
@@ -68,234 +87,491 @@
 
 ## 2. 프론트엔드 기술 상세
 
-### 2.1 HTML5
+### 2.1 React 18
+
+#### 핵심 특징
+
+| 특징 | 설명 |
+|------|------|
+| Concurrent Mode | 렌더링 우선순위 관리로 부드러운 UX |
+| Automatic Batching | 여러 상태 업데이트를 한 번에 처리 |
+| Suspense 개선 | 데이터 로딩 상태 관리 |
+| Transitions | startTransition으로 긴급하지 않은 업데이트 관리 |
+
+#### 다운그레이드 이유
+
+React 19에서 18로 다운그레이드한 이유:
+- @toss/tds-mobile은 React 16~18만 지원 (peer dependency)
+- @apps-in-toss/web-framework도 React 18 기준으로 동작
+- Apps-in-Toss 미니앱 배포를 위한 SDK 호환성 확보
+
+#### 사용 훅
+
+| 훅 | 용도 | 사용처 |
+|----|------|--------|
+| useState | 상태 관리 | 색상 선택, 히스토리 |
+| useEffect | 부수 효과 | SVG 로드, 이벤트 리스너 |
+| useCallback | 함수 메모이제이션 | 이벤트 핸들러 |
+| useMemo | 값 메모이제이션 | 계산된 값 캐싱 |
+| useRef | DOM 참조 | SVG 컨테이너 접근 |
+
+### 2.2 TypeScript 5.9
 
 #### 사용 기능
 
-| 기능 | 용도 | 코드 위치 |
-|------|------|-----------|
-| 시맨틱 태그 | 문서 구조화 | header, main, section |
-| data-* 속성 | 색상 데이터 저장 | data-color, data-name |
-| 메타 태그 | 뷰포트 설정 | viewport |
+| 기능 | 용도 | 예시 |
+|------|------|------|
+| 인터페이스 | 데이터 타입 정의 | ImageInfo, ColorInfo |
+| 제네릭 | 재사용 가능한 타입 | Map<string, string> |
+| 타입 가드 | 런타임 타입 체크 | isColorable() |
+| 유니온 타입 | 복합 타입 | string \| null |
+| 타입 추론 | 자동 타입 결정 | const, let 변수 |
 
-#### 문서 구조
+#### 주요 타입 정의
 
-```html
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>색칠 공부 - SVG Coloring Book</title>
-</head>
-<body>
-    <header class="header">...</header>
-    <main class="main-container">
-        <div class="svg-container">...</div>
-        <section class="palette-section">...</section>
-        <div class="controls">...</div>
-    </main>
-</body>
-</html>
-```
+```typescript
+// src/types/index.ts
 
-### 2.2 CSS3
+export interface ImageInfo {
+    file: string;
+    name: string;
+}
 
-#### 핵심 기술
+export interface ColorInfo {
+    hex: string;
+    name: string;
+}
 
-| 기술 | 용도 | 적용 대상 |
-|------|------|-----------|
-| Flexbox | 레이아웃 | body, main-container, controls |
-| CSS Gradients | 배경 효과 | body, svg-container, save-btn |
-| Box Shadow | 깊이감 표현 | polaroid-frame, color-btn |
-| Transitions | 호버 애니메이션 | color-btn, control-btn |
-| @font-face | 웹폰트 정의 | Pretendard (9개 웨이트) |
-| Media Queries | 반응형 디자인 | 600px 브레이크포인트 |
+export interface HistoryItem {
+    pathId: string;
+    previousColor: string | null;
+}
 
-#### 주요 스타일 패턴
+export type ColorState = Map<string, string>;
 
-**그라데이션 배경**
-```css
-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-```
-
-**폴라로이드 프레임 효과**
-```css
-.polaroid-frame {
-    background: #ffffff;
-    box-shadow:
-        0 4px 6px rgba(0, 0, 0, 0.1),
-        0 15px 40px rgba(0, 0, 0, 0.25),
-        inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+export interface UseColoringReturn {
+    selectedColor: string;
+    colorState: ColorState;
+    history: HistoryItem[];
+    setColor: (color: string) => void;
+    fillPath: (pathId: string, color: string) => void;
+    undo: () => void;
+    reset: () => void;
+    canUndo: boolean;
 }
 ```
 
-**반응형 브레이크포인트**
-```css
-@media (max-width: 600px) {
-    .header h1 { font-size: 1.2rem; }
-    .color-btn { width: 28px; height: 28px; }
-    .control-btn { padding: 6px 12px; font-size: 0.8rem; }
-}
-```
+### 2.3 Vite 7.3
 
-### 2.3 JavaScript (ES6+)
+#### 설정
 
-#### 사용 기능
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
-| ES6+ 기능 | 용도 | 예시 |
-|-----------|------|------|
-| const/let | 변수 선언 | `const COLORS = [...]` |
-| Arrow Functions | 콜백 함수 | `(color) => selectColor(...)` |
-| Template Literals | 문자열 조합 | `'_AEC/' + filename` |
-| Array Methods | 배열 처리 | `forEach`, `find`, `push`, `pop` |
-| Destructuring | 객체 분해 | `{ hex, name }` |
-| Spread Operator | 배열/객체 복사 | (사용 가능) |
-
-#### 상태 관리 패턴
-
-```javascript
-const state = {
-    selectedColor: COLORS[0].hex,    // 현재 선택 색상
-    originalSvgContent: null,        // 원본 SVG (초기화용)
-    currentImageIndex: 0,            // 현재 이미지 인덱스
-    history: [],                     // 뒤로가기 히스토리
-    maxHistory: 50                   // 최대 히스토리 개수
-};
-```
-
-#### 이벤트 위임 패턴
-
-클릭 이벤트를 개별 path에 등록하지 않고, SVG 요소에서 위임 처리:
-
-```javascript
-svg.onclick = function(e) {
-    const target = e.target;
-    if (target.tagName.toLowerCase() !== 'path') return;
-    if (isBlackColor(target.getAttribute('fill'))) return;
-    // 색칠 처리
-};
-```
-
-#### 히스토리 스택 패턴
-
-```javascript
-// 색칠 시 히스토리 저장
-state.history.push({
-    element: target,
-    previousColor: previousFill
+export default defineConfig({
+    plugins: [react()],
+    server: {
+        port: 8080,
+        open: true,
+    },
+    build: {
+        outDir: 'dist',
+        sourcemap: true,
+    },
+    resolve: {
+        alias: {
+            '@': '/src',
+        },
+    },
 });
+```
 
-// 뒤로가기 시 복원
-const lastAction = state.history.pop();
-lastAction.element.setAttribute('fill', lastAction.previousColor);
+#### 주요 특징
+
+| 특징 | 설명 |
+|------|------|
+| ESM 기반 | 네이티브 ES 모듈로 빠른 HMR |
+| esbuild | 초고속 트랜스파일링 |
+| Rollup | 프로덕션 번들링 최적화 |
+| CSS 분할 | 컴포넌트별 CSS 자동 분리 |
+
+### 2.4 CSS Modules
+
+#### 스타일링 패턴
+
+CSS Modules를 사용하여 컴포넌트별 스코프드 스타일을 적용합니다.
+
+#### 반응형 CSS 변수 (clamp() 기반)
+
+고해상도 화면을 위한 동적 크기 조절 변수:
+
+```css
+/* App.css - 반응형 크기 변수 */
+:root {
+  --base-unit: clamp(6px, 1.5vw, 12px);
+  --font-xs: clamp(14px, 3.5vw, 20px);
+  --font-sm: clamp(16px, 4vw, 24px);
+  --font-md: clamp(18px, 4.5vw, 28px);
+  --font-lg: clamp(20px, 5vw, 32px);
+  --spacing-xs: clamp(6px, 1.5vw, 12px);
+  --spacing-sm: clamp(10px, 2.5vw, 18px);
+  --spacing-md: clamp(14px, 3.5vw, 24px);
+  --spacing-lg: clamp(18px, 4.5vw, 32px);
+  --btn-size: clamp(44px, 11vw, 72px);
+  --icon-size: clamp(24px, 6vw, 40px);
+}
+```
+
+#### 40% 패널 레이아웃
+
+```css
+/* 세로 모드: 높이 40%, 가로 모드: 너비 40% */
+.right-panel {
+  height: 40vh;
+  max-height: 40%;
+}
+
+@media (orientation: landscape) {
+  .right-panel {
+    width: 40%;
+    max-width: 40vw;
+    height: 100%;
+  }
+}
+```
+
+#### 컴포넌트 스타일 예시
+
+```css
+/* ColoringCanvas.module.css */
+.container {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.svgWrapper {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.polaroidFrame {
+    padding: 20px 20px 60px;
+}
+```
+
+```typescript
+// ColoringCanvas.tsx
+import styles from './ColoringCanvas.module.css';
+
+export function ColoringCanvas() {
+    return (
+        <div className={styles.container}>
+            <div className={styles.svgWrapper}>
+                {/* SVG 내용 */}
+            </div>
+        </div>
+    );
+}
+```
+
+### 2.5 TDS (Toss Design System)
+
+#### 사용 컴포넌트
+
+| 컴포넌트 | 용도 | 적용 상태 |
+|----------|------|----------|
+| Button | 컨트롤 버튼 (저장, 뒤로가기, 리셋, 달력) | ✅ 적용 완료 |
+| Text | 타이포그래피 | 계획 중 |
+| Stack | 레이아웃 | 계획 중 |
+| Spacing | 간격 관리 | 계획 중 |
+
+#### TDS Button 적용 예시
+
+```typescript
+// Controls.tsx - TDS Button 사용
+import { Button } from '@toss/tds-mobile';
+
+<Button color="primary" variant="fill" size="medium" display="block" onClick={onUndo}>
+  ↩️ 뒤로
+</Button>
+<Button color="light" variant="weak" size="medium" display="block" onClick={onReset}>
+  🔄 리셋
+</Button>
+<Button color="dark" variant="fill" size="medium" display="block" onClick={onSaveCalendar}>
+  📅 달력
+</Button>
+```
+
+#### TDS Button Props
+
+| Prop | 타입 | 설명 |
+|------|------|------|
+| color | 'primary' \| 'danger' \| 'light' \| 'dark' | 버튼 색상 |
+| variant | 'fill' \| 'weak' | 버튼 스타일 |
+| size | 'small' \| 'medium' \| 'large' \| 'xlarge' | 버튼 크기 |
+| display | 'inline' \| 'block' \| 'full' | 표시 방식 |
+| disabled | boolean | 비활성화 상태 |
+
+---
+
+## 3. 상태 관리 아키텍처
+
+### 3.1 커스텀 훅 기반 상태 관리
+
+외부 상태 관리 라이브러리 없이 React 훅으로 상태를 관리합니다.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         App.tsx                              │
+│  ┌─────────────────┐  ┌─────────────────┐                   │
+│  │  useColoring()  │  │   useImages()   │                   │
+│  │  - selectedColor│  │  - images[]     │                   │
+│  │  - colorState   │  │  - currentImage │                   │
+│  │  - history[]    │  │  - svgContent   │                   │
+│  │  - undo()       │  │  - loadImage()  │                   │
+│  │  - reset()      │  │  - isLoading    │                   │
+│  └────────┬────────┘  └────────┬────────┘                   │
+│           │                    │                             │
+│           ▼                    ▼                             │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │              Props로 자식 컴포넌트에 전달                 ││
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐                 ││
+│  │  │ Canvas   │ │ Palette  │ │ Controls │                 ││
+│  │  └──────────┘ └──────────┘ └──────────┘                 ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 3.2 useColoring 훅 상세
+
+```typescript
+// src/hooks/useColoring.ts
+
+export function useColoring(initialColor: string = '#EF5350') {
+    const [selectedColor, setSelectedColor] = useState(initialColor);
+    const [colorState, setColorState] = useState<ColorState>(new Map());
+    const [history, setHistory] = useState<HistoryItem[]>([]);
+    const maxHistory = 50;
+
+    const fillPath = useCallback((pathId: string, color: string) => {
+        const previousColor = colorState.get(pathId) || null;
+
+        // 히스토리 추가
+        setHistory(prev => {
+            const newHistory = [...prev, { pathId, previousColor }];
+            return newHistory.slice(-maxHistory);
+        });
+
+        // 색상 상태 업데이트
+        setColorState(prev => new Map(prev).set(pathId, color));
+    }, [colorState]);
+
+    const undo = useCallback(() => {
+        if (history.length === 0) return;
+
+        const lastAction = history[history.length - 1];
+        setHistory(prev => prev.slice(0, -1));
+
+        if (lastAction.previousColor) {
+            setColorState(prev =>
+                new Map(prev).set(lastAction.pathId, lastAction.previousColor!)
+            );
+        } else {
+            setColorState(prev => {
+                const newState = new Map(prev);
+                newState.delete(lastAction.pathId);
+                return newState;
+            });
+        }
+    }, [history]);
+
+    const reset = useCallback(() => {
+        setColorState(new Map());
+        setHistory([]);
+    }, []);
+
+    return {
+        selectedColor,
+        setColor: setSelectedColor,
+        colorState,
+        history,
+        fillPath,
+        undo,
+        reset,
+        canUndo: history.length > 0,
+    };
+}
 ```
 
 ---
 
-## 3. 그래픽 기술 상세
+## 4. 그래픽 기술 상세
 
-### 3.1 SVG (Scalable Vector Graphics)
+### 4.1 SVG 처리
 
-#### SVG 구조
+#### React에서의 SVG 렌더링
 
-```xml
-<svg viewBox="0 0 1773 1773" xmlns="http://www.w3.org/2000/svg">
-    <!-- 검정색 라인 (색칠 불가) -->
-    <path fill="#000000" d="M..."/>
-    <path fill="black" d="M..."/>
+```typescript
+// ColoringCanvas.tsx
+export function ColoringCanvas({
+    svgContent,
+    colorState,
+    selectedColor,
+    onFillPath,
+}: ColoringCanvasProps) {
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    <!-- 색칠 가능 영역 -->
-    <path fill="#FFFFFF" d="M..."/>
-    <path d="M..."/>  <!-- fill 없음 = 흰색 -->
-</svg>
+    // SVG 클릭 핸들러
+    const handleClick = useCallback((e: React.MouseEvent) => {
+        const target = e.target as SVGElement;
+        if (target.tagName.toLowerCase() !== 'path') return;
+
+        const pathId = target.id || target.getAttribute('data-id');
+        if (!pathId) return;
+
+        const fill = target.getAttribute('fill');
+        if (isBlackColor(fill)) return;
+
+        onFillPath(pathId, selectedColor);
+    }, [selectedColor, onFillPath]);
+
+    // colorState 변경 시 SVG 업데이트
+    useEffect(() => {
+        if (!containerRef.current) return;
+
+        const svg = containerRef.current.querySelector('svg');
+        if (!svg) return;
+
+        colorState.forEach((color, pathId) => {
+            const path = svg.querySelector(`#${pathId}, [data-id="${pathId}"]`);
+            if (path) {
+                path.setAttribute('fill', color);
+            }
+        });
+    }, [colorState]);
+
+    return (
+        <div
+            ref={containerRef}
+            onClick={handleClick}
+            dangerouslySetInnerHTML={{ __html: svgContent }}
+        />
+    );
+}
 ```
 
-#### SVG 처리 로직
+#### 검정색 판별 함수
 
-| 단계 | 동작 | 코드 |
-|------|------|------|
-| 로드 | fetch API로 SVG 파일 가져오기 | `fetch('_AEC/' + filename)` |
-| 삽입 | innerHTML로 DOM에 삽입 | `svgContainer.innerHTML = svgText` |
-| 설정 | preserveAspectRatio 설정 | `'xMidYMid meet'` |
-| 이벤트 | 클릭 핸들러 등록 | `svg.onclick = function(e) {...}` |
+검정색 판별 기준이 v5.0.0에서 변경되었습니다.
 
-#### 검정색 판별 알고리즘
+**변경 전 (v4.0.0 이전)**:
+- 밝기(brightness) < 50 기준으로 판별
+- 어두운 색상(#121212, #212121, #5D4037 등)도 색칠 불가로 처리됨
 
-```javascript
-function isBlackColor(color) {
+**변경 후 (v5.0.0)**:
+- 정확히 순수 검정색(#000000, black, rgb(0,0,0))만 색칠 불가
+- 어두운 색상(차콜, 다크브라운 등)도 색칠 가능
+
+```typescript
+// src/utils/colorUtils.ts
+export function isBlackColor(color: string | null): boolean {
     if (!color) return false;
     const c = color.toLowerCase().trim();
 
-    // 명시적 검정색
+    // 순수 검정색만 색칠 불가 (라인아트 보존)
     if (c === 'black' || c === '#000000' || c === '#000') return true;
 
-    // RGB 형식 검사
+    // RGB 형식 검사 - 정확히 rgb(0, 0, 0)만 검정색으로 판별
     const rgbMatch = c.match(/rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
     if (rgbMatch) {
-        const brightness = (parseInt(rgbMatch[1]) +
-                           parseInt(rgbMatch[2]) +
-                           parseInt(rgbMatch[3])) / 3;
-        return brightness < 50;  // 밝기 50 미만 = 검정 취급
+        const r = parseInt(rgbMatch[1]);
+        const g = parseInt(rgbMatch[2]);
+        const b = parseInt(rgbMatch[3]);
+        return r === 0 && g === 0 && b === 0;
     }
     return false;
 }
 ```
 
-### 3.2 Canvas API
+### 4.2 Canvas API - 이미지 저장
 
-#### PNG 저장 프로세스
+```typescript
+// src/utils/saveImage.ts
 
-```
-SVG → Blob → ObjectURL → Image → Canvas → DataURL → Download
-```
+export async function saveAsCalendar(
+    svgElement: SVGElement,
+    imageName: string
+): Promise<void> {
+    const canvas = document.createElement('canvas');
+    const width = 1080;
+    const height = 2340;
+    canvas.width = width;
+    canvas.height = height;
 
-#### 상세 구현
+    const ctx = canvas.getContext('2d')!;
 
-```javascript
-function saveSvg() {
-    const svg = svgContainer.querySelector('svg');
+    // 배경 흰색
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, width, height);
 
-    // 1. SVG를 문자열로 직렬화
-    const svgData = new XMLSerializer().serializeToString(svg);
-
-    // 2. Blob 생성
-    const svgBlob = new Blob([svgData], {
-        type: 'image/svg+xml;charset=utf-8'
-    });
+    // SVG를 이미지로 변환
+    const svgData = new XMLSerializer().serializeToString(svgElement);
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
     const svgUrl = URL.createObjectURL(svgBlob);
 
-    // 3. Image 객체로 로드
-    const img = new Image();
-    img.onload = function() {
-        // 4. Canvas에 그리기
-        const canvas = document.createElement('canvas');
-        canvas.width = svg.viewBox.baseVal.width || 1773;
-        canvas.height = svg.viewBox.baseVal.height || 1773;
+    const img = await loadImage(svgUrl);
 
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
+    // 상단 55%에 이미지 그리기
+    const imageHeight = height * 0.55;
+    const scale = Math.min(width / img.width, imageHeight / img.height);
+    const imgWidth = img.width * scale;
+    const imgHeight = img.height * scale;
+    const imgX = (width - imgWidth) / 2;
+    const imgY = (imageHeight - imgHeight) / 2;
 
-        // 5. PNG DataURL 생성 및 다운로드
-        const pngUrl = canvas.toDataURL('image/png');
-        const downloadLink = document.createElement('a');
-        downloadLink.href = pngUrl;
-        downloadLink.download = 'coloring_' + imageName + '_' + Date.now() + '.png';
-        downloadLink.click();
+    ctx.drawImage(img, imgX, imgY, imgWidth, imgHeight);
 
-        URL.revokeObjectURL(svgUrl);
-    };
-    img.src = svgUrl;
+    // 하단 45%에 달력 그리기
+    drawCalendar(ctx, width, imageHeight, height - imageHeight);
+
+    // 다운로드
+    downloadCanvas(canvas, `calendar_${imageName}_${getYearMonth()}.png`);
+
+    URL.revokeObjectURL(svgUrl);
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+    });
 }
 ```
 
 ---
 
-## 4. 외부 리소스
+## 5. 외부 리소스
 
-### 4.1 Pretendard 폰트
+### 5.1 npm 패키지
+
+| 패키지 | 버전 | 용도 |
+|--------|------|------|
+| react | 18.3.1 | UI 프레임워크 (토스 SDK 호환) |
+| react-dom | 18.3.1 | DOM 렌더링 |
+| @toss/tds-mobile | 2.2.1 | Toss 디자인 시스템 |
+| @apps-in-toss/web-framework | 1.9.1 | Apps-in-Toss 웹 프레임워크 |
+| @emotion/react | 11.14.0 | TDS 런타임 스타일링 |
+| typescript | 5.9.3 | 타입 체커 |
+| vite | 7.3.1 | 빌드 도구 |
+| @vitejs/plugin-react | 5.1.2 | Vite React 플러그인 |
+
+### 5.2 Pretendard 폰트
 
 | 항목 | 값 |
 |------|-----|
@@ -305,32 +581,70 @@ function saveSvg() {
 | 포맷 | woff2 |
 | 로딩 | font-display: swap |
 
-#### CDN URL 패턴
+---
 
-```
-https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-{Weight}.woff2
+## 6. 개발 환경
+
+### 6.1 개발 명령어
+
+```bash
+# 의존성 설치
+npm install
+
+# 개발 서버 시작 (localhost:8080)
+npm run dev
+
+# 프로덕션 빌드
+npm run build
+
+# 빌드 결과 미리보기
+npm run preview
+
+# 타입 체크
+npm run type-check
+
+# 린트
+npm run lint
 ```
 
-#### 폴백 폰트
+### 6.2 package.json scripts
 
-```css
-font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+```json
+{
+  "scripts": {
+    "dev": "vite --port 8080",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx"
+  }
+}
 ```
+
+### 6.3 VS Code 확장
+
+| 확장 | 용도 |
+|------|------|
+| TypeScript Vue Plugin (Volar) | TypeScript 지원 |
+| ESLint | 코드 린팅 |
+| Prettier | 코드 포맷팅 |
+| CSS Modules | CSS 모듈 자동완성 |
+| SVG Preview | SVG 미리보기 |
 
 ---
 
-## 5. 배포 설정
+## 7. 배포 설정
 
-### 5.1 Cloudflare Workers
+### 7.1 Cloudflare Workers
 
 #### wrangler.jsonc 설정
 
 ```jsonc
 {
-  "name": "aec-coloring",           // Workers 이름
-  "compatibility_date": "2026-02-01", // API 호환성 날짜
+  "name": "aec-coloring",
+  "compatibility_date": "2026-02-01",
   "assets": {
-    "directory": "./"               // 정적 에셋 루트 디렉토리
+    "directory": "./dist"
   }
 }
 ```
@@ -344,97 +658,72 @@ npm install -g wrangler
 # Cloudflare 로그인
 wrangler login
 
-# 배포
-wrangler deploy
+# 빌드 후 배포
+npm run build && wrangler deploy
 
-# 로컬 개발 서버
+# 로컬 개발 서버 (Wrangler)
 wrangler dev
 ```
 
 #### 배포 파일 목록
 
 ```
-배포 대상:
-├── index.html        # 메인 페이지
-├── _AEC/
-│   ├── 25__01 1 (1).svg
-│   ├── 25__02 1 (1).svg
-│   └── 25__02-1 1.svg
-└── (기타 정적 파일)
-```
-
-### 5.2 로컬 개발
-
-#### 간단한 HTTP 서버
-
-```bash
-# Python (Python 3)
-python -m http.server 8000
-
-# Node.js (http-server 패키지)
-npx http-server -p 8000
-
-# PHP
-php -S localhost:8000
-```
-
-#### 브라우저 접속
-
-```
-http://localhost:8000
+dist/
+├── index.html              # 메인 페이지
+├── assets/
+│   ├── index-[hash].js     # JS 번들
+│   └── index-[hash].css    # CSS 번들
+└── _AEC/
+    ├── images.json         # 이미지 매니페스트
+    └── *.svg               # SVG 이미지
 ```
 
 ---
 
-## 6. 브라우저 호환성
+## 8. 브라우저 호환성
 
-### 6.1 지원 브라우저
+### 8.1 지원 브라우저
 
 | 브라우저 | 최소 버전 | 주요 기능 |
 |----------|-----------|-----------|
 | Chrome | 90+ | 모든 기능 지원 |
 | Firefox | 88+ | 모든 기능 지원 |
 | Edge | 90+ | 모든 기능 지원 |
-| Safari | 14+ | 부분 지원 (PNG 저장 주의) |
+| Safari | 15+ | 부분 지원 (PNG 저장 주의) |
 
-### 6.2 필수 API 지원
+### 8.2 필수 기능 지원
 
-| API | 용도 | 지원 현황 |
-|-----|------|-----------|
-| Fetch API | SVG 파일 로드 | 모든 모던 브라우저 |
+| 기능 | 용도 | 지원 현황 |
+|------|------|-----------|
+| ES2020+ | TypeScript 타겟 | 모든 모던 브라우저 |
+| CSS Modules | 스코프드 스타일 | 빌드 타임 처리 |
+| Fetch API | 데이터 로드 | 모든 모던 브라우저 |
 | SVG DOM | path 조작 | 모든 모던 브라우저 |
 | Canvas 2D | PNG 생성 | 모든 모던 브라우저 |
-| Blob API | 파일 생성 | 모든 모던 브라우저 |
-| URL.createObjectURL | 다운로드 | 모든 모던 브라우저 |
-
-### 6.3 폴리필 불필요
-
-ES6+ 기능 사용 범위가 모든 타겟 브라우저에서 지원되므로 폴리필이 필요하지 않습니다.
 
 ---
 
-## 7. 성능 최적화
+## 9. 성능 최적화
 
-### 7.1 현재 최적화 상태
+### 9.1 빌드 최적화
 
 | 항목 | 상태 | 비고 |
 |------|------|------|
-| 번들링 | 불필요 | 단일 HTML 파일 |
-| 압축 | CDN 자동 | Cloudflare gzip/brotli |
-| 캐싱 | CDN 자동 | Cloudflare 에지 캐시 |
-| 이미지 최적화 | SVG 사용 | 벡터 = 무손실 확대 |
-| 폰트 로딩 | swap | 깜빡임 방지 |
+| Tree Shaking | 자동 | Vite/Rollup 내장 |
+| Code Splitting | 자동 | 동적 import 지원 |
+| 압축 | Brotli/gzip | Cloudflare CDN |
+| 캐싱 | 자동 | 해시 기반 파일명 |
 
-### 7.2 추가 최적화 옵션
+### 9.2 React 최적화
 
-| 최적화 | 방법 | 효과 |
-|--------|------|------|
-| CSS 인라인 | 이미 적용됨 | HTTP 요청 감소 |
-| JS 인라인 | 이미 적용됨 | HTTP 요청 감소 |
-| SVG 압축 | svgo 도구 | 파일 크기 20-40% 감소 |
-| 폰트 서브셋 | 사용 글자만 포함 | 로딩 시간 감소 |
+| 기법 | 적용 | 효과 |
+|------|------|------|
+| useCallback | 이벤트 핸들러 | 불필요한 리렌더링 방지 |
+| useMemo | 계산된 값 | 비용 높은 연산 캐싱 |
+| React.memo | 컴포넌트 | Props 변경 시만 리렌더링 |
+| key 속성 | 리스트 | 효율적인 DOM 업데이트 |
 
-### 7.3 성능 지표 목표
+### 9.3 성능 지표 목표
 
 | 지표 | 목표 | 측정 방법 |
 |------|------|-----------|
@@ -445,28 +734,45 @@ ES6+ 기능 사용 범위가 모든 타겟 브라우저에서 지원되므로 �
 
 ---
 
-## 8. 보안 고려사항
+## 10. 보안 고려사항
 
-### 8.1 현재 보안 상태
+### 10.1 현재 보안 상태
 
 | 항목 | 상태 | 설명 |
 |------|------|------|
-| XSS | 안전 | 사용자 입력 없음 |
+| XSS | 주의 필요 | dangerouslySetInnerHTML 사용 |
 | CSRF | 해당 없음 | 서버 통신 없음 |
 | 인증 | 해당 없음 | 인증 기능 없음 |
 | 데이터 저장 | 로컬만 | 서버 저장 없음 |
 
-### 8.2 CORS 설정
+### 10.2 XSS 방지
 
-SVG 파일이 동일 출처(Same-Origin)에서 제공되므로 CORS 이슈 없음.
+SVG 파일은 신뢰할 수 있는 소스(_AEC/ 디렉토리)에서만 로드합니다.
 
-### 8.3 Content Security Policy (선택)
+```typescript
+// 안전한 SVG 로드
+const loadSvg = async (filename: string) => {
+    // 경로 검증
+    if (!filename.endsWith('.svg')) {
+        throw new Error('Invalid file type');
+    }
+
+    const response = await fetch(`/_AEC/${filename}`);
+    if (!response.ok) {
+        throw new Error('Failed to load SVG');
+    }
+
+    return response.text();
+};
+```
+
+### 10.3 Content Security Policy
 
 ```html
 <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
     style-src 'self' 'unsafe-inline';
-    script-src 'self' 'unsafe-inline';
+    script-src 'self';
     font-src 'self' https://cdn.jsdelivr.net;
     img-src 'self' blob: data:;
 ">
@@ -474,53 +780,22 @@ SVG 파일이 동일 출처(Same-Origin)에서 제공되므로 CORS 이슈 없�
 
 ---
 
-## 9. 개발 도구
+## 11. 마이그레이션 가이드
 
-### 9.1 권장 IDE
+### 11.1 Vanilla JS에서 React로
 
-- Visual Studio Code
-- WebStorm
-- Sublime Text
+| 이전 (Vanilla JS) | 현재 (React) |
+|-------------------|--------------|
+| 단일 index.html | 컴포넌트 기반 src/ |
+| 전역 state 객체 | useState 훅 |
+| DOM 직접 조작 | Virtual DOM |
+| 인라인 CSS | CSS Modules |
+| 수동 이벤트 바인딩 | React 이벤트 시스템 |
+| 없음 | TypeScript 타입 안전 |
 
-### 9.2 VS Code 확장
+### 11.2 백업 파일
 
-| 확장 | 용도 |
-|------|------|
-| Live Server | 로컬 개발 서버 |
-| SVG Preview | SVG 미리보기 |
-| HTML CSS Support | 자동 완성 |
-| Prettier | 코드 포맷팅 |
-
-### 9.3 디버깅 도구
-
-| 도구 | 용도 |
-|------|------|
-| Chrome DevTools | DOM 검사, 콘솔 로깅 |
-| Performance 탭 | 성능 분석 |
-| Network 탭 | 네트워크 요청 분석 |
-| Lighthouse | 성능/접근성 감사 |
-
----
-
-## 10. 향후 기술 로드맵
-
-### 10.1 단기 (1-3개월)
-
-- TypeScript 마이그레이션 검토
-- PWA (Progressive Web App) 지원
-- Service Worker 캐싱
-
-### 10.2 중기 (3-6개월)
-
-- React/Vue 프레임워크 도입 검토
-- 컴포넌트 기반 아키텍처
-- 상태 관리 라이브러리 (Zustand/Pinia)
-
-### 10.3 장기 (6개월 이상)
-
-- 백엔드 API 연동 (작품 저장/공유)
-- 실시간 협업 기능
-- AI 기반 색상 추천
+원본 바닐라 JS 버전은 `index-vanilla.html`로 보존되어 있습니다.
 
 ---
 
@@ -529,3 +804,7 @@ SVG 파일이 동일 출처(Same-Origin)에서 제공되므로 CORS 이슈 없�
 | 버전 | 날짜 | 작성자 | 변경 내용 |
 |------|------|--------|----------|
 | 1.0.0 | 2026-02-01 | manager-docs | 초기 기술 문서 작성 |
+| 3.0.0 | 2026-02-02 | manager-docs | React 마이그레이션: React 19 + TypeScript + Vite 아키텍처, CSS Modules, TDS 디자인 시스템, 컴포넌트/훅 기반 구조 |
+| 4.0.0 | 2026-02-02 | manager-docs | 반응형 UI: CSS clamp() 기반 동적 크기 변수, 40% 패널 레이아웃, 고해상도 디바이스 최적화 |
+| 5.0.0 | 2026-02-02 | manager-docs | 색상 팔레트 60색 확장, isBlackColor 함수 로직 변경 (brightness 기준 -> 순수 검정색만 판별), selectedColorRef 추가로 클로저 캡처 버그 수정 |
+| 6.0.0 | 2026-02-02 | manager-docs | Apps-in-Toss 출시 준비: React 19→18.3.1 다운그레이드, TDS Button 컴포넌트 적용, @emotion/react 추가, 64색 팔레트 확장 |
