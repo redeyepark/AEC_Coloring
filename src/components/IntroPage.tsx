@@ -4,10 +4,10 @@ import styles from './IntroPage.module.css';
 
 // gallery 폴더의 이미지 목록 (실제 존재하는 파일)
 const GALLERY_IMAGES = [
-  '/gallery/20260204_01.png',
-  '/gallery/20260204_02.jpg',
-  '/gallery/20260204_03.jpeg',
-  '/gallery/20260204_04.jpeg',
+  '/gallery/20260202_02.png',
+  '/gallery/20260202_03.jpg',
+  '/gallery/20260202_04.jpeg',
+  '/gallery/20260202_06.jpeg',
 ];
 
 interface IntroPageProps {
