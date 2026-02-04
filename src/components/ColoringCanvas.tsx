@@ -8,9 +8,10 @@ interface ColoringCanvasProps {
   isBlackColor: (color: string | null) => boolean;
   svgRef: React.RefObject<SVGSVGElement | null>;
   selectedColorHex: string;
+  onContainerReady?: (container: HTMLElement | null) => void;
 }
 
-export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selectedColorHex }: ColoringCanvasProps) {
+export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selectedColorHex, onContainerReady }: ColoringCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [svgContent, setSvgContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -26,6 +27,13 @@ export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selec
   useEffect(() => {
     selectedColorRef.current = selectedColorHex;
   }, [selectedColorHex]);
+
+  // container가 준비되면 알림
+  useEffect(() => {
+    if (containerRef.current && onContainerReady) {
+      onContainerReady(containerRef.current);
+    }
+  }, [onContainerReady]);
 
   // SVG 로드
   useEffect(() => {
