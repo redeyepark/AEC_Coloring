@@ -10,16 +10,6 @@ interface PaletteProps {
 export function Palette({ selectedColor, onColorSelect }: PaletteProps) {
   return (
     <section className={styles.paletteSection}>
-      <div className={styles.paletteHeader}>
-        <span className={styles.paletteTitle}>🎨 색상 팔레트</span>
-        <div className={styles.selectedColorDisplay}>
-          <div
-            className={styles.selectedColorPreview}
-            style={{ backgroundColor: selectedColor.hex }}
-          />
-          <span className={styles.selectedColorText}>{selectedColor.name}</span>
-        </div>
-      </div>
       <div className={styles.colorPalette}>
         {COLORS.map((color) => (
           <button

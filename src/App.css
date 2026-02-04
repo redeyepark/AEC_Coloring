@@ -22,9 +22,9 @@
   --font-sm: clamp(11px, 3vmin, 16px);
   --font-md: clamp(12px, 3.5vmin, 18px);
 
-  /* 패널 비율 */
-  --panel-ratio: 38%;
-  --canvas-ratio: 62%;
+  /* 패널 비율 - v6.0.0 기준 40% */
+  --panel-ratio: 40%;
+  --canvas-ratio: 60%;
 }
 
 /* 전역 스타일 초기화 */
@@ -100,6 +100,17 @@ body {
   font-size: var(--font-xs);
 }
 
+/* 색칠 페이지 - 세로 레이아웃 */
+.main-container.coloring-page {
+  flex-direction: column;
+  padding: var(--spacing-sm);
+  gap: var(--spacing-sm);
+}
+
+.main-container.coloring-page .paletteSection {
+  width: 100%;
+}
+
 /* 가로 모드 레이아웃 */
 @media (orientation: landscape) {
   .main-container {
@@ -107,11 +118,12 @@ body {
     gap: var(--spacing-sm);
   }
 
-  .right-panel {
-    width: var(--panel-ratio);
-    height: 100%;
-    flex-direction: column;
-    justify-content: space-between;
+  .main-container.coloring-page {
+    flex-direction: row;
+  }
+
+  .main-container.coloring-page .paletteSection {
+    width: auto;
   }
 }
 

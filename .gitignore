@@ -179,3 +179,5 @@ dist-ssr/
 .vercel/
 .netlify/
 .firebase/
+.vercel
+.env*.local

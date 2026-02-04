@@ -120,24 +120,22 @@ export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selec
 
         const pathElement = target as SVGPathElement;
         const currentFill = pathElement.getAttribute('fill');
-        const currentColor = selectedColorRef.current;
 
         if (isBlackColor(currentFill)) return;
 
         e.preventDefault();
         e.stopPropagation();
 
-        // 직접 색상 변경 (ref에서 최신 색상 사용)
-        pathElement.setAttribute('fill', currentColor);
-        pathElement.style.fill = currentColor;
+        // fillPath가 색상 변경과 히스토리 저장을 처리
+        const changed = onPathClick(pathElement);
 
-        // svgContent 상태 업데이트 (React와 동기화)
-        const svgElement = container.querySelector('svg');
-        if (svgElement) {
-          setSvgContent(svgElement.outerHTML);
+        // 색상이 변경되었으면 svgContent 상태 업데이트 (React와 동기화)
+        if (changed) {
+          const svgElement = container.querySelector('svg');
+          if (svgElement) {
+            setSvgContent(svgElement.outerHTML);
+          }
         }
-
-        onPathClick(pathElement);
       };
 
       // ref에 저장
@@ -205,21 +203,19 @@ export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selec
     if (target.tagName.toLowerCase() === 'path') {
       const pathElement = target as SVGPathElement;
       const currentFill = pathElement.getAttribute('fill');
-      const currentColor = selectedColorRef.current;
 
       if (!isBlackColor(currentFill)) {
-        // 직접 색상 변경 (ref에서 최신 색상 사용)
-        pathElement.setAttribute('fill', currentColor);
-        pathElement.style.fill = currentColor;
+        // fillPath가 색상 변경과 히스토리 저장을 처리
+        const changed = onPathClick(pathElement);
 
-        // svgContent 상태 업데이트
-        const container = containerRef.current;
-        const svgElement = container?.querySelector('svg');
-        if (svgElement) {
-          setSvgContent(svgElement.outerHTML);
+        // 색상이 변경되었으면 svgContent 상태 업데이트
+        if (changed) {
+          const container = containerRef.current;
+          const svgElement = container?.querySelector('svg');
+          if (svgElement) {
+            setSvgContent(svgElement.outerHTML);
+          }
         }
-
-        onPathClick(pathElement);
       }
     }
   };

@@ -1,101 +1,84 @@
-/* 컨트롤 영역 - 4버튼 2x2 그리드 */
+/* 컨트롤 영역 - 아이콘 + 완료 버튼 */
 .controls {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: clamp(8px, 2vmin, 12px);
   flex-shrink: 0;
   padding: clamp(8px, 2vmin, 12px);
 }
 
-.controlBtn {
-  padding: min(8px, 2vmin) min(12px, 3vmin);
-  font-size: clamp(13px, 3.5vmin, 18px);
-  font-weight: 700;
-  border: none;
-  border-radius: min(10px, 2.5vmin);
+.iconBtn {
+  width: clamp(40px, 9vmin, 48px);
+  height: clamp(40px, 9vmin, 48px);
+  border-radius: 11px;
+  border: 1.5px solid var(--tds-primary);
+  background: var(--tds-card);
   cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: min(4px, 1vmin);
-  font-family: inherit;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  transition: transform 0.1s ease, background 0.1s ease, border-color 0.1s ease;
+  flex-shrink: 0;
 }
 
-.controlBtn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+.iconBtn:hover {
+  background: rgba(49, 130, 246, 0.1);
+  transform: scale(1.05);
 }
 
-.controlBtn:active {
-  transform: scale(0.97);
+.iconBtn:active {
+  transform: scale(0.95);
 }
 
-.undoBtn {
-  background: var(--tds-primary);
+.iconBtn.disabled {
+  border-color: var(--tds-border);
+  cursor: not-allowed;
+}
+
+.iconBtn.disabled:hover {
+  transform: none;
+  background: var(--tds-card);
+}
+
+.iconBtn svg {
+  width: clamp(18px, 4.5vmin, 22px);
+  height: clamp(18px, 4.5vmin, 22px);
+}
+
+.completeBtn {
+  flex: none;
+  width: 30%;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 600;
   color: white;
+  background: var(--tds-primary);
+  border: none;
+  border-radius: 11px;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.1s ease;
+  font-family: inherit;
+  margin-left: clamp(12px, 3vmin, 20px);
 }
 
-.undoBtn:hover:not(:disabled) {
+.completeBtn:hover {
   background: var(--tds-primary-dark);
 }
 
-.undoBtn:disabled {
-  background: var(--tds-border);
-  color: var(--tds-text-tertiary);
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.resetBtn {
-  background: var(--tds-background);
-  color: var(--tds-text-secondary);
-  border: 1px solid var(--tds-border);
-}
-
-.resetBtn:hover {
-  background: var(--tds-border);
-  color: var(--tds-text-primary);
-}
-
-.calendarBtn {
-  background: var(--tds-warning);
-  color: white;
-}
-
-.calendarBtn:hover {
-  background: #E68600;
-}
-
-.wallpaperBtn {
-  background: var(--tds-success);
-  color: white;
-}
-
-.wallpaperBtn:hover {
-  background: #00A87D;
-}
-
-/* 가로 모드 */
-@media (orientation: landscape) {
-  .controls {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: clamp(6px, 1.5vh, 10px);
-    padding: clamp(6px, 1.5vh, 10px);
-  }
+.completeBtn:active {
+  transform: scale(0.97);
 }
 
 /* 터치 디바이스 */
 @media (hover: none) {
-  .controlBtn:hover {
+  .iconBtn:hover {
     transform: none;
-    box-shadow: none;
+    background: var(--tds-card);
+  }
+
+  .completeBtn:hover {
+    background: var(--tds-primary);
   }
 }
 

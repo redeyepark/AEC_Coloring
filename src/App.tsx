@@ -2,15 +2,20 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ColoringCanvas } from './components/ColoringCanvas';
 import { Palette } from './components/Palette';
 import { Controls } from './components/Controls';
+import { IntroPage } from './components/IntroPage';
+import { ResultPage } from './components/ResultPage';
 import { useImages } from './hooks/useImages';
 import { useColoring } from './hooks/useColoring';
-import { saveAsCalendar, saveAsWallpaper } from './utils/saveImage';
+import { saveAsImage, saveAsCalendar, saveAsWallpaper } from './utils/saveImage';
 import { ImageInfo } from './types';
 import './App.css';
+
+type AppPhase = 'intro' | 'coloring' | 'result';
 
 export default function App() {
   const { images, isLoading: imagesLoading, error: imagesError } = useImages();
   const [currentImage, setCurrentImage] = useState<ImageInfo | null>(null);
+  const [phase, setPhase] = useState<AppPhase>('intro');
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   const {
@@ -19,18 +24,37 @@ export default function App() {
     history,
     fillPath,
     undo,
+    redo,
     clearHistory,
     isBlackColor,
-    canUndo
+    canUndo,
+    canRedo
   } = useColoring();
 
-  // 랜덤 이미지 선택
+  // 랜덤 이미지 선택 (색칠 화면 진입 시)
   useEffect(() => {
-    if (images.length > 0 && !currentImage) {
+    if (images.length > 0 && !currentImage && phase === 'coloring') {
       const randomIndex = Math.floor(Math.random() * images.length);
       setCurrentImage(images[randomIndex]);
     }
-  }, [images, currentImage]);
+  }, [images, currentImage, phase]);
+
+  // 인트로 → 색칠 전환
+  const handleStart = useCallback(() => {
+    setPhase('coloring');
+  }, []);
+
+  // 색칠 완료 → 결과 전환
+  const handleComplete = useCallback(() => {
+    setPhase('result');
+  }, []);
+
+  // 새로 시작 (결과 → 인트로)
+  const handleRestart = useCallback(() => {
+    setPhase('intro');
+    setCurrentImage(null);
+    clearHistory();
+  }, [clearHistory]);
 
   // 리셋 핸들러
   const handleReset = useCallback(() => {
@@ -43,25 +67,52 @@ export default function App() {
     }
   }, [currentImage, clearHistory]);
 
-  // 달력 저장 핸들러
-  const handleSaveCalendar = useCallback(() => {
+  // 이미지 저장 핸들러
+  const handleSaveImage = useCallback(async (): Promise<void> => {
     if (svgRef.current && currentImage) {
-      saveAsCalendar(svgRef.current, currentImage.name);
+      await saveAsImage(svgRef.current, currentImage.name);
     } else {
-      alert('저장할 이미지가 없습니다.');
+      throw new Error('저장할 이미지가 없습니다.');
+    }
+  }, [currentImage]);
+
+  // 달력 저장 핸들러
+  const handleSaveCalendar = useCallback(async (): Promise<void> => {
+    if (svgRef.current && currentImage) {
+      await saveAsCalendar(svgRef.current, currentImage.name);
+    } else {
+      throw new Error('저장할 이미지가 없습니다.');
     }
   }, [currentImage]);
 
   // 배경화면 저장 핸들러
-  const handleSaveWallpaper = useCallback(() => {
+  const handleSaveWallpaper = useCallback(async (): Promise<void> => {
     if (svgRef.current && currentImage) {
-      saveAsWallpaper(svgRef.current, currentImage.name);
+      await saveAsWallpaper(svgRef.current, currentImage.name);
     } else {
-      alert('저장할 이미지가 없습니다.');
+      throw new Error('저장할 이미지가 없습니다.');
     }
   }, [currentImage]);
 
-  // 로딩 상태
+  // 인트로 화면
+  if (phase === 'intro') {
+    return <IntroPage onStart={handleStart} />;
+  }
+
+  // 결과 화면
+  if (phase === 'result') {
+    return (
+      <ResultPage
+        svgRef={svgRef}
+        onSaveImage={handleSaveImage}
+        onSaveCalendar={handleSaveCalendar}
+        onSaveWallpaper={handleSaveWallpaper}
+        onRestart={handleRestart}
+      />
+    );
+  }
+
+  // 색칠 화면 - 로딩 상태
   if (imagesLoading) {
     return (
       <main className="main-container">
@@ -70,7 +121,7 @@ export default function App() {
     );
   }
 
-  // 에러 상태
+  // 색칠 화면 - 에러 상태
   if (imagesError) {
     return (
       <main className="main-container">
@@ -82,7 +133,7 @@ export default function App() {
     );
   }
 
-  // 이미지 없음
+  // 색칠 화면 - 이미지 없음
   if (images.length === 0) {
     return (
       <main className="main-container">
@@ -94,8 +145,9 @@ export default function App() {
     );
   }
 
+  // 색칠 화면
   return (
-    <main className="main-container">
+    <main className="main-container coloring-page">
       <ColoringCanvas
         image={currentImage}
         onPathClick={fillPath}
@@ -104,21 +156,19 @@ export default function App() {
         selectedColorHex={selectedColor.hex}
       />
 
-      <div className="right-panel">
-        <Palette
-          selectedColor={selectedColor}
-          onColorSelect={setSelectedColor}
-        />
+      <Palette
+        selectedColor={selectedColor}
+        onColorSelect={setSelectedColor}
+      />
 
-        <Controls
-          canUndo={canUndo}
-          historyCount={history.length}
-          onUndo={undo}
-          onReset={handleReset}
-          onSaveCalendar={handleSaveCalendar}
-          onSaveWallpaper={handleSaveWallpaper}
-        />
-      </div>
+      <Controls
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={undo}
+        onRedo={redo}
+        onReset={handleReset}
+        onComplete={handleComplete}
+      />
     </main>
   );
 }

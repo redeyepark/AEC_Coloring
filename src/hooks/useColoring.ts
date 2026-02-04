@@ -4,9 +4,17 @@ import { COLORS } from '../constants/colors';
 
 const MAX_HISTORY = 50;
 
+// Redo 스택용 타입
+interface RedoItem {
+  element: SVGPathElement;
+  color: string;
+  previousColor: string;
+}
+
 export function useColoring() {
   const [selectedColor, setSelectedColor] = useState<ColorInfo>(COLORS[0]);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [redoStack, setRedoStack] = useState<RedoItem[]>([]);
 
   const isBlackColor = useCallback((color: string | null): boolean => {
     if (!color) return false;
@@ -40,6 +48,9 @@ export function useColoring() {
     element.setAttribute('fill', selectedColor.hex);
     element.style.fill = selectedColor.hex;
 
+    // 새 액션 시 redo 스택 초기화
+    setRedoStack([]);
+
     // 히스토리에 저장
     setTimeout(() => {
       setHistory(prev => {
@@ -58,15 +69,47 @@ export function useColoring() {
       const newHistory = [...prev];
       const lastAction = newHistory.pop();
       if (lastAction?.element?.parentNode) {
+        const currentColor = lastAction.element.getAttribute('fill') || '#FFFFFF';
+        // redo 스택에 추가
+        setRedoStack(redoPrev => [...redoPrev, {
+          element: lastAction.element,
+          color: currentColor,
+          previousColor: lastAction.previousColor
+        }]);
+        // 이전 색상으로 복원
         lastAction.element.setAttribute('fill', lastAction.previousColor);
+        lastAction.element.style.fill = lastAction.previousColor;
       }
       return newHistory;
     });
     return true;
   }, [history.length]);
 
+  const redo = useCallback(() => {
+    if (redoStack.length === 0) return false;
+
+    setRedoStack(prev => {
+      const newRedoStack = [...prev];
+      const lastRedo = newRedoStack.pop();
+      if (lastRedo?.element?.parentNode) {
+        const previousColor = lastRedo.element.getAttribute('fill') || '#FFFFFF';
+        // 히스토리에 추가
+        setHistory(historyPrev => [...historyPrev, {
+          element: lastRedo.element,
+          previousColor: previousColor
+        }]);
+        // 색상 복원
+        lastRedo.element.setAttribute('fill', lastRedo.color);
+        lastRedo.element.style.fill = lastRedo.color;
+      }
+      return newRedoStack;
+    });
+    return true;
+  }, [redoStack.length]);
+
   const clearHistory = useCallback(() => {
     setHistory([]);
+    setRedoStack([]);
   }, []);
 
   return {
@@ -75,8 +118,10 @@ export function useColoring() {
     history,
     fillPath,
     undo,
+    redo,
     clearHistory,
     isBlackColor,
-    canUndo: history.length > 0
+    canUndo: history.length > 0,
+    canRedo: redoStack.length > 0
   };
 }
