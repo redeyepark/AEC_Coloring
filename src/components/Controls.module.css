@@ -1,19 +1,78 @@
-/* 컨트롤 영역 - 4버튼 2x2 그리드 */
+/* 컨트롤 영역 - 아이콘 + 완료 버튼 */
 .controls {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
+  display: flex;
+  align-items: center;
   gap: clamp(8px, 2vmin, 12px);
   flex-shrink: 0;
   padding: clamp(8px, 2vmin, 12px);
 }
 
-.controlBtn {
-  padding: min(8px, 2vmin) min(12px, 3vmin);
-  font-size: clamp(13px, 3.5vmin, 18px);
-  font-weight: 700;
+.iconBtn {
+  width: clamp(36px, 8vmin, 44px);
+  height: clamp(36px, 8vmin, 44px);
+  border-radius: 10px;
+  border: 1.5px solid var(--tds-primary);
+  background: var(--tds-card);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease, background 0.1s ease, border-color 0.1s ease;
+  flex-shrink: 0;
+}
+
+.iconBtn:hover {
+  background: rgba(49, 130, 246, 0.1);
+  transform: scale(1.05);
+}
+
+.iconBtn:active {
+  transform: scale(0.95);
+}
+
+.iconBtn.disabled {
+  border-color: var(--tds-border);
+  cursor: not-allowed;
+}
+
+.iconBtn.disabled:hover {
+  transform: none;
+  background: var(--tds-card);
+}
+
+.iconBtn svg {
+  width: clamp(16px, 4vmin, 20px);
+  height: clamp(16px, 4vmin, 20px);
+}
+
+.completeBtn {
+  flex: 1;
+  padding: clamp(8px, 2vmin, 12px) clamp(12px, 3vmin, 16px);
+  font-size: clamp(12px, 3vmin, 14px);
+  font-weight: 600;
+  color: white;
+  background: var(--tds-primary);
   border: none;
-  border-radius: min(10px, 2.5vmin);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.1s ease;
+  font-family: inherit;
+}
+
+.completeBtn:hover {
+  background: var(--tds-primary-dark);
+}
+
+.completeBtn:active {
+  transform: scale(0.97);
+}
+
+.controlBtn {
+  padding: min(6px, 1.5vmin) min(8px, 2vmin);
+  font-size: clamp(11px, 2.8vmin, 14px);
+  font-weight: 600;
+  border: none;
+  border-radius: min(8px, 2vmin);
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
   display: flex;
@@ -24,6 +83,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.btnIcon {
+  width: clamp(16px, 4vmin, 24px);
+  height: clamp(16px, 4vmin, 24px);
+  object-fit: contain;
 }
 
 .controlBtn:hover {
@@ -86,8 +151,8 @@
   .controls {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);
-    gap: clamp(6px, 1.5vh, 10px);
-    padding: clamp(6px, 1.5vh, 10px);
+    gap: clamp(4px, 1vh, 8px);
+    padding: clamp(4px, 1vh, 8px);
   }
 }
 

@@ -1,6 +1,6 @@
-/* 팔레트 섹션 - flex:1로 남은 공간 차지 */
+/* 팔레트 섹션 - 색상 그리드만 표시 */
 .paletteSection {
-  background: var(--tds-background);
+  background: var(--tds-card);
   border-radius: var(--spacing-sm);
   padding: var(--spacing-sm);
   flex: 1;
@@ -8,41 +8,6 @@
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
-}
-
-.paletteHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-xs);
-  flex-shrink: 0;
-}
-
-.paletteTitle {
-  font-size: var(--font-sm);
-  font-weight: 600;
-  color: var(--tds-text-primary);
-}
-
-.selectedColorDisplay {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-.selectedColorPreview {
-  width: clamp(24px, 5vmin, 40px);
-  height: clamp(24px, 5vmin, 40px);
-  border-radius: var(--spacing-xs);
-  border: 2px solid var(--tds-border);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  flex-shrink: 0;
-}
-
-.selectedColorText {
-  font-size: var(--font-xs);
-  font-weight: 500;
-  color: var(--tds-text-secondary);
 }
 
 /* 색상 팔레트 - CSS Grid로 자동 맞춤 */
@@ -92,22 +57,10 @@
   .colorPalette {
     grid-template-columns: repeat(8, 1fr);
   }
-
-  .selectedColorText {
-    display: none;
-  }
 }
 
-/* 매우 작은 화면 - 색상명 숨기기 */
+/* 매우 작은 화면 */
 @media (max-width: 360px), (max-height: 500px) {
-  .selectedColorText {
-    display: none;
-  }
-
-  .paletteHeader {
-    margin-bottom: 2px;
-  }
-
   .paletteSection {
     padding: 4px;
   }

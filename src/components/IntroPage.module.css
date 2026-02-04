@@ -1,0 +1,67 @@
+.introPage {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--tds-card);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.imageContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  min-height: 0;
+}
+
+.galleryImage {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--spacing-sm);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.startHint {
+  padding: var(--spacing-lg);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.hintText {
+  display: inline-block;
+  padding: 12px 32px;
+  background: var(--tds-primary);
+  color: white;
+  font-size: var(--font-md);
+  font-weight: 600;
+  border-radius: 24px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+/* 터치 피드백 */
+.introPage:active .galleryImage {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* 안전 영역 */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .startHint {
+    padding-bottom: max(var(--spacing-lg), env(safe-area-inset-bottom));
+  }
+}

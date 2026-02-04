@@ -1,4 +1,59 @@
 import { getDeviceResolution } from '../hooks/useDeviceResolution';
+import { saveBase64Data } from '@apps-in-toss/web-framework';
+
+// 이미지만 저장 (색칠한 그림 그대로)
+export function saveAsImage(svg: SVGSVGElement, imageName: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const resolution = getDeviceResolution();
+    const phoneWidth = resolution.width;
+    const phoneHeight = resolution.height;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const svgUrl = URL.createObjectURL(svgBlob);
+
+    const img = new Image();
+    img.onload = async () => {
+      const canvas = document.createElement('canvas');
+
+      const imgAspect = img.width / img.height;
+      let canvasWidth, canvasHeight;
+
+      if (imgAspect > phoneWidth / phoneHeight) {
+        canvasWidth = phoneWidth;
+        canvasHeight = phoneWidth / imgAspect;
+      } else {
+        canvasHeight = phoneHeight;
+        canvasWidth = phoneHeight * imgAspect;
+      }
+
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      const ctx = canvas.getContext('2d')!;
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
+
+      const pngUrl = canvas.toDataURL('image/png');
+      const base64Data = pngUrl.replace(/^data:image\/png;base64,/, '');
+      const fileName = `coloring_${imageName.replace(/\s/g, '_')}_${Date.now()}.png`;
+
+      try {
+        await saveBase64Data({ data: base64Data, fileName, mimeType: 'image/png' });
+        resolve();
+      } catch (err) {
+        console.error('저장 실패:', err);
+        reject(err);
+      }
+
+      URL.revokeObjectURL(svgUrl);
+    };
+
+    img.onerror = reject;
+    img.src = svgUrl;
+  });
+}
 
 // 월간 달력 그리기 함수
 function drawCalendar(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) {
@@ -101,57 +156,66 @@ function drawDailyCalendar(ctx: CanvasRenderingContext2D, x: number, y: number, 
   ctx.fillText(dayNames[dayOfWeek], x + width / 2, y + height - padding - dayFontSize * 0.5);
 }
 
-export function saveAsCalendar(svg: SVGSVGElement, imageName: string) {
-  const resolution = getDeviceResolution();
-  const phoneWidth = resolution.width;
-  const phoneHeight = resolution.height;
-  const imageHeight = Math.floor(phoneHeight * 0.55);
-  const calendarHeight = phoneHeight - imageHeight;
+export function saveAsCalendar(svg: SVGSVGElement, imageName: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const resolution = getDeviceResolution();
+    const phoneWidth = resolution.width;
+    const phoneHeight = resolution.height;
+    const imageHeight = Math.floor(phoneHeight * 0.55);
+    const calendarHeight = phoneHeight - imageHeight;
 
-  const svgData = new XMLSerializer().serializeToString(svg);
-  const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-  const svgUrl = URL.createObjectURL(svgBlob);
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const svgUrl = URL.createObjectURL(svgBlob);
 
-  const img = new Image();
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = phoneWidth;
-    canvas.height = phoneHeight;
-    const ctx = canvas.getContext('2d')!;
+    const img = new Image();
+    img.onload = async () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = phoneWidth;
+      canvas.height = phoneHeight;
+      const ctx = canvas.getContext('2d')!;
 
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, phoneWidth, phoneHeight);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, phoneWidth, phoneHeight);
 
-    const imgAspect = img.width / img.height;
-    let drawWidth, drawHeight, drawX, drawY;
+      const imgAspect = img.width / img.height;
+      let drawWidth, drawHeight, drawX, drawY;
 
-    if (imgAspect > phoneWidth / imageHeight) {
-      drawWidth = phoneWidth;
-      drawHeight = phoneWidth / imgAspect;
-      drawX = 0;
-      drawY = (imageHeight - drawHeight) / 2;
-    } else {
-      drawHeight = imageHeight;
-      drawWidth = imageHeight * imgAspect;
-      drawX = (phoneWidth - drawWidth) / 2;
-      drawY = 0;
-    }
-    ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+      if (imgAspect > phoneWidth / imageHeight) {
+        drawWidth = phoneWidth;
+        drawHeight = phoneWidth / imgAspect;
+        drawX = 0;
+        drawY = (imageHeight - drawHeight) / 2;
+      } else {
+        drawHeight = imageHeight;
+        drawWidth = imageHeight * imgAspect;
+        drawX = (phoneWidth - drawWidth) / 2;
+        drawY = 0;
+      }
+      ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
 
-    drawCalendar(ctx, 0, imageHeight, phoneWidth, calendarHeight);
+      drawCalendar(ctx, 0, imageHeight, phoneWidth, calendarHeight);
 
-    const pngUrl = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.href = pngUrl;
-    const now = new Date();
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    link.download = `calendar_${imageName.replace(/\s/g, '_')}_${monthNames[now.getMonth()]}_${Date.now()}.png`;
-    link.click();
+      const pngUrl = canvas.toDataURL('image/png');
+      const base64Data = pngUrl.replace(/^data:image\/png;base64,/, '');
+      const now = new Date();
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const fileName = `calendar_${imageName.replace(/\s/g, '_')}_${monthNames[now.getMonth()]}_${Date.now()}.png`;
 
-    URL.revokeObjectURL(svgUrl);
-  };
+      try {
+        await saveBase64Data({ data: base64Data, fileName, mimeType: 'image/png' });
+        resolve();
+      } catch (err) {
+        console.error('저장 실패:', err);
+        reject(err);
+      }
 
-  img.src = svgUrl;
+      URL.revokeObjectURL(svgUrl);
+    };
+
+    img.onerror = reject;
+    img.src = svgUrl;
+  });
 }
 
 export function saveAsDailyCalendar(svg: SVGSVGElement, imageName: string) {
@@ -194,11 +258,18 @@ export function saveAsDailyCalendar(svg: SVGSVGElement, imageName: string) {
     drawDailyCalendar(ctx, 0, imageHeight, phoneWidth, dailyHeight);
 
     const pngUrl = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.href = pngUrl;
+    const base64Data = pngUrl.replace(/^data:image\/png;base64,/, '');
     const now = new Date();
-    link.download = `daily_${imageName.replace(/\s/g, '_')}_${now.getDate()}_${Date.now()}.png`;
-    link.click();
+    const fileName = `daily_${imageName.replace(/\s/g, '_')}_${now.getDate()}_${Date.now()}.png`;
+
+    saveBase64Data({
+      data: base64Data,
+      fileName,
+      mimeType: 'image/png',
+    }).catch(err => {
+      console.error('저장 실패:', err);
+      alert('이미지 저장에 실패했습니다.');
+    });
 
     URL.revokeObjectURL(svgUrl);
   };
@@ -206,51 +277,60 @@ export function saveAsDailyCalendar(svg: SVGSVGElement, imageName: string) {
   img.src = svgUrl;
 }
 
-export function saveAsWallpaper(svg: SVGSVGElement, imageName: string) {
-  const resolution = getDeviceResolution();
-  const phoneWidth = resolution.width;
-  const phoneHeight = resolution.height;
+export function saveAsWallpaper(svg: SVGSVGElement, imageName: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const resolution = getDeviceResolution();
+    const phoneWidth = resolution.width;
+    const phoneHeight = resolution.height;
 
-  const svgData = new XMLSerializer().serializeToString(svg);
-  const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-  const svgUrl = URL.createObjectURL(svgBlob);
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const svgUrl = URL.createObjectURL(svgBlob);
 
-  const img = new Image();
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = phoneWidth;
-    canvas.height = phoneHeight;
-    const ctx = canvas.getContext('2d')!;
+    const img = new Image();
+    img.onload = async () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = phoneWidth;
+      canvas.height = phoneHeight;
+      const ctx = canvas.getContext('2d')!;
 
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, phoneWidth, phoneHeight);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, phoneWidth, phoneHeight);
 
-    const phoneAspect = phoneWidth / phoneHeight;
+      const phoneAspect = phoneWidth / phoneHeight;
 
-    let srcX, srcY, srcWidth, srcHeight;
+      let srcX, srcY, srcWidth, srcHeight;
 
-    srcWidth = img.width;
-    srcHeight = img.width / phoneAspect;
-    srcX = 0;
-    srcY = (img.height - srcHeight) / 2;
+      srcWidth = img.width;
+      srcHeight = img.width / phoneAspect;
+      srcX = 0;
+      srcY = (img.height - srcHeight) / 2;
 
-    if (srcHeight > img.height) {
-      srcHeight = img.height;
-      srcWidth = img.height * phoneAspect;
-      srcX = (img.width - srcWidth) / 2;
-      srcY = 0;
-    }
+      if (srcHeight > img.height) {
+        srcHeight = img.height;
+        srcWidth = img.height * phoneAspect;
+        srcX = (img.width - srcWidth) / 2;
+        srcY = 0;
+      }
 
-    ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, 0, 0, phoneWidth, phoneHeight);
+      ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, 0, 0, phoneWidth, phoneHeight);
 
-    const pngUrl = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.href = pngUrl;
-    link.download = `wallpaper_${imageName.replace(/\s/g, '_')}_${Date.now()}.png`;
-    link.click();
+      const pngUrl = canvas.toDataURL('image/png');
+      const base64Data = pngUrl.replace(/^data:image\/png;base64,/, '');
+      const fileName = `wallpaper_${imageName.replace(/\s/g, '_')}_${Date.now()}.png`;
 
-    URL.revokeObjectURL(svgUrl);
-  };
+      try {
+        await saveBase64Data({ data: base64Data, fileName, mimeType: 'image/png' });
+        resolve();
+      } catch (err) {
+        console.error('저장 실패:', err);
+        reject(err);
+      }
 
-  img.src = svgUrl;
+      URL.revokeObjectURL(svgUrl);
+    };
+
+    img.onerror = reject;
+    img.src = svgUrl;
+  });
 }

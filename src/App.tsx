@@ -2,15 +2,19 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ColoringCanvas } from './components/ColoringCanvas';
 import { Palette } from './components/Palette';
 import { Controls } from './components/Controls';
+import { ResultPage } from './components/ResultPage';
+import { IntroPage } from './components/IntroPage';
 import { useImages } from './hooks/useImages';
 import { useColoring } from './hooks/useColoring';
-import { saveAsCalendar, saveAsWallpaper } from './utils/saveImage';
+import { saveAsImage, saveAsCalendar, saveAsWallpaper } from './utils/saveImage';
 import { ImageInfo } from './types';
 import './App.css';
 
 export default function App() {
   const { images, isLoading: imagesLoading, error: imagesError } = useImages();
   const [currentImage, setCurrentImage] = useState<ImageInfo | null>(null);
+  const [isStarted, setIsStarted] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   const {
@@ -21,45 +25,68 @@ export default function App() {
     undo,
     clearHistory,
     isBlackColor,
-    canUndo
+    canUndo,
+    setSvgContainer
   } = useColoring();
 
-  // 랜덤 이미지 선택
-  useEffect(() => {
-    if (images.length > 0 && !currentImage) {
-      const randomIndex = Math.floor(Math.random() * images.length);
-      setCurrentImage(images[randomIndex]);
-    }
-  }, [images, currentImage]);
-
-  // 리셋 핸들러
+  // 리셋 핸들러 - 새로운 랜덤 이미지 선택
   const handleReset = useCallback(() => {
     clearHistory();
-    // SVG 리로드를 위해 currentImage를 다시 설정
-    if (currentImage) {
-      const temp = currentImage;
+    if (images.length > 0) {
+      let randomIndex = Math.floor(Math.random() * images.length);
+      if (images.length > 1 && currentImage) {
+        const currentIndex = images.findIndex(img => img.path === currentImage.path);
+        while (randomIndex === currentIndex) {
+          randomIndex = Math.floor(Math.random() * images.length);
+        }
+      }
       setCurrentImage(null);
-      setTimeout(() => setCurrentImage(temp), 0);
+      setTimeout(() => setCurrentImage(images[randomIndex]), 0);
     }
-  }, [currentImage, clearHistory]);
+  }, [images, currentImage, clearHistory]);
+
+  // 완료 핸들러
+  const handleComplete = useCallback(() => {
+    setIsCompleted(true);
+  }, []);
+
+  // 이미지 저장 핸들러
+  const handleSaveImage = useCallback(async () => {
+    if (svgRef.current && currentImage) {
+      await saveAsImage(svgRef.current, currentImage.name);
+    }
+  }, [currentImage]);
 
   // 달력 저장 핸들러
-  const handleSaveCalendar = useCallback(() => {
+  const handleSaveCalendar = useCallback(async () => {
     if (svgRef.current && currentImage) {
-      saveAsCalendar(svgRef.current, currentImage.name);
-    } else {
-      alert('저장할 이미지가 없습니다.');
+      await saveAsCalendar(svgRef.current, currentImage.name);
     }
   }, [currentImage]);
 
   // 배경화면 저장 핸들러
-  const handleSaveWallpaper = useCallback(() => {
+  const handleSaveWallpaper = useCallback(async () => {
     if (svgRef.current && currentImage) {
-      saveAsWallpaper(svgRef.current, currentImage.name);
-    } else {
-      alert('저장할 이미지가 없습니다.');
+      await saveAsWallpaper(svgRef.current, currentImage.name);
     }
   }, [currentImage]);
+
+  // 새로 시작하기 핸들러
+  const handleRestart = useCallback(() => {
+    setIsCompleted(false);
+    setIsStarted(false);
+    clearHistory();
+    setCurrentImage(null);
+  }, [clearHistory]);
+
+  // 인트로에서 시작하기 핸들러
+  const handleStart = useCallback(() => {
+    if (images.length > 0) {
+      const randomIndex = Math.floor(Math.random() * images.length);
+      setCurrentImage(images[randomIndex]);
+      setIsStarted(true);
+    }
+  }, [images]);
 
   // 로딩 상태
   if (imagesLoading) {
@@ -94,6 +121,30 @@ export default function App() {
     );
   }
 
+  // 인트로 화면
+  if (!isStarted) {
+    return (
+      <main className="main-container">
+        <IntroPage onStart={handleStart} />
+      </main>
+    );
+  }
+
+  // 완료 화면
+  if (isCompleted) {
+    return (
+      <main className="main-container">
+        <ResultPage
+          svgRef={svgRef}
+          onSaveImage={handleSaveImage}
+          onSaveCalendar={handleSaveCalendar}
+          onSaveWallpaper={handleSaveWallpaper}
+          onRestart={handleRestart}
+        />
+      </main>
+    );
+  }
+
   return (
     <main className="main-container">
       <ColoringCanvas
@@ -102,6 +153,7 @@ export default function App() {
         isBlackColor={isBlackColor}
         svgRef={svgRef}
         selectedColorHex={selectedColor.hex}
+        onContainerReady={setSvgContainer}
       />
 
       <div className="right-panel">
@@ -112,11 +164,9 @@ export default function App() {
 
         <Controls
           canUndo={canUndo}
-          historyCount={history.length}
           onUndo={undo}
           onReset={handleReset}
-          onSaveCalendar={handleSaveCalendar}
-          onSaveWallpaper={handleSaveWallpaper}
+          onComplete={handleComplete}
         />
       </div>
     </main>

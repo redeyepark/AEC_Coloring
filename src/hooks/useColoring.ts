@@ -1,25 +1,32 @@
-import { useState, useCallback } from 'react';
-import { ColorInfo, HistoryItem } from '../types';
+import { useState, useCallback, useRef } from 'react';
+import { ColorInfo } from '../types';
 import { COLORS } from '../constants/colors';
 
 const MAX_HISTORY = 50;
 
+interface PathHistoryItem {
+  pathId: string;
+  previousColor: string;
+}
+
 export function useColoring() {
   const [selectedColor, setSelectedColor] = useState<ColorInfo>(COLORS[0]);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [history, setHistory] = useState<PathHistoryItem[]>([]);
+  const svgContainerRef = useRef<HTMLElement | null>(null);
+
+  const setSvgContainer = useCallback((container: HTMLElement | null) => {
+    svgContainerRef.current = container;
+  }, []);
 
   const isBlackColor = useCallback((color: string | null): boolean => {
     if (!color) return false;
     const c = color.toLowerCase().trim();
-    // 정확히 #000000만 색칠 불가 (어두운 색상도 색칠 가능하도록)
     if (c === 'black' || c === '#000000' || c === '#000') return true;
-    // rgb(0,0,0)만 검정색으로 판별
     const rgbMatch = c.match(/rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
     if (rgbMatch) {
       const r = parseInt(rgbMatch[1]);
       const g = parseInt(rgbMatch[2]);
       const b = parseInt(rgbMatch[3]);
-      // 정확히 rgb(0,0,0)만 검정색
       return r === 0 && g === 0 && b === 0;
     }
     return false;
@@ -36,17 +43,22 @@ export function useColoring() {
       return false;
     }
 
-    // 색상 변경 (속성과 스타일 모두 설정)
+    // path에 고유 ID 부여 (없으면 생성)
+    let pathId = element.getAttribute('data-path-id');
+    if (!pathId) {
+      pathId = `path-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      element.setAttribute('data-path-id', pathId);
+    }
+
+    // 색상 변경
     element.setAttribute('fill', selectedColor.hex);
     element.style.fill = selectedColor.hex;
 
-    // 히스토리에 저장
-    setTimeout(() => {
-      setHistory(prev => {
-        const newHistory = [...prev, { element, previousColor: currentFill || '#FFFFFF' }];
-        return newHistory.slice(-MAX_HISTORY);
-      });
-    }, 0);
+    // 히스토리에 저장 (pathId 사용)
+    setHistory(prev => {
+      const newHistory = [...prev, { pathId, previousColor: currentFill || '#FFFFFF' }];
+      return newHistory.slice(-MAX_HISTORY);
+    });
 
     return true;
   }, [selectedColor, isBlackColor]);
@@ -54,16 +66,20 @@ export function useColoring() {
   const undo = useCallback(() => {
     if (history.length === 0) return false;
 
-    setHistory(prev => {
-      const newHistory = [...prev];
-      const lastAction = newHistory.pop();
-      if (lastAction?.element?.parentNode) {
-        lastAction.element.setAttribute('fill', lastAction.previousColor);
+    const lastAction = history[history.length - 1];
+
+    // svgContainer에서 pathId로 element 찾기
+    if (svgContainerRef.current && lastAction) {
+      const element = svgContainerRef.current.querySelector(`[data-path-id="${lastAction.pathId}"]`) as SVGPathElement;
+      if (element) {
+        element.setAttribute('fill', lastAction.previousColor);
+        element.style.fill = lastAction.previousColor;
       }
-      return newHistory;
-    });
+    }
+
+    setHistory(prev => prev.slice(0, -1));
     return true;
-  }, [history.length]);
+  }, [history]);
 
   const clearHistory = useCallback(() => {
     setHistory([]);
@@ -77,6 +93,7 @@ export function useColoring() {
     undo,
     clearHistory,
     isBlackColor,
-    canUndo: history.length > 0
+    canUndo: history.length > 0,
+    setSvgContainer
   };
 }

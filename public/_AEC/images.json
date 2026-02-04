@@ -1,25 +1,49 @@
 {
   "images": [
     {
-      "file": "DavidHockney.svg",
-      "name": "DavidHockney"
+      "file": "TOSS__03_DavidHockney.svg",
+      "name": "David Hockney"
     },
     {
-      "file": "FridaKahlo.svg",
-      "name": "FridaKahlo"
+      "file": "TOSS__04_FridaKahlo.svg",
+      "name": "Frida Kahlo"
     },
     {
-      "file": "VincentvanGogh.svg",
-      "name": "VincentvanGogh"
+      "file": "TOSS__02_VincentvanGogh.svg",
+      "name": "Vincent van Gogh"
+    },
+    {
+      "file": "TOSS__00.svg",
+      "name": "TOSS"
+    },
+    {
+      "file": "TOSS__01_AEC_WOW.svg",
+      "name": "AEC WOW"
     },
     {
       "file": "20260202_01.svg",
-      "name": "20260202_01"
+      "name": "작품 01"
     },
     {
       "file": "20260202_02.svg",
-      "name": "20260202_02"
+      "name": "작품 02"
+    },
+    {
+      "file": "20260202_03.svg",
+      "name": "작품 03"
+    },
+    {
+      "file": "20260202_04.svg",
+      "name": "작품 04"
+    },
+    {
+      "file": "20260202_05.svg",
+      "name": "작품 05"
+    },
+    {
+      "file": "20260202_06.svg",
+      "name": "작품 06"
     }
   ],
-  "lastUpdated": "2026-02-02"
+  "lastUpdated": "2026-02-04"
 }

@@ -22,9 +22,9 @@
   --font-sm: clamp(11px, 3vmin, 16px);
   --font-md: clamp(12px, 3.5vmin, 18px);
 
-  /* 패널 비율 */
-  --panel-ratio: 38%;
-  --canvas-ratio: 62%;
+  /* 패널 비율 - 팔레트 6줄 전체 표시를 위해 조정 */
+  --panel-ratio: 46%;
+  --canvas-ratio: 54%;
 }
 
 /* 전역 스타일 초기화 */

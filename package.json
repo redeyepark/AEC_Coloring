@@ -1,13 +1,15 @@
 {
-  "name": "jwy_bg",
-  "version": "1.0.0",
+  "name": "todays-coloring",
+  "version": "1.0.1",
   "description": "웹 기반 SVG 컬러링북 애플리케이션입니다. 유명 화가 스타일의 라인아트를 색칠할 수 있습니다.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "bundle": "vite build && node scripts/create-ait.mjs",
     "preview": "vite preview",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy": "ait deploy"
   },
   "repository": {
     "type": "git",
@@ -16,22 +18,25 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/redeyepark/AEC_Coloring/issues"
   },
   "homepage": "https://github.com/redeyepark/AEC_Coloring#readme",
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",
+    "@rsbuild/core": "^1.7.2",
+    "@rsbuild/plugin-react": "^1.4.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
+    "archiver": "^7.0.1",
     "sharp": "^0.34.5",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   },
   "dependencies": {
-    "@apps-in-toss/web-framework": "^1.9.1",
+    "@apps-in-toss/web-framework": "^1.5.2",
     "@emotion/react": "^11.14.0",
+    "@granite-js/plugin-router": "^0.1.34",
     "@toss/tds-mobile": "^2.2.1",
     "@vitejs/plugin-react": "^5.1.2",
     "react": "^18.3.1",
