@@ -3,11 +3,10 @@
   background: var(--tds-card);
   border-radius: var(--spacing-sm);
   padding: var(--spacing-sm);
-  flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  min-height: 0;
+  flex-shrink: 0;
 }
 
 /* 색상 팔레트 - CSS Grid로 자동 맞춤 */

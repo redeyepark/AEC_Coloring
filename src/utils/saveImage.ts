@@ -1,6 +1,33 @@
 import { getDeviceResolution } from '../hooks/useDeviceResolution';
 import { saveBase64Data } from '@apps-in-toss/web-framework';
 
+// Toss 환경 체크
+function isTossEnvironment(): boolean {
+  return typeof window !== 'undefined' &&
+    !!(window as any).ReactNativeWebView;
+}
+
+// 브라우저 환경에서 이미지 다운로드
+function downloadInBrowser(dataUrl: string, fileName: string): void {
+  const link = document.createElement('a');
+  link.href = dataUrl;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// 이미지 저장 (Toss 또는 브라우저)
+async function saveImage(dataUrl: string, fileName: string): Promise<void> {
+  if (isTossEnvironment()) {
+    const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
+    await saveBase64Data({ data: base64Data, fileName, mimeType: 'image/png' });
+  } else {
+    // 브라우저 환경: 다운로드
+    downloadInBrowser(dataUrl, fileName);
+  }
+}
+
 // 이미지만 저장 (색칠한 그림 그대로)
 export function saveAsImage(svg: SVGSVGElement, imageName: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -36,11 +63,10 @@ export function saveAsImage(svg: SVGSVGElement, imageName: string): Promise<void
       ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight);
 
       const pngUrl = canvas.toDataURL('image/png');
-      const base64Data = pngUrl.replace(/^data:image\/png;base64,/, '');
       const fileName = `coloring_${imageName.replace(/\s/g, '_')}_${Date.now()}.png`;
 
       try {
-        await saveBase64Data({ data: base64Data, fileName, mimeType: 'image/png' });
+        await saveImage(pngUrl, fileName);
         resolve();
       } catch (err) {
         console.error('저장 실패:', err);
@@ -197,13 +223,12 @@ export function saveAsCalendar(svg: SVGSVGElement, imageName: string): Promise<v
       drawCalendar(ctx, 0, imageHeight, phoneWidth, calendarHeight);
 
       const pngUrl = canvas.toDataURL('image/png');
-      const base64Data = pngUrl.replace(/^data:image\/png;base64,/, '');
       const now = new Date();
       const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       const fileName = `calendar_${imageName.replace(/\s/g, '_')}_${monthNames[now.getMonth()]}_${Date.now()}.png`;
 
       try {
-        await saveBase64Data({ data: base64Data, fileName, mimeType: 'image/png' });
+        await saveImage(pngUrl, fileName);
         resolve();
       } catch (err) {
         console.error('저장 실패:', err);
@@ -258,15 +283,10 @@ export function saveAsDailyCalendar(svg: SVGSVGElement, imageName: string) {
     drawDailyCalendar(ctx, 0, imageHeight, phoneWidth, dailyHeight);
 
     const pngUrl = canvas.toDataURL('image/png');
-    const base64Data = pngUrl.replace(/^data:image\/png;base64,/, '');
     const now = new Date();
     const fileName = `daily_${imageName.replace(/\s/g, '_')}_${now.getDate()}_${Date.now()}.png`;
 
-    saveBase64Data({
-      data: base64Data,
-      fileName,
-      mimeType: 'image/png',
-    }).catch(err => {
+    saveImage(pngUrl, fileName).catch(err => {
       console.error('저장 실패:', err);
       alert('이미지 저장에 실패했습니다.');
     });
@@ -316,11 +336,10 @@ export function saveAsWallpaper(svg: SVGSVGElement, imageName: string): Promise<
       ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, 0, 0, phoneWidth, phoneHeight);
 
       const pngUrl = canvas.toDataURL('image/png');
-      const base64Data = pngUrl.replace(/^data:image\/png;base64,/, '');
       const fileName = `wallpaper_${imageName.replace(/\s/g, '_')}_${Date.now()}.png`;
 
       try {
-        await saveBase64Data({ data: base64Data, fileName, mimeType: 'image/png' });
+        await saveImage(pngUrl, fileName);
         resolve();
       } catch (err) {
         console.error('저장 실패:', err);

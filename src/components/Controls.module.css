@@ -2,15 +2,16 @@
 .controls {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: clamp(8px, 2vmin, 12px);
   flex-shrink: 0;
   padding: clamp(8px, 2vmin, 12px);
 }
 
 .iconBtn {
-  width: clamp(36px, 8vmin, 44px);
-  height: clamp(36px, 8vmin, 44px);
-  border-radius: 10px;
+  width: clamp(40px, 9vmin, 48px);
+  height: clamp(40px, 9vmin, 48px);
+  border-radius: 11px;
   border: 1.5px solid var(--tds-primary);
   background: var(--tds-card);
   cursor: pointer;
@@ -41,23 +42,24 @@
 }
 
 .iconBtn svg {
-  width: clamp(16px, 4vmin, 20px);
-  height: clamp(16px, 4vmin, 20px);
+  width: clamp(18px, 4.5vmin, 22px);
+  height: clamp(18px, 4.5vmin, 22px);
 }
 
 .completeBtn {
   flex: none;
-  width: 66%;
-  padding: clamp(8px, 2vmin, 12px) clamp(12px, 3vmin, 16px);
-  font-size: clamp(12px, 3vmin, 14px);
+  width: 30%;
+  padding: 14px;
+  font-size: 14px;
   font-weight: 600;
   color: white;
   background: var(--tds-primary);
   border: none;
-  border-radius: 10px;
+  border-radius: 11px;
   cursor: pointer;
   transition: transform 0.1s ease, background 0.1s ease;
   font-family: inherit;
+  margin-left: clamp(12px, 3vmin, 20px);
 }
 
 .completeBtn:hover {

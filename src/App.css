@@ -22,9 +22,9 @@
   --font-sm: clamp(11px, 3vmin, 16px);
   --font-md: clamp(12px, 3.5vmin, 18px);
 
-  /* 패널 비율 - 팔레트 6줄 전체 표시를 위해 조정 */
-  --panel-ratio: 46%;
-  --canvas-ratio: 54%;
+  /* 패널 비율 - 50:50 균등 분할 */
+  --panel-ratio: 50%;
+  --canvas-ratio: 50%;
 }
 
 /* 전역 스타일 초기화 */
@@ -65,14 +65,15 @@ body {
   overflow: hidden;
 }
 
-/* 오른쪽 패널 - 스크롤 없이 비율로 조정 */
+/* 오른쪽 패널 - 팔레트를 중앙에 배치 */
 .right-panel {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   height: var(--panel-ratio);
   overflow: hidden;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
+  justify-content: center;
 }
 
 /* 상태 표시 */
@@ -111,7 +112,8 @@ body {
     width: var(--panel-ratio);
     height: 100%;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
+    gap: var(--spacing-md);
   }
 }
 

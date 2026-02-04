@@ -23,27 +23,23 @@ export default function App() {
     history,
     fillPath,
     undo,
+    redo,
     clearHistory,
     isBlackColor,
     canUndo,
-    setSvgContainer
+    canRedo,
+    setSvgContainer,
+    setOnSvgSync
   } = useColoring();
 
-  // 리셋 핸들러 - 새로운 랜덤 이미지 선택
+  // 리셋 핸들러 - 현재 이미지의 색칠 초기화
   const handleReset = useCallback(() => {
     clearHistory();
-    if (images.length > 0) {
-      let randomIndex = Math.floor(Math.random() * images.length);
-      if (images.length > 1 && currentImage) {
-        const currentIndex = images.findIndex(img => img.path === currentImage.path);
-        while (randomIndex === currentIndex) {
-          randomIndex = Math.floor(Math.random() * images.length);
-        }
-      }
-      setCurrentImage(null);
-      setTimeout(() => setCurrentImage(images[randomIndex]), 0);
-    }
-  }, [images, currentImage, clearHistory]);
+    // 현재 이미지를 다시 로드하여 색칠 초기화
+    const img = currentImage;
+    setCurrentImage(null);
+    setTimeout(() => setCurrentImage(img), 0);
+  }, [currentImage, clearHistory]);
 
   // 완료 핸들러
   const handleComplete = useCallback(() => {
@@ -154,6 +150,7 @@ export default function App() {
         svgRef={svgRef}
         selectedColorHex={selectedColor.hex}
         onContainerReady={setSvgContainer}
+        setOnSvgSync={setOnSvgSync}
       />
 
       <div className="right-panel">
@@ -164,7 +161,9 @@ export default function App() {
 
         <Controls
           canUndo={canUndo}
+          canRedo={canRedo}
           onUndo={undo}
+          onRedo={redo}
           onReset={handleReset}
           onComplete={handleComplete}
         />

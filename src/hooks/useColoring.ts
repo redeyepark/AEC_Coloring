@@ -12,10 +12,21 @@ interface PathHistoryItem {
 export function useColoring() {
   const [selectedColor, setSelectedColor] = useState<ColorInfo>(COLORS[0]);
   const [history, setHistory] = useState<PathHistoryItem[]>([]);
+  const [redoStack, setRedoStack] = useState<PathHistoryItem[]>([]);
+  // 히스토리를 ref로도 저장하여 최신 상태 접근 보장
+  const historyRef = useRef<PathHistoryItem[]>([]);
+  const redoStackRef = useRef<PathHistoryItem[]>([]);
   const svgContainerRef = useRef<HTMLElement | null>(null);
+  const onSvgSyncRef = useRef<((html: string) => void) | null>(null);
 
   const setSvgContainer = useCallback((container: HTMLElement | null) => {
     svgContainerRef.current = container;
+    console.log('[useColoring] setSvgContainer:', container);
+  }, []);
+
+  const setOnSvgSync = useCallback((callback: ((html: string) => void) | null) => {
+    onSvgSyncRef.current = callback;
+    console.log('[useColoring] setOnSvgSync:', callback ? 'registered' : 'cleared');
   }, []);
 
   const isBlackColor = useCallback((color: string | null): boolean => {
@@ -55,34 +66,141 @@ export function useColoring() {
     element.style.fill = selectedColor.hex;
 
     // 히스토리에 저장 (pathId 사용)
+    const newItem = { pathId, previousColor: currentFill || '#FFFFFF' };
     setHistory(prev => {
-      const newHistory = [...prev, { pathId, previousColor: currentFill || '#FFFFFF' }];
-      return newHistory.slice(-MAX_HISTORY);
+      const newHistory = [...prev, newItem];
+      const sliced = newHistory.slice(-MAX_HISTORY);
+      historyRef.current = sliced; // ref도 업데이트
+      return sliced;
     });
 
+    // 새로운 액션이 발생하면 redo 스택 초기화
+    redoStackRef.current = [];
+    setRedoStack([]);
+
+    console.log('[fillPath] Added to history:', newItem);
     return true;
   }, [selectedColor, isBlackColor]);
 
   const undo = useCallback(() => {
-    if (history.length === 0) return false;
+    // ref에서 최신 히스토리 가져오기
+    const currentHistory = historyRef.current;
+    console.log('[undo] Current history length:', currentHistory.length);
 
-    const lastAction = history[history.length - 1];
-
-    // svgContainer에서 pathId로 element 찾기
-    if (svgContainerRef.current && lastAction) {
-      const element = svgContainerRef.current.querySelector(`[data-path-id="${lastAction.pathId}"]`) as SVGPathElement;
-      if (element) {
-        element.setAttribute('fill', lastAction.previousColor);
-        element.style.fill = lastAction.previousColor;
-      }
+    if (currentHistory.length === 0) {
+      console.log('[undo] No history to undo');
+      return false;
     }
 
-    setHistory(prev => prev.slice(0, -1));
+    const lastAction = currentHistory[currentHistory.length - 1];
+    console.log('[undo] Last action:', lastAction);
+
+    // svgContainer에서 pathId로 element 찾기
+    console.log('[undo] svgContainerRef.current:', svgContainerRef.current);
+
+    if (!svgContainerRef.current) {
+      console.error('[undo] svgContainerRef.current is null!');
+      return false;
+    }
+
+    const element = svgContainerRef.current.querySelector(`[data-path-id="${lastAction.pathId}"]`) as SVGPathElement;
+    console.log('[undo] Found element:', element);
+
+    if (element) {
+      const currentFill = element.getAttribute('fill') || '#FFFFFF';
+      console.log('[undo] Changing fill from', currentFill, 'to', lastAction.previousColor);
+      element.setAttribute('fill', lastAction.previousColor);
+      element.style.fill = lastAction.previousColor;
+
+      // Redo 스택에 추가 (현재 색상 저장)
+      const redoItem = { pathId: lastAction.pathId, previousColor: currentFill };
+      const newRedoStack = [...redoStackRef.current, redoItem];
+      redoStackRef.current = newRedoStack;
+      setRedoStack(newRedoStack);
+      console.log('[undo] Added to redo stack:', redoItem);
+
+      // SVG 상태 동기화 콜백 호출
+      const svgElement = svgContainerRef.current.querySelector('svg');
+      console.log('[undo] SVG element:', svgElement);
+      console.log('[undo] onSvgSyncRef.current:', onSvgSyncRef.current ? 'exists' : 'null');
+
+      if (svgElement && onSvgSyncRef.current) {
+        const newHtml = svgElement.outerHTML;
+        console.log('[undo] Calling sync callback');
+        onSvgSyncRef.current(newHtml);
+      }
+    } else {
+      console.error('[undo] Element not found with pathId:', lastAction.pathId);
+    }
+
+    // 히스토리 업데이트
+    const newHistory = currentHistory.slice(0, -1);
+    historyRef.current = newHistory;
+    setHistory(newHistory);
+
+    console.log('[undo] New history length:', newHistory.length);
     return true;
-  }, [history]);
+  }, []);
+
+  const redo = useCallback(() => {
+    // ref에서 최신 redo 스택 가져오기
+    const currentRedoStack = redoStackRef.current;
+    console.log('[redo] Current redo stack length:', currentRedoStack.length);
+
+    if (currentRedoStack.length === 0) {
+      console.log('[redo] No redo actions available');
+      return false;
+    }
+
+    const lastRedo = currentRedoStack[currentRedoStack.length - 1];
+    console.log('[redo] Last redo action:', lastRedo);
+
+    if (!svgContainerRef.current) {
+      console.error('[redo] svgContainerRef.current is null!');
+      return false;
+    }
+
+    const element = svgContainerRef.current.querySelector(`[data-path-id="${lastRedo.pathId}"]`) as SVGPathElement;
+    console.log('[redo] Found element:', element);
+
+    if (element) {
+      const currentFill = element.getAttribute('fill') || '#FFFFFF';
+      console.log('[redo] Changing fill from', currentFill, 'to', lastRedo.previousColor);
+      element.setAttribute('fill', lastRedo.previousColor);
+      element.style.fill = lastRedo.previousColor;
+
+      // 히스토리에 다시 추가 (현재 색상 저장)
+      const historyItem = { pathId: lastRedo.pathId, previousColor: currentFill };
+      const newHistory = [...historyRef.current, historyItem];
+      historyRef.current = newHistory;
+      setHistory(newHistory);
+      console.log('[redo] Added back to history:', historyItem);
+
+      // SVG 상태 동기화 콜백 호출
+      const svgElement = svgContainerRef.current.querySelector('svg');
+      if (svgElement && onSvgSyncRef.current) {
+        const newHtml = svgElement.outerHTML;
+        console.log('[redo] Calling sync callback');
+        onSvgSyncRef.current(newHtml);
+      }
+    } else {
+      console.error('[redo] Element not found with pathId:', lastRedo.pathId);
+    }
+
+    // Redo 스택 업데이트
+    const newRedoStack = currentRedoStack.slice(0, -1);
+    redoStackRef.current = newRedoStack;
+    setRedoStack(newRedoStack);
+
+    console.log('[redo] New redo stack length:', newRedoStack.length);
+    return true;
+  }, []);
 
   const clearHistory = useCallback(() => {
+    historyRef.current = [];
+    redoStackRef.current = [];
     setHistory([]);
+    setRedoStack([]);
   }, []);
 
   return {
@@ -91,9 +209,12 @@ export function useColoring() {
     history,
     fillPath,
     undo,
+    redo,
     clearHistory,
     isBlackColor,
     canUndo: history.length > 0,
-    setSvgContainer
+    canRedo: redoStack.length > 0,
+    setSvgContainer,
+    setOnSvgSync
   };
 }
