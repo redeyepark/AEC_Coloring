@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Button } from '@toss/tds-mobile';
 import styles from './ResultPage.module.css';
 
 interface ResultPageProps {
@@ -78,36 +77,27 @@ export function ResultPage({
       </div>
 
       <div className={styles.actionButtons}>
-        <Button
-          color={savedImage ? "light" : "primary"}
-          variant="fill"
-          size="large"
-          display="block"
+        <button
+          className={`${styles.saveBtn} ${savedImage ? styles.saved : ''}`}
           onClick={handleSaveImage}
           disabled={savedImage}
         >
           {savedImage ? '이미지 저장됨' : '이미지 저장'}
-        </Button>
-        <Button
-          color={savedCalendar ? "light" : "primary"}
-          variant="fill"
-          size="large"
-          display="block"
+        </button>
+        <button
+          className={`${styles.saveBtn} ${savedCalendar ? styles.saved : ''}`}
           onClick={handleSaveCalendar}
           disabled={savedCalendar}
         >
           {savedCalendar ? '달력 저장됨' : '달력으로 저장'}
-        </Button>
-        <Button
-          color={savedWallpaper ? "light" : "primary"}
-          variant="fill"
-          size="large"
-          display="block"
+        </button>
+        <button
+          className={`${styles.saveBtn} ${savedWallpaper ? styles.saved : ''}`}
           onClick={handleSaveWallpaper}
           disabled={savedWallpaper}
         >
           {savedWallpaper ? '배경화면 저장됨' : '배경화면으로 저장'}
-        </Button>
+        </button>
         <button
           className={styles.restartBtn}
           onClick={onRestart}

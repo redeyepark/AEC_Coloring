@@ -70,6 +70,38 @@
   flex-shrink: 0;
 }
 
+.saveBtn {
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: var(--tds-primary);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.saveBtn:hover {
+  background: var(--tds-primary-dark);
+}
+
+.saveBtn:active {
+  transform: scale(0.98);
+}
+
+.saveBtn.saved {
+  background: var(--tds-text-tertiary);
+  cursor: default;
+}
+
+.saveBtn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
 .restartBtn {
   width: 100%;
   padding: 16px;
