@@ -4,19 +4,30 @@ import { Palette } from './components/Palette';
 import { Controls } from './components/Controls';
 import { IntroPage } from './components/IntroPage';
 import { ResultPage } from './components/ResultPage';
+import { AdminPage } from './components/AdminPage';
+import { PrivacyPage } from './components/PrivacyPage';
 import { useImages } from './hooks/useImages';
 import { useColoring } from './hooks/useColoring';
-import { saveAsImage, saveAsCalendar, saveAsWallpaper } from './utils/saveImage';
+import { saveAsImage, saveAsCalendar, saveAsWallpaper, saveAsDiary } from './utils/saveImage';
 import { ImageInfo } from './types';
 import './App.css';
 
-type AppPhase = 'intro' | 'coloring' | 'result';
+type AppPhase = 'intro' | 'coloring' | 'result' | 'admin' | 'privacy';
 
 export default function App() {
   const { images, isLoading: imagesLoading, error: imagesError } = useImages();
   const [currentImage, setCurrentImage] = useState<ImageInfo | null>(null);
   const [phase, setPhase] = useState<AppPhase>('intro');
+  const [showAdmin, setShowAdmin] = useState(false);
   const svgRef = useRef<SVGSVGElement | null>(null);
+
+  // URL 파라미터로 관리 페이지 접근 확인
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('admin') === 'true') {
+      setShowAdmin(true);
+    }
+  }, []);
 
   const {
     selectedColor,
@@ -43,6 +54,16 @@ export default function App() {
   // 인트로 → 색칠 전환
   const handleStart = useCallback(() => {
     setPhase('coloring');
+  }, []);
+
+  // 인트로 → 개인정보처리방침 전환
+  const handlePrivacy = useCallback(() => {
+    setPhase('privacy');
+  }, []);
+
+  // 개인정보처리방침 → 인트로 전환
+  const handlePrivacyBack = useCallback(() => {
+    setPhase('intro');
   }, []);
 
   // 색칠 완료 → 결과 전환
@@ -95,21 +116,56 @@ export default function App() {
     }
   }, [currentImage]);
 
+  // 일기장 저장 핸들러
+  const handleSaveDiary = useCallback(async (text: string): Promise<void> => {
+    if (svgRef.current && currentImage) {
+      await saveAsDiary(svgRef.current, currentImage.name, text);
+    } else {
+      throw new Error('저장할 이미지가 없습니다.');
+    }
+  }, [currentImage]);
+
+  // 관리 페이지 (오버레이)
+  const adminOverlay = showAdmin ? (
+    <AdminPage onClose={() => {
+      setShowAdmin(false);
+      // URL에서 admin 파라미터 제거
+      window.history.replaceState({}, '', window.location.pathname);
+    }} />
+  ) : null;
+
   // 인트로 화면
   if (phase === 'intro') {
-    return <IntroPage onStart={handleStart} />;
+    return (
+      <div className="page-transition" key="intro">
+        <IntroPage onStart={handleStart} onAdminOpen={() => setShowAdmin(true)} onPrivacy={handlePrivacy} />
+        {adminOverlay}
+      </div>
+    );
+  }
+
+  // 개인정보처리방침 화면
+  if (phase === 'privacy') {
+    return (
+      <div className="page-transition" key="privacy">
+        <PrivacyPage onBack={handlePrivacyBack} />
+      </div>
+    );
   }
 
   // 결과 화면
   if (phase === 'result') {
     return (
-      <ResultPage
-        svgRef={svgRef}
-        onSaveImage={handleSaveImage}
-        onSaveCalendar={handleSaveCalendar}
-        onSaveWallpaper={handleSaveWallpaper}
-        onRestart={handleRestart}
-      />
+      <div className="page-transition" key="result">
+        <ResultPage
+          svgRef={svgRef}
+          onSaveImage={handleSaveImage}
+          onSaveCalendar={handleSaveCalendar}
+          onSaveWallpaper={handleSaveWallpaper}
+          onSaveDiary={handleSaveDiary}
+          onRestart={handleRestart}
+        />
+      </div>
     );
   }
 
@@ -148,7 +204,7 @@ export default function App() {
 
   // 색칠 화면
   return (
-    <main className="main-container coloring-page">
+    <main className="main-container coloring-page page-transition" key="coloring">
       <ColoringCanvas
         image={currentImage}
         onPathClick={fillPath}
