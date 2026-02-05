@@ -72,29 +72,27 @@ export function useColoring() {
       return false;
     }
 
-    // path 인덱스 저장
-    const pathIndex = getPathIndex(element);
-    if (pathIndex === -1) {
-      console.warn('Path index not found');
-      return false;
-    }
-
-    // 색상 변경 (속성과 스타일 모두 설정)
+    // 색상 변경 먼저 수행 (속성과 스타일 모두 설정)
     element.setAttribute('fill', selectedColor.hex);
     element.style.fill = selectedColor.hex;
+
+    // path 인덱스 저장 (히스토리용)
+    const pathIndex = getPathIndex(element);
 
     // 새 액션 시 redo 스택 초기화
     setRedoStack([]);
 
-    // 히스토리에 저장 (인덱스 기반)
-    setHistory(prev => {
-      const newHistory = [...prev, {
-        pathIndex,
-        previousColor: currentFill || '#FFFFFF',
-        newColor: selectedColor.hex
-      }];
-      return newHistory.slice(-MAX_HISTORY);
-    });
+    // 히스토리에 저장 (인덱스를 찾은 경우에만)
+    if (pathIndex !== -1) {
+      setHistory(prev => {
+        const newHistory = [...prev, {
+          pathIndex,
+          previousColor: currentFill || '#FFFFFF',
+          newColor: selectedColor.hex
+        }];
+        return newHistory.slice(-MAX_HISTORY);
+      });
+    }
 
     return true;
   }, [selectedColor, isBlackColor, getPathIndex]);
