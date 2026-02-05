@@ -1,15 +1,24 @@
 import { getDeviceResolution } from '../hooks/useDeviceResolution';
+import { extractColorsFromSvg, analyzeColors } from './colorAnalysis';
+import { getSeoulWeather, ALL_WEATHER_TYPES, getWeatherEmoji, type WeatherType } from './weather';
 
 // 이미지 저장 함수 (Promise 반환)
-export function saveAsImage(svg: SVGSVGElement, imageName: string): Promise<void> {
+export async function saveAsImage(svg: SVGSVGElement, imageName: string): Promise<void> {
+  console.log('[saveAsImage] 시작', { svg, imageName });
+
   return new Promise((resolve, reject) => {
     try {
       const svgData = new XMLSerializer().serializeToString(svg);
+      console.log('[saveAsImage] SVG 직렬화 완료, 길이:', svgData.length);
+
       const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
       const svgUrl = URL.createObjectURL(svgBlob);
+      console.log('[saveAsImage] Blob URL 생성:', svgUrl);
 
       const img = new Image();
       img.onload = () => {
+        console.log('[saveAsImage] 이미지 로드 완료', { width: img.width, height: img.height });
+
         const canvas = document.createElement('canvas');
         canvas.width = img.width;
         canvas.height = img.height;
@@ -20,17 +29,24 @@ export function saveAsImage(svg: SVGSVGElement, imageName: string): Promise<void
         ctx.drawImage(img, 0, 0);
 
         const pngUrl = canvas.toDataURL('image/png');
+        console.log('[saveAsImage] PNG 생성 완료, 길이:', pngUrl.length);
+
         const link = document.createElement('a');
         link.href = pngUrl;
         link.download = `coloring_${imageName.replace(/\s/g, '_')}_${Date.now()}.png`;
+        console.log('[saveAsImage] 다운로드 시작:', link.download);
         link.click();
 
         URL.revokeObjectURL(svgUrl);
         resolve();
       };
-      img.onerror = () => reject(new Error('이미지 로드 실패'));
+      img.onerror = (e) => {
+        console.error('[saveAsImage] 이미지 로드 실패', e);
+        reject(new Error('이미지 로드 실패'));
+      };
       img.src = svgUrl;
     } catch (error) {
+      console.error('[saveAsImage] 예외 발생', error);
       reject(error);
     }
   });
@@ -137,7 +153,9 @@ function drawDailyCalendar(ctx: CanvasRenderingContext2D, x: number, y: number, 
   ctx.fillText(dayNames[dayOfWeek], x + width / 2, y + height - padding - dayFontSize * 0.5);
 }
 
-export function saveAsCalendar(svg: SVGSVGElement, imageName: string): Promise<void> {
+export async function saveAsCalendar(svg: SVGSVGElement, imageName: string): Promise<void> {
+  console.log('[saveAsCalendar] 시작', { svg, imageName });
+
   return new Promise((resolve, reject) => {
     try {
       const resolution = getDeviceResolution();
@@ -145,13 +163,17 @@ export function saveAsCalendar(svg: SVGSVGElement, imageName: string): Promise<v
       const phoneHeight = resolution.height;
       const imageHeight = Math.floor(phoneHeight * 0.55);
       const calendarHeight = phoneHeight - imageHeight;
+      console.log('[saveAsCalendar] 해상도:', { phoneWidth, phoneHeight });
 
       const svgData = new XMLSerializer().serializeToString(svg);
+      console.log('[saveAsCalendar] SVG 직렬화 완료, 길이:', svgData.length);
+
       const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
       const svgUrl = URL.createObjectURL(svgBlob);
 
       const img = new Image();
       img.onload = () => {
+        console.log('[saveAsCalendar] 이미지 로드 완료', { width: img.width, height: img.height });
         const canvas = document.createElement('canvas');
         canvas.width = phoneWidth;
         canvas.height = phoneHeight;
@@ -179,19 +201,26 @@ export function saveAsCalendar(svg: SVGSVGElement, imageName: string): Promise<v
         drawCalendar(ctx, 0, imageHeight, phoneWidth, calendarHeight);
 
         const pngUrl = canvas.toDataURL('image/png');
+        console.log('[saveAsCalendar] PNG 생성 완료');
+
         const link = document.createElement('a');
         link.href = pngUrl;
         const now = new Date();
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         link.download = `calendar_${imageName.replace(/\s/g, '_')}_${monthNames[now.getMonth()]}_${Date.now()}.png`;
+        console.log('[saveAsCalendar] 다운로드 시작:', link.download);
         link.click();
 
         URL.revokeObjectURL(svgUrl);
         resolve();
       };
-      img.onerror = () => reject(new Error('이미지 로드 실패'));
+      img.onerror = (e) => {
+        console.error('[saveAsCalendar] 이미지 로드 실패', e);
+        reject(new Error('이미지 로드 실패'));
+      };
       img.src = svgUrl;
     } catch (error) {
+      console.error('[saveAsCalendar] 예외 발생', error);
       reject(error);
     }
   });
@@ -249,12 +278,208 @@ export function saveAsDailyCalendar(svg: SVGSVGElement, imageName: string) {
   img.src = svgUrl;
 }
 
-export function saveAsWallpaper(svg: SVGSVGElement, imageName: string): Promise<void> {
+// 그림일기장 날짜 헤더 그리기 (원고지 스타일 - 한 글자씩, 날씨 강조)
+function drawDiaryHeader(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, currentWeather: WeatherType) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  const dayOfWeek = now.getDay();
+
+  const scale = width / 1080;
+  const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+
+  // 배경
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(x, y, width, height);
+
+  // 격자 영역 (외부에서 이미 padding이 적용된 위치로 전달됨)
+  const gridX = x;
+  const gridY = y;
+  const gridWidth = width;
+  const gridHeight = height;
+
+  // 격자 설정 (메시지 영역과 동일한 14칸)
+  const cols = 14;
+  const rows = 1;
+  const cellSize = Math.min(gridWidth / cols, gridHeight);
+  const actualGridWidth = cellSize * cols;
+  const actualGridHeight = cellSize * rows;
+  const offsetX = gridX + (gridWidth - actualGridWidth) / 2;
+  const offsetY = gridY + (gridHeight - actualGridHeight) / 2;
+
+  // 외곽선
+  ctx.strokeStyle = '#333333';
+  ctx.lineWidth = Math.round(2 * scale);
+  ctx.strokeRect(offsetX, offsetY, actualGridWidth, actualGridHeight);
+
+  // 내부 격자선 (세로선만)
+  ctx.strokeStyle = '#CCCCCC';
+  ctx.lineWidth = Math.round(1 * scale);
+
+  for (let i = 1; i < cols; i++) {
+    ctx.beginPath();
+    ctx.moveTo(offsetX + cellSize * i, offsetY);
+    ctx.lineTo(offsetX + cellSize * i, offsetY + actualGridHeight);
+    ctx.stroke();
+  }
+
+  // 날짜 문자열 생성: "2026년2월5일수" (10글자) + 날씨 아이콘 4개
+  const dateStr = `${year}년${month}월${day}일${dayNames[dayOfWeek]}`;
+  const dateChars = [...dateStr];
+
+  // 날씨 아이콘 (순서: sunny, cloudy, rainy, snowy)
+  const weatherEmojis = ALL_WEATHER_TYPES.map(type => getWeatherEmoji(type));
+
+  // 날짜 부분 배치
+  const fontSize = Math.round(cellSize * 0.5);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // 날짜 글자 배치 (처음 10칸 - 요일 포함)
+  for (let col = 0; col < 10 && col < dateChars.length; col++) {
+    const char = dateChars[col];
+    const cellCenterX = offsetX + cellSize * col + cellSize / 2;
+    const cellCenterY = offsetY + actualGridHeight / 2;
+
+    ctx.fillStyle = '#191F28';
+    ctx.font = `500 ${fontSize}px Pretendard, sans-serif`;
+    ctx.fillText(char, cellCenterX, cellCenterY);
+  }
+
+  // 날씨 아이콘 배치 (마지막 4칸: 10, 11, 12, 13)
+  const weatherStartCol = 10;
+  for (let i = 0; i < weatherEmojis.length; i++) {
+    const col = weatherStartCol + i;
+    const emoji = weatherEmojis[i];
+    const weatherType = ALL_WEATHER_TYPES[i];
+    const cellCenterX = offsetX + cellSize * col + cellSize / 2;
+    const cellCenterY = offsetY + actualGridHeight / 2;
+
+    // 현재 날씨인지 확인
+    const isCurrentWeather = weatherType === currentWeather;
+
+    ctx.font = `${Math.round(cellSize * 0.6)}px sans-serif`;
+
+    if (isCurrentWeather) {
+      // 현재 날씨: 컬러로 표시 (기본 이모지 색상)
+      ctx.globalAlpha = 1.0;
+    } else {
+      // 다른 날씨: 회색으로 표시 (반투명)
+      ctx.globalAlpha = 0.3;
+    }
+
+    ctx.fillText(emoji, cellCenterX, cellCenterY);
+    ctx.globalAlpha = 1.0; // 알파값 복원
+  }
+}
+
+// 그림일기장 메시지 영역 그리기 (원고지 스타일 - 한 글자씩)
+function drawDiaryMessage(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, message: string, emoji: string) {
+  const scale = width / 1080;
+
+  // 배경
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(x, y, width, height);
+
+  // 격자 영역 (외부에서 이미 padding이 적용된 위치로 전달됨)
+  const gridX = x;
+  const gridY = y;
+  const gridWidth = width;
+  const gridHeight = height;
+
+  // 격자 설정 (원고지 스타일)
+  const cols = 14; // 한 줄에 14글자
+  const rows = 7;  // 7줄 (3줄 추가)
+  const cellSize = Math.min(gridWidth / cols, gridHeight / rows);
+  const actualGridWidth = cellSize * cols;
+  const actualGridHeight = cellSize * rows;
+  const offsetX = gridX + (gridWidth - actualGridWidth) / 2;
+  const offsetY = gridY + (gridHeight - actualGridHeight) / 2;
+
+  // 외곽선
+  ctx.strokeStyle = '#333333';
+  ctx.lineWidth = Math.round(2 * scale);
+  ctx.strokeRect(offsetX, offsetY, actualGridWidth, actualGridHeight);
+
+  // 내부 격자선
+  ctx.strokeStyle = '#CCCCCC';
+  ctx.lineWidth = Math.round(1 * scale);
+
+  // 세로선
+  for (let i = 1; i < cols; i++) {
+    ctx.beginPath();
+    ctx.moveTo(offsetX + cellSize * i, offsetY);
+    ctx.lineTo(offsetX + cellSize * i, offsetY + actualGridHeight);
+    ctx.stroke();
+  }
+
+  // 가로선
+  for (let i = 1; i < rows; i++) {
+    ctx.beginPath();
+    ctx.moveTo(offsetX, offsetY + cellSize * i);
+    ctx.lineTo(offsetX + actualGridWidth, offsetY + cellSize * i);
+    ctx.stroke();
+  }
+
+  // 메시지를 한 글자씩 격자에 배치
+  const fontSize = Math.round(cellSize * 0.6);
+  ctx.fillStyle = '#191F28';
+  ctx.font = `500 ${fontSize}px Pretendard, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // 이모지 + 메시지 결합
+  const fullText = emoji + ' ' + message;
+  const chars = [...fullText]; // 유니코드 문자 배열로 변환
+
+  let charIndex = 0;
+  for (let row = 0; row < rows && charIndex < chars.length; row++) {
+    for (let col = 0; col < cols && charIndex < chars.length; col++) {
+      const char = chars[charIndex];
+      const cellCenterX = offsetX + cellSize * col + cellSize / 2;
+      const cellCenterY = offsetY + cellSize * row + cellSize / 2;
+
+      // 이모지는 더 큰 폰트로
+      if (charIndex === 0) {
+        ctx.font = `${Math.round(cellSize * 0.7)}px sans-serif`;
+      } else {
+        ctx.font = `500 ${fontSize}px Pretendard, sans-serif`;
+      }
+
+      ctx.fillText(char, cellCenterX, cellCenterY);
+      charIndex++;
+    }
+  }
+}
+
+// 그림일기장으로 저장
+export async function saveAsDiary(svg: SVGSVGElement, imageName: string, userText?: string): Promise<void> {
+  // 먼저 날씨 정보 가져오기
+  const weather = await getSeoulWeather();
+
   return new Promise((resolve, reject) => {
     try {
-      const resolution = getDeviceResolution();
-      const phoneWidth = resolution.width;
-      const phoneHeight = resolution.height;
+      // A4 용지 비율 (210mm x 297mm = 1:1.414)
+      const a4Width = 1080;
+      const a4Height = Math.round(a4Width * 1.414); // 1527
+      const scale = a4Width / 1080;
+      const borderWidth = Math.round(2 * scale); // 격자와 동일한 두께
+      const padding = Math.round(20 * scale); // 격자와 동일한 padding
+
+      // 컨텐츠 영역 (테두리 안쪽)
+      const contentWidth = a4Width - padding * 2;
+      const contentHeight = a4Height - padding * 2;
+
+      // 레이아웃 비율: 헤더 6%, 이미지 50%, 메시지 44% (7줄)
+      const headerHeight = Math.floor(contentHeight * 0.06);
+      const messageHeight = Math.floor(contentHeight * 0.44);
+      const imageHeight = contentHeight - headerHeight - messageHeight;
+
+      // 사용자 텍스트 또는 색상 분석 메시지 사용
+      const colors = extractColorsFromSvg(svg);
+      const analysis = analyzeColors(colors);
+      const diaryText = userText || analysis.message;
 
       const svgData = new XMLSerializer().serializeToString(svg);
       const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
@@ -262,6 +487,92 @@ export function saveAsWallpaper(svg: SVGSVGElement, imageName: string): Promise<
 
       const img = new Image();
       img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = a4Width;
+        canvas.height = a4Height;
+        const ctx = canvas.getContext('2d')!;
+
+        // 전체 배경
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, a4Width, a4Height);
+
+        // 컨텐츠 시작 위치 (테두리 안쪽)
+        const contentX = padding;
+        const contentY = padding;
+
+        // 헤더 그리기 (현재 날씨 전달) - 테두리 안쪽에 배치
+        drawDiaryHeader(ctx, contentX, contentY, contentWidth, headerHeight, weather.type);
+
+        // 이미지 영역 배경
+        const imageY = contentY + headerHeight;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(contentX, imageY, contentWidth, imageHeight);
+
+        // 이미지 그리기
+        const imgAspect = img.width / img.height;
+        let drawWidth, drawHeight, drawX, drawY;
+
+        if (imgAspect > contentWidth / imageHeight) {
+          drawWidth = contentWidth;
+          drawHeight = contentWidth / imgAspect;
+          drawX = contentX;
+          drawY = imageY + (imageHeight - drawHeight) / 2;
+        } else {
+          drawHeight = imageHeight;
+          drawWidth = imageHeight * imgAspect;
+          drawX = contentX + (contentWidth - drawWidth) / 2;
+          drawY = imageY;
+        }
+        ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+
+        // 메시지 영역 그리기 (사용자 텍스트 사용) - 테두리 안쪽에 배치
+        const messageY = imageY + imageHeight;
+        drawDiaryMessage(ctx, contentX, messageY, contentWidth, messageHeight, diaryText, '');
+
+        // 페이지 전체 테두리 그리기 (격자와 동일한 스타일)
+        ctx.strokeStyle = '#333333';
+        ctx.lineWidth = borderWidth;
+        ctx.strokeRect(padding, padding, a4Width - padding * 2, a4Height - padding * 2);
+
+        // 다운로드
+        const pngUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = pngUrl;
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+        link.download = `diary_${dateStr}_${imageName.replace(/\s/g, '_')}.png`;
+        link.click();
+
+        URL.revokeObjectURL(svgUrl);
+        resolve();
+      };
+      img.onerror = () => reject(new Error('이미지 로드 실패'));
+      img.src = svgUrl;
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+export async function saveAsWallpaper(svg: SVGSVGElement, imageName: string): Promise<void> {
+  console.log('[saveAsWallpaper] 시작', { svg, imageName });
+
+  return new Promise((resolve, reject) => {
+    try {
+      const resolution = getDeviceResolution();
+      const phoneWidth = resolution.width;
+      const phoneHeight = resolution.height;
+      console.log('[saveAsWallpaper] 해상도:', { phoneWidth, phoneHeight });
+
+      const svgData = new XMLSerializer().serializeToString(svg);
+      console.log('[saveAsWallpaper] SVG 직렬화 완료, 길이:', svgData.length);
+
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.onload = () => {
+        console.log('[saveAsWallpaper] 이미지 로드 완료', { width: img.width, height: img.height });
         const canvas = document.createElement('canvas');
         canvas.width = phoneWidth;
         canvas.height = phoneHeight;
@@ -289,17 +600,24 @@ export function saveAsWallpaper(svg: SVGSVGElement, imageName: string): Promise<
         ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, 0, 0, phoneWidth, phoneHeight);
 
         const pngUrl = canvas.toDataURL('image/png');
+        console.log('[saveAsWallpaper] PNG 생성 완료');
+
         const link = document.createElement('a');
         link.href = pngUrl;
         link.download = `wallpaper_${imageName.replace(/\s/g, '_')}_${Date.now()}.png`;
+        console.log('[saveAsWallpaper] 다운로드 시작:', link.download);
         link.click();
 
         URL.revokeObjectURL(svgUrl);
         resolve();
       };
-      img.onerror = () => reject(new Error('이미지 로드 실패'));
+      img.onerror = (e) => {
+        console.error('[saveAsWallpaper] 이미지 로드 실패', e);
+        reject(new Error('이미지 로드 실패'));
+      };
       img.src = svgUrl;
     } catch (error) {
+      console.error('[saveAsWallpaper] 예외 발생', error);
       reject(error);
     }
   });

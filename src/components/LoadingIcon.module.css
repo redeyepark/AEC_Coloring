@@ -1,0 +1,14 @@
+/* 로딩 그리드 컨테이너 */
+.loadingGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 54px;
+  height: 54px;
+  overflow: hidden;
+}
+
+/* 개별 셀 */
+.cell {
+  transition: background-color 0.3s ease-in-out;
+}

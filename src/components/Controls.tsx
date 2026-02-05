@@ -77,7 +77,8 @@ export function Controls({
   onComplete
 }: ControlsProps) {
   return (
-    <div className={styles.controls}>
+    // 'controls' 클래스: App.css 그리드 배치용, styles.controls: 스타일링용
+    <div className={`controls ${styles.controls}`}>
       <button
         className={`${styles.iconBtn} ${!canUndo ? styles.disabled : ''}`}
         onClick={onUndo}

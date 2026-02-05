@@ -9,7 +9,8 @@ interface PaletteProps {
 
 export function Palette({ selectedColor, onColorSelect }: PaletteProps) {
   return (
-    <section className={styles.paletteSection}>
+    // 'paletteSection' 클래스: App.css 그리드 배치용, styles.paletteSection: 스타일링용
+    <section className={`paletteSection ${styles.paletteSection}`}>
       <div className={styles.colorPalette}>
         {COLORS.map((color) => (
           <button

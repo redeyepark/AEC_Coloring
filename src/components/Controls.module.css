@@ -88,3 +88,100 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/* PC 데스크톱 - 컨트롤 버튼 (컴팩트하게 유지) */
+@media (min-width: 1024px) and (orientation: landscape) {
+  .controls {
+    padding: clamp(6px, 1vh, 10px);
+    gap: clamp(6px, 1vh, 10px);
+    justify-content: center;
+    flex-shrink: 0;
+    /* 고정 높이로 예측 가능한 레이아웃 */
+    height: clamp(50px, 8vh, 70px);
+    min-height: 50px;
+    max-height: 70px;
+    /* 그리드 열 경계 내에 유지 */
+    max-width: 100%;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+  }
+
+  .iconBtn {
+    width: clamp(36px, 5vh, 48px);
+    height: clamp(36px, 5vh, 48px);
+    border-radius: clamp(8px, 1vh, 12px);
+  }
+
+  .iconBtn svg {
+    width: clamp(16px, 2.2vh, 20px);
+    height: clamp(16px, 2.2vh, 20px);
+  }
+
+  .completeBtn {
+    width: auto;
+    min-width: clamp(80px, 10vh, 120px);
+    padding: clamp(8px, 1.2vh, 12px) clamp(16px, 2.5vh, 24px);
+    font-size: clamp(12px, 1.6vh, 15px);
+    border-radius: clamp(8px, 1vh, 12px);
+    /* PC에서 margin-left 축소하여 오버플로우 방지 */
+    margin-left: clamp(8px, 1.5vmin, 12px);
+  }
+}
+
+/* 낮은 높이의 화면 - 더 컴팩트한 컨트롤 */
+@media (min-width: 1024px) and (orientation: landscape) and (max-height: 800px) {
+  .controls {
+    padding: 5px;
+    gap: 5px;
+    height: clamp(44px, 6vh, 56px);
+    min-height: 44px;
+    max-height: 56px;
+  }
+
+  .iconBtn {
+    width: clamp(32px, 4.5vh, 40px);
+    height: clamp(32px, 4.5vh, 40px);
+    border-radius: 8px;
+  }
+
+  .iconBtn svg {
+    width: clamp(14px, 2vh, 18px);
+    height: clamp(14px, 2vh, 18px);
+  }
+
+  .completeBtn {
+    min-width: clamp(70px, 9vh, 100px);
+    padding: clamp(6px, 1vh, 10px) clamp(12px, 2vh, 20px);
+    font-size: clamp(11px, 1.4vh, 14px);
+    border-radius: 8px;
+  }
+}
+
+/* 매우 낮은 높이 (700px 미만) */
+@media (min-width: 1024px) and (orientation: landscape) and (max-height: 700px) {
+  .controls {
+    padding: 4px;
+    gap: 4px;
+    height: 40px;
+    min-height: 40px;
+    max-height: 40px;
+  }
+
+  .iconBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+  }
+
+  .iconBtn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .completeBtn {
+    min-width: 70px;
+    padding: 6px 12px;
+    font-size: 11px;
+    border-radius: 6px;
+  }
+}

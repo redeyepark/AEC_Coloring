@@ -62,6 +62,63 @@
   object-fit: contain;
 }
 
+/* 색상 심리 분석 섹션 */
+.colorAnalysis {
+  margin: 0 var(--spacing-md);
+  padding: var(--spacing-md);
+  flex-shrink: 0;
+}
+
+.analysisHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.analysisEmoji {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.analysisTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--tds-text-primary);
+}
+
+.analysisMessage {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--tds-text-primary);
+  margin-bottom: 12px;
+  word-break: keep-all;
+  text-align: center;
+}
+
+.analysisStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--tds-text-secondary);
+}
+
+.analysisStats span {
+  background: rgba(255, 255, 255, 0.6);
+  padding: 4px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+/* 오른쪽 섹션 (세로모드: 하단, 가로모드: 오른쪽) */
+.rightSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
 .actionButtons {
   display: flex;
   flex-direction: column;
@@ -134,14 +191,129 @@
     flex: 1;
   }
 
-  .actionButtons {
+  .rightSection {
     width: 40%;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+  }
+
+  .colorAnalysis {
+    margin: 0;
+  }
+
+  .actionButtons {
+    width: 100%;
+    justify-content: center;
+    padding: 0;
   }
 }
 
 @supports (padding: env(safe-area-inset-bottom)) {
-  .actionButtons {
+  .rightSection {
     padding-bottom: max(var(--spacing-md), env(safe-area-inset-bottom));
   }
+}
+
+/* 그림일기 모달 */
+.diaryModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.diaryModalContent {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.diaryModalTitle {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--tds-text-primary);
+  text-align: center;
+}
+
+.diaryModalHint {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--tds-text-secondary);
+  text-align: center;
+}
+
+.diaryTextarea {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid var(--tds-border);
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s;
+  line-height: 1.6;
+}
+
+.diaryTextarea:focus {
+  border-color: var(--tds-primary);
+}
+
+.diaryCharCount {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--tds-text-secondary);
+  text-align: right;
+}
+
+.diaryModalButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.diaryModalCancel,
+.diaryModalSave {
+  flex: 1;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.diaryModalCancel {
+  background: transparent;
+  border: 2px solid var(--tds-border);
+  color: var(--tds-text-secondary);
+}
+
+.diaryModalCancel:hover {
+  background: var(--tds-background);
+}
+
+.diaryModalSave {
+  background: var(--tds-primary);
+  border: none;
+  color: white;
+}
+
+.diaryModalSave:hover {
+  background: var(--tds-primary-dark);
 }

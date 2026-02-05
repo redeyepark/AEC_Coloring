@@ -68,3 +68,115 @@
     gap: 2px;
   }
 }
+
+/* PC/태블릿 - 큰 화면에서 팔레트 크기 증가 */
+@media (min-width: 768px) {
+  .paletteSection {
+    padding: var(--spacing-md);
+  }
+
+  .colorPalette {
+    gap: 8px;
+    grid-template-columns: repeat(8, 1fr);
+  }
+
+  .colorBtn {
+    min-width: 36px;
+    min-height: 36px;
+    border-radius: 8px;
+    border-width: 2px;
+  }
+
+  .colorBtn.selected {
+    border-width: 3px;
+  }
+}
+
+/* 데스크톱 가로 모드 - 뷰포트 내에 맞춤 (스크롤 없음) */
+@media (min-width: 1024px) and (orientation: landscape) {
+  .paletteSection {
+    padding: 8px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 1;
+    min-height: 0;
+  }
+
+  .colorPalette {
+    /* 6열 그리드로 65개 색상 = 11행 */
+    grid-template-columns: repeat(6, 1fr);
+    /* 간격을 뷰포트 높이 기준으로 동적 조정 */
+    gap: clamp(3px, 0.8vh, 6px);
+    flex: 1;
+    align-content: start;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .colorBtn {
+    /* 뷰포트 기반 크기로 자동 축소 - aspect-ratio로 정사각형 유지 */
+    aspect-ratio: 1;
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    /* 높이 기준으로 버튼 크기 제한 (65색 / 6열 = 11행 필요) */
+    /* 가용 높이에서 컨트롤(80px) + 패딩(16px) + 간격(10*gap) 제외 */
+    max-height: calc((100vh - 140px) / 12);
+    border-radius: clamp(4px, 0.6vh, 8px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .colorBtn:hover {
+    transform: scale(1.08);
+  }
+
+  .colorBtn.selected {
+    transform: scale(1.08);
+    box-shadow: 0 3px 8px rgba(49, 130, 246, 0.5);
+  }
+}
+
+/* 더 큰 화면 (1440px+, 높이 900px+) - 더 큰 버튼 허용 */
+@media (min-width: 1440px) and (min-height: 900px) {
+  .colorPalette {
+    grid-template-columns: repeat(5, 1fr);
+    gap: clamp(5px, 1vh, 8px);
+  }
+
+  .colorBtn {
+    max-height: calc((100vh - 160px) / 14);
+    border-radius: clamp(6px, 0.8vh, 10px);
+  }
+}
+
+/* 낮은 높이의 화면 (800px 미만) - 더 작은 버튼, 더 많은 열 */
+@media (min-width: 1024px) and (orientation: landscape) and (max-height: 800px) {
+  .paletteSection {
+    padding: 6px;
+  }
+
+  .colorPalette {
+    grid-template-columns: repeat(7, 1fr);
+    gap: clamp(2px, 0.5vh, 4px);
+  }
+
+  .colorBtn {
+    max-height: calc((100vh - 120px) / 10);
+    border-radius: clamp(3px, 0.5vh, 6px);
+  }
+}
+
+/* 매우 낮은 높이 (700px 미만) - 최소 크기 */
+@media (min-width: 1024px) and (orientation: landscape) and (max-height: 700px) {
+  .colorPalette {
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+  }
+
+  .colorBtn {
+    max-height: calc((100vh - 100px) / 9);
+    border-radius: 3px;
+  }
+}

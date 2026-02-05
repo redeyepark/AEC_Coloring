@@ -39,14 +39,17 @@ export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selec
     }
   }, [onContainerReady, svgContent]);
 
-  // SVG 로드
+  // SVG 로드 (Supabase Storage에서만)
   useEffect(() => {
     if (!image) return;
 
     setIsLoading(true);
     setError(null);
 
-    fetch(`/_AEC/${image.file}`)
+    // image.file은 항상 Supabase 전체 URL
+    const svgUrl = image.file;
+
+    fetch(svgUrl)
       .then(response => {
         if (!response.ok) throw new Error('SVG 파일을 찾을 수 없습니다.');
         return response.text();
@@ -184,7 +187,9 @@ export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selec
   if (isLoading) {
     return (
       <div className={styles.svgContainer}>
-        <div className={styles.loading}>로딩 중...</div>
+        <div className={styles.loading}>
+          <span className={styles.loadingText}>로딩 중...</span>
+        </div>
       </div>
     );
   }

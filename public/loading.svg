@@ -1,0 +1,35 @@
+<svg width="2000" height="2000" viewBox="0 0 2000 2000" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_3026_5)">
+<rect width="2000" height="2000" fill="#E2E2E2"/>
+<rect x="294" y="-11" width="444" height="444" fill="white"/>
+<rect x="738" y="-11" width="444" height="444" fill="#FFFF00"/>
+<rect x="1182" y="-11" width="444" height="444" fill="#FFB800"/>
+<rect x="1626" y="-11" width="403" height="444" fill="#FF9300"/>
+<rect y="-11" width="294" height="444" fill="#C6C6C6"/>
+<rect x="294" y="433" width="444" height="444" fill="#CAEA00"/>
+<rect x="738" y="433" width="444" height="444" fill="#E8BE00"/>
+<rect x="1182" y="433" width="444" height="444" fill="#D68900"/>
+<rect x="1626" y="433" width="403" height="444" fill="#C88131"/>
+<rect y="433" width="294" height="444" fill="#919191"/>
+<rect x="294" y="877" width="444" height="444" fill="#48B300"/>
+<rect x="738" y="877" width="444" height="444" fill="#8F8400"/>
+<rect x="1182" y="877" width="444" height="444" fill="white"/>
+<rect x="1626" y="877" width="403" height="444" fill="#EC0000"/>
+<rect y="877" width="294" height="444" fill="#5E5E5E"/>
+<rect x="294" y="1321" width="444" height="444" fill="#0093D2"/>
+<rect x="738" y="1321" width="444" height="444" fill="#385DC5"/>
+<rect x="1182" y="1321" width="444" height="444" fill="#752C81"/>
+<rect x="1626" y="1321" width="403" height="444" fill="#B13885"/>
+<rect y="1321" width="294" height="444" fill="#303030"/>
+<rect x="294" y="1765" width="444" height="444" fill="white"/>
+<rect x="738" y="1765" width="444" height="444" fill="#0048FF"/>
+<rect x="1182" y="1765" width="444" height="444" fill="#4400AB"/>
+<rect x="1626" y="1765" width="403" height="444" fill="#9300B7"/>
+<rect y="1765" width="294" height="444" fill="black"/>
+</g>
+<defs>
+<clipPath id="clip0_3026_5">
+<rect width="2000" height="2000" fill="white"/>
+</clipPath>
+</defs>
+</svg>
