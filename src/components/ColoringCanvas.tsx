@@ -9,10 +9,9 @@ interface ColoringCanvasProps {
   svgRef: React.RefObject<SVGSVGElement | null>;
   selectedColorHex: string;
   onContainerReady?: (container: HTMLElement | null) => void;
-  setOnSvgSync?: (callback: ((html: string) => void) | null) => void;
 }
 
-export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selectedColorHex, onContainerReady, setOnSvgSync }: ColoringCanvasProps) {
+export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selectedColorHex, onContainerReady }: ColoringCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [svgContent, setSvgContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -29,30 +28,16 @@ export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selec
     selectedColorRef.current = selectedColorHex;
   }, [selectedColorHex]);
 
-  // container가 준비되면 알림 - svgContent가 로드된 후에도 호출
+  // container가 준비되면 알림 (SVG 로드 후에 호출)
   useEffect(() => {
-    if (containerRef.current && onContainerReady) {
-      console.log('[ColoringCanvas] Calling onContainerReady with:', containerRef.current);
-      onContainerReady(containerRef.current);
-    }
-  }, [onContainerReady, svgContent]); // svgContent도 의존성에 추가
-
-  // SVG 동기화 콜백 등록 (undo 시 상태 동기화용)
-  useEffect(() => {
-    if (setOnSvgSync) {
-      console.log('[ColoringCanvas] Registering SVG sync callback');
-      setOnSvgSync((html: string) => {
-        console.log('[ColoringCanvas] SVG sync callback called, updating content');
-        setSvgContent(html);
+    if (containerRef.current && onContainerReady && svgContent) {
+      // SVG가 DOM에 렌더링된 후 호출 (requestAnimationFrame으로 보장)
+      const rafId = requestAnimationFrame(() => {
+        onContainerReady(containerRef.current);
       });
+      return () => cancelAnimationFrame(rafId);
     }
-    return () => {
-      if (setOnSvgSync) {
-        console.log('[ColoringCanvas] Clearing SVG sync callback');
-        setOnSvgSync(null);
-      }
-    };
-  }, [setOnSvgSync]);
+  }, [onContainerReady, svgContent]);
 
   // SVG 로드
   useEffect(() => {
@@ -153,7 +138,7 @@ export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selec
         e.preventDefault();
         e.stopPropagation();
 
-        // onPathClick이 색상 변경과 히스토리 저장을 처리
+        // fillPath가 색상 변경과 히스토리 저장을 처리
         const changed = onPathClick(pathElement);
 
         // 색상이 변경되었으면 svgContent 상태 업데이트 (React와 동기화)
@@ -232,7 +217,7 @@ export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selec
       const currentFill = pathElement.getAttribute('fill');
 
       if (!isBlackColor(currentFill)) {
-        // onPathClick이 색상 변경과 히스토리 저장을 처리
+        // fillPath가 색상 변경과 히스토리 저장을 처리
         const changed = onPathClick(pathElement);
 
         // 색상이 변경되었으면 svgContent 상태 업데이트

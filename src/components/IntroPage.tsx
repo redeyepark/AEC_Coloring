@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getRandomFortune } from '../constants/fortunes';
 import styles from './IntroPage.module.css';
 
-// gallery 폴더의 이미지 목록
+// gallery 폴더의 이미지 목록 (전체 8개)
 const GALLERY_IMAGES = [
   '/gallery/20260202_02.png',
   '/gallery/20260202_03.jpg',

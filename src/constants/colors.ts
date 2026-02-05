@@ -1,76 +1,92 @@
 import { ColorInfo } from '../types';
 
 export const COLORS: ColorInfo[] = [
-  // 빨강 계열 (5)
-  { hex: '#FF0000', name: '빨강' },
-  { hex: '#E53935', name: '머터리얼레드' },
-  { hex: '#DC143C', name: '크림슨' },
-  { hex: '#8B0000', name: '다크레드' },
-  { hex: '#FF6347', name: '토마토' },
-  // 주황 계열 (4)
-  { hex: '#FF4500', name: '오렌지레드' },
-  { hex: '#FFA500', name: '주황' },
-  { hex: '#FF7F50', name: '코랄' },
-  { hex: '#FF8C00', name: '다크오렌지' },
-  // 노랑 계열 (5)
-  { hex: '#FFD700', name: '골드' },
-  { hex: '#FDF001', name: '레몬' },
-  { hex: '#FFFF00', name: '노랑' },
+  // 빨강 계열 (5색)
+  { hex: '#FFEBEE', name: '연한빨강' },
+  { hex: '#FFCDD2', name: '밝은빨강' },
+  { hex: '#EF9A9A', name: '파스텔빨강' },
+  { hex: '#E57373', name: '소프트빨강' },
+  { hex: '#EF5350', name: '빨강' },
+
+  // 주황 계열 (5색)
+  { hex: '#FFF3E0', name: '연한주황' },
+  { hex: '#FFE0B2', name: '밝은주황' },
+  { hex: '#FFCC80', name: '파스텔주황' },
+  { hex: '#FFB74D', name: '소프트주황' },
+  { hex: '#FFA726', name: '주황' },
+
+  // 노랑 계열 (6색)
+  { hex: '#FFFDE7', name: '연한노랑' },
   { hex: '#FFF9C4', name: '크림' },
-  { hex: '#F0E68C', name: '카키' },
-  // 초록 계열 (7)
-  { hex: '#CCFF00', name: '연두' },
-  { hex: '#00FF00', name: '라임' },
-  { hex: '#4CAF50', name: '머터리얼그린' },
-  { hex: '#008000', name: '초록' },
-  { hex: '#006400', name: '다크그린' },
-  { hex: '#2E8B57', name: '씨그린' },
-  { hex: '#98FB98', name: '민트' },
-  // 시안/청록 계열 (3)
-  { hex: '#00FFFF', name: '시안' },
-  { hex: '#00CED1', name: '터콰이즈' },
-  { hex: '#20B2AA', name: '청록' },
-  // 파랑 계열 (8)
-  { hex: '#87CEEB', name: '하늘색' },
-  { hex: '#00BFFF', name: '스카이' },
-  { hex: '#2196F3', name: '머터리얼블루' },
-  { hex: '#1E90FF', name: '도저블루' },
-  { hex: '#0000FF', name: '파랑' },
-  { hex: '#4169E1', name: '로얄블루' },
-  { hex: '#0D47A1', name: '인디고' },
-  { hex: '#000080', name: '남색' },
-  // 보라 계열 (5)
-  { hex: '#E6E6FA', name: '라벤더' },
-  { hex: '#9C27B0', name: '머터리얼퍼플' },
-  { hex: '#9370DB', name: '퍼플' },
-  { hex: '#800080', name: '보라' },
-  { hex: '#FF00FF', name: '마젠타' },
-  // 분홍 계열 (4)
-  { hex: '#E91E63', name: '머터리얼핑크' },
-  { hex: '#FF69B4', name: '핫핑크' },
-  { hex: '#FFC0CB', name: '분홍' },
-  { hex: '#FACCBC', name: '살구' },
-  // 피부색 계열 (4)
+  { hex: '#FFF59D', name: '밝은노랑' },
+  { hex: '#FFEE58', name: '파스텔노랑' },
+  { hex: '#FFEB3B', name: '노랑' },
+  { hex: '#FDD835', name: '진노랑' },
+
+  // 초록 계열 (5색)
+  { hex: '#E8F5E9', name: '연한초록' },
+  { hex: '#C8E6C9', name: '밝은초록' },
+  { hex: '#A5D6A7', name: '파스텔초록' },
+  { hex: '#81C784', name: '소프트초록' },
+  { hex: '#66BB6A', name: '초록' },
+
+  // 시안/청록 계열 (4색) - v6.0.0 추가
+  { hex: '#E0F7FA', name: '연한시안' },
+  { hex: '#80DEEA', name: '밝은시안' },
+  { hex: '#26C6DA', name: '시안' },
+  { hex: '#00ACC1', name: '진시안' },
+
+  // 파랑 계열 (5색)
+  { hex: '#E3F2FD', name: '연한파랑' },
+  { hex: '#BBDEFB', name: '밝은파랑' },
+  { hex: '#90CAF9', name: '파스텔파랑' },
+  { hex: '#64B5F6', name: '소프트파랑' },
+  { hex: '#42A5F5', name: '파랑' },
+
+  // 보라 계열 (5색)
+  { hex: '#F3E5F5', name: '연한보라' },
+  { hex: '#E1BEE7', name: '밝은보라' },
+  { hex: '#CE93D8', name: '파스텔보라' },
+  { hex: '#BA68C8', name: '소프트보라' },
+  { hex: '#AB47BC', name: '보라' },
+
+  // 핑크 계열 (5색)
+  { hex: '#FCE4EC', name: '연한핑크' },
+  { hex: '#F8BBD0', name: '밝은핑크' },
+  { hex: '#F48FB1', name: '파스텔핑크' },
+  { hex: '#F06292', name: '소프트핑크' },
+  { hex: '#EC407A', name: '핑크' },
+
+  // 갈색 계열 (7색)
+  { hex: '#EFEBE9', name: '연한갈색' },
+  { hex: '#D7CCC8', name: '밝은갈색' },
+  { hex: '#BCAAA4', name: '파스텔갈색' },
+  { hex: '#A1887F', name: '소프트갈색' },
+  { hex: '#8D6E63', name: '갈색' },
+  { hex: '#6D4C41', name: '웜브라운' },
+  { hex: '#5D4037', name: '다크브라운' },
+
+  // 피부색 계열 (4색)
   { hex: '#F5D5C8', name: '밝은피부' },
   { hex: '#E8C4B8', name: '피부색' },
   { hex: '#D4A590', name: '어두운피부' },
   { hex: '#C9A080', name: '탄피부' },
-  // 갈색/베이지 계열 (6)
-  { hex: '#DBB588', name: '샌드' },
-  { hex: '#F5DEB3', name: '베이지' },
-  { hex: '#D2B48C', name: '탄' },
-  { hex: '#8D6E63', name: '웜브라운' },
-  { hex: '#8B4513', name: '갈색' },
-  { hex: '#5D4037', name: '다크브라운' },
-  // 무채색 (5)
-  { hex: '#FFFFFF', name: '흰색' },
-  { hex: '#C0C0C0', name: '실버' },
-  { hex: '#808080', name: '회색' },
-  { hex: '#404040', name: '다크그레이' },
+
+  // 머터리얼 계열 (8색)
+  { hex: '#E53935', name: '머터리얼레드' },
+  { hex: '#C62828', name: '다크레드' },
+  { hex: '#4CAF50', name: '머터리얼그린' },
+  { hex: '#2196F3', name: '머터리얼블루' },
+  { hex: '#1976D2', name: '다크블루' },
+  { hex: '#0D47A1', name: '인디고' },
+  { hex: '#9C27B0', name: '머터리얼퍼플' },
+  { hex: '#E91E63', name: '머터리얼핑크' },
+
+  // 무채색 계열 (6색)
+  { hex: '#FFFFFF', name: '지우개' },
+  { hex: '#E0E0E0', name: '밝은회색' },
+  { hex: '#9E9E9E', name: '회색' },
+  { hex: '#424242', name: '다크그레이' },
+  { hex: '#212121', name: '차콜' },
   { hex: '#121212', name: '검정' },
-  // 특수색 (4)
-  { hex: '#808000', name: '올리브' },
-  { hex: '#A0522D', name: '시에나' },
-  { hex: '#8B008B', name: '다크마젠타' },
-  { hex: '#1976D2', name: '다크머터리얼블루' }
 ];

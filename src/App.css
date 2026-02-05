@@ -22,9 +22,9 @@
   --font-sm: clamp(11px, 3vmin, 16px);
   --font-md: clamp(12px, 3.5vmin, 18px);
 
-  /* 패널 비율 - 50:50 균등 분할 */
-  --panel-ratio: 50%;
-  --canvas-ratio: 50%;
+  /* 패널 비율 - v6.0.0 기준 40% */
+  --panel-ratio: 40%;
+  --canvas-ratio: 60%;
 }
 
 /* 전역 스타일 초기화 */
@@ -65,15 +65,14 @@ body {
   overflow: hidden;
 }
 
-/* 오른쪽 패널 - 팔레트를 중앙에 배치 */
+/* 오른쪽 패널 - 스크롤 없이 비율로 조정 */
 .right-panel {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   height: var(--panel-ratio);
   overflow: hidden;
-  gap: var(--spacing-sm);
-  justify-content: center;
+  gap: var(--spacing-xs);
 }
 
 /* 상태 표시 */
@@ -101,6 +100,17 @@ body {
   font-size: var(--font-xs);
 }
 
+/* 색칠 페이지 - 세로 레이아웃 */
+.main-container.coloring-page {
+  flex-direction: column;
+  padding: var(--spacing-sm);
+  gap: var(--spacing-sm);
+}
+
+.main-container.coloring-page .paletteSection {
+  width: 100%;
+}
+
 /* 가로 모드 레이아웃 */
 @media (orientation: landscape) {
   .main-container {
@@ -108,12 +118,12 @@ body {
     gap: var(--spacing-sm);
   }
 
-  .right-panel {
-    width: var(--panel-ratio);
-    height: 100%;
-    flex-direction: column;
-    justify-content: center;
-    gap: var(--spacing-md);
+  .main-container.coloring-page {
+    flex-direction: row;
+  }
+
+  .main-container.coloring-page .paletteSection {
+    width: auto;
   }
 }
 

@@ -76,27 +76,11 @@ export function Controls({
   onReset,
   onComplete
 }: ControlsProps) {
-  const handleUndo = () => {
-    console.log('[Controls] Undo button clicked, canUndo:', canUndo);
-    if (canUndo) {
-      console.log('[Controls] Calling onUndo');
-      onUndo();
-    }
-  };
-
-  const handleRedo = () => {
-    console.log('[Controls] Redo button clicked, canRedo:', canRedo);
-    if (canRedo) {
-      console.log('[Controls] Calling onRedo');
-      onRedo();
-    }
-  };
-
   return (
     <div className={styles.controls}>
       <button
         className={`${styles.iconBtn} ${!canUndo ? styles.disabled : ''}`}
-        onClick={handleUndo}
+        onClick={onUndo}
         disabled={!canUndo}
         title="되돌리기"
       >
@@ -104,7 +88,7 @@ export function Controls({
       </button>
       <button
         className={`${styles.iconBtn} ${!canRedo ? styles.disabled : ''}`}
-        onClick={handleRedo}
+        onClick={onRedo}
         disabled={!canRedo}
         title="다시하기"
       >

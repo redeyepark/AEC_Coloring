@@ -65,13 +65,11 @@
   }
 }
 
-/* 터치 피드백 */
 .introPage:active .galleryImage {
   transform: scale(0.98);
   transition: transform 0.1s ease;
 }
 
-/* 안전 영역 */
 @supports (padding: env(safe-area-inset-bottom)) {
   .startHint {
     padding-bottom: max(var(--spacing-lg), env(safe-area-inset-bottom));
