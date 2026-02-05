@@ -28,12 +28,16 @@ export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selec
     selectedColorRef.current = selectedColorHex;
   }, [selectedColorHex]);
 
-  // container가 준비되면 알림
+  // container가 준비되면 알림 (SVG 로드 후에 호출)
   useEffect(() => {
-    if (containerRef.current && onContainerReady) {
-      onContainerReady(containerRef.current);
+    if (containerRef.current && onContainerReady && svgContent) {
+      // SVG가 DOM에 렌더링된 후 호출 (requestAnimationFrame으로 보장)
+      const rafId = requestAnimationFrame(() => {
+        onContainerReady(containerRef.current);
+      });
+      return () => cancelAnimationFrame(rafId);
     }
-  }, [onContainerReady]);
+  }, [onContainerReady, svgContent]);
 
   // SVG 로드
   useEffect(() => {
