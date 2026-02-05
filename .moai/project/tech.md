@@ -8,7 +8,7 @@
 |------|-----|
 | 프로젝트명 | AEC 컬러링북 |
 | 문서 유형 | 기술 스택 문서 |
-| 버전 | 7.0.0 |
+| 버전 | 8.0.0 |
 | 최종 업데이트 | 2026-02-05 |
 
 ---
@@ -811,6 +811,125 @@ const loadSvg = async (filename: string) => {
 
 ---
 
+## 12. Apps-in-Toss 빌드 및 배포
+
+### 12.1 공식 빌드 방식
+
+Apps-in-Toss 앱은 `granite build` 명령어를 사용하여 `.ait` 파일을 생성해야 합니다.
+
+#### granite.config.ts 설정
+
+```typescript
+import { defineConfig } from '@apps-in-toss/web-framework/config';
+
+export default defineConfig({
+  appName: 'dailycoloring',
+  web: {
+    host: 'localhost',
+    port: 3000,
+    commands: {
+      dev: 'vite',
+      build: 'vite build',
+    },
+  },
+  permissions: [],
+  outdir: 'dist',
+  brand: {
+    displayName: '오늘의 컬러링',
+    primaryColor: '#3182F6',
+    icon: 'https://static.toss.im/icons/png/4x/icon-toss-logo.png',
+  },
+});
+```
+
+#### 빌드 명령어
+
+```bash
+# 공식 빌드 명령어 (권장)
+npx granite build
+
+# 결과: dailycoloring.ait 파일 생성
+```
+
+### 12.2 빌드 이슈 해결 가이드
+
+#### 이슈 1: "기존 버전과 동일" 오류
+
+**증상**: ait 파일 업로드 시 버전 중복 오류 발생
+
+**원인**: `.granite/app.json`에 이전 버전 정보가 캐시되어 있음
+
+**해결 방법**:
+```bash
+# 1. 캐시된 app.json 삭제
+rm -f .granite/app.json
+
+# 2. 다시 빌드
+npx granite build
+```
+
+#### 이슈 2: "유효하지 않은 deploymentId" 오류
+
+**증상**: 수동 생성한 UUID가 서버에서 거부됨
+
+**원인**:
+- 수동 `create-ait.mjs` 스크립트 사용 시 UUID v4 형식 생성
+- 서버는 UUID v7 형식 (시간 기반)을 요구
+
+**해결 방법**:
+- 수동 스크립트 대신 공식 `granite build` 사용
+- `granite build`는 올바른 UUID v7 형식의 deploymentId를 자동 생성
+
+#### 이슈 3: CSS 모듈 빌드 오류 (rsbuild)
+
+**증상**: `granite build` 실행 시 CSS 모듈 처리 오류
+```
+Module build failed: Failed to convert JavaScript value `Undefined` into rust type `String`
+```
+
+**원인**: `granite.config.ts`의 `commands.build`가 `rsbuild build`로 설정되어 있으나 프로젝트는 Vite 사용
+
+**해결 방법**:
+```typescript
+// granite.config.ts
+commands: {
+  dev: 'vite',        // rsbuild dev → vite
+  build: 'vite build', // rsbuild build → vite build
+}
+```
+
+### 12.3 빌드 체크리스트
+
+빌드 전 확인 사항:
+
+| 항목 | 확인 내용 | 명령어/파일 |
+|------|----------|-------------|
+| granite.config.ts | appName이 콘솔과 동일한지 확인 | `granite.config.ts` |
+| commands.build | 실제 사용 번들러와 일치하는지 확인 | Vite: `vite build` |
+| brand 설정 | icon, displayName 설정 완료 | `granite.config.ts` |
+| .granite/app.json | 버전 오류 시 삭제 후 재빌드 | `.granite/app.json` |
+
+### 12.4 배포 프로세스
+
+```bash
+# 1. 빌드
+npx granite build
+
+# 2. 생성된 파일 확인
+ls -la dailycoloring.ait
+
+# 3. 앱 출시 메뉴에서 업로드
+# - deploymentId는 업로드 시 서버에서 자동 발급
+# - version은 granite build 시 자동 관리
+```
+
+### 12.5 참고 문서
+
+- [웹뷰 개발 가이드](https://developers-apps-in-toss.toss.im/tutorials/webview.html)
+- [앱 번들 파일 생성](https://developers-apps-in-toss.toss.im/development/test/toss.html)
+
+---
+
 ## 변경 이력
 
 | 버전 | 날짜 | 작성자 | 변경 내용 |
@@ -821,3 +940,4 @@ const loadSvg = async (filename: string) => {
 | 5.0.0 | 2026-02-02 | manager-docs | 색상 팔레트 60색 확장, isBlackColor 함수 로직 변경 (brightness 기준 -> 순수 검정색만 판별), selectedColorRef 추가로 클로저 캡처 버그 수정 |
 | 6.0.0 | 2026-02-02 | manager-docs | Apps-in-Toss 출시 준비: React 19→18.3.1 다운그레이드, TDS Button 컴포넌트 적용, @emotion/react 추가, 64색 팔레트 확장 |
 | 7.0.0 | 2026-02-05 | manager-docs | 3단계 플로우 아키텍처: isStarted/isCompleted 상태 관리, useColoring 훅 redo 기능 추가 (redoStack, canRedo), saveAsImage 함수 추가, SVG 동기화 콜백 패턴 추가 |
+| 8.0.0 | 2026-02-05 | manager-docs | Apps-in-Toss 빌드 가이드 추가: granite build 공식 방식, 버전/deploymentId 오류 해결, CSS 모듈 빌드 이슈 해결 |

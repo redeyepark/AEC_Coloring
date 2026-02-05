@@ -6,8 +6,8 @@ export default defineConfig({
     host: 'localhost',
     port: 3000,
     commands: {
-      dev: 'rsbuild dev',
-      build: 'rsbuild build',
+      dev: 'vite',
+      build: 'vite build',
     },
   },
   permissions: [],
