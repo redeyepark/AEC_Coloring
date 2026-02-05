@@ -28,7 +28,8 @@ export default function App() {
     clearHistory,
     isBlackColor,
     canUndo,
-    canRedo
+    canRedo,
+    setSvgContainer
   } = useColoring();
 
   // 랜덤 이미지 선택 (색칠 화면 진입 시)
@@ -154,6 +155,7 @@ export default function App() {
         isBlackColor={isBlackColor}
         svgRef={svgRef}
         selectedColorHex={selectedColor.hex}
+        onContainerReady={setSvgContainer}
       />
 
       <Palette
