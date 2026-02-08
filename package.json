@@ -7,9 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "bundle": "vite build && node scripts/create-ait.mjs",
     "preview": "vite preview",
-    "deploy": "ait deploy"
+    "deploy": "npx wrangler pages deploy dist --project-name=aec-bg"
   },
   "repository": {
     "type": "git",
@@ -28,12 +27,12 @@
     "@rsbuild/plugin-react": "^1.4.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
-    "archiver": "^7.0.1",
     "sharp": "^0.34.5",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.95.3",
     "@vitejs/plugin-react": "^5.1.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

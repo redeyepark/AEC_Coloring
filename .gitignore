@@ -13,6 +13,7 @@ build/
 dist/
 *.egg-info/
 *.egg
+*.ait
 
 # ===========================================
 # Python Cache & Bytecode
