@@ -83,6 +83,7 @@ export function BannerAd({ className }: BannerAdProps) {
         data-ad-slot={AD_CONFIG.slots.banner}
         data-ad-format="auto"
         data-full-width-responsive="true"
+        data-tag-for-child-directed-treatment="1"
       />
     </div>
   );

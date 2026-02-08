@@ -1,0 +1,227 @@
+.colorStoryPage {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--tds-card);
+  overflow: hidden;
+}
+
+/* 상단 헤더 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--tds-border);
+  flex-shrink: 0;
+  background: var(--tds-card);
+}
+
+@supports (padding: env(safe-area-inset-top)) {
+  .header {
+    padding-top: max(var(--spacing-md), env(safe-area-inset-top));
+  }
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--tds-primary);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.backBtn:hover {
+  background: rgba(49, 130, 246, 0.1);
+}
+
+.backBtn:active {
+  background: rgba(49, 130, 246, 0.2);
+}
+
+.title {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--tds-text-primary);
+  margin: 0;
+}
+
+.spacer {
+  width: 80px;
+}
+
+/* 스크롤 콘텐츠 영역 */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+  -webkit-overflow-scrolling: touch;
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  .content {
+    padding-bottom: max(var(--spacing-lg), calc(env(safe-area-inset-bottom) + var(--spacing-lg)));
+  }
+}
+
+/* 페이지 소개 */
+.intro {
+  font-size: var(--font-sm);
+  color: var(--tds-text-secondary);
+  line-height: 1.7;
+  margin: 0 0 var(--spacing-lg) 0;
+}
+
+/* 색상 섹션 공통 */
+.colorSection {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  border-radius: 12px;
+  border-left: 4px solid transparent;
+  background: var(--tds-card);
+}
+
+/* 각 색상별 테마 */
+.redSection {
+  composes: colorSection;
+  border-left-color: #ef4444;
+  background: rgba(239, 68, 68, 0.04);
+}
+
+.blueSection {
+  composes: colorSection;
+  border-left-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.04);
+}
+
+.yellowSection {
+  composes: colorSection;
+  border-left-color: #eab308;
+  background: rgba(234, 179, 8, 0.04);
+}
+
+.greenSection {
+  composes: colorSection;
+  border-left-color: #22c55e;
+  background: rgba(34, 197, 94, 0.04);
+}
+
+.purpleSection {
+  composes: colorSection;
+  border-left-color: #a855f7;
+  background: rgba(168, 85, 247, 0.04);
+}
+
+.orangeSection {
+  composes: colorSection;
+  border-left-color: #f97316;
+  background: rgba(249, 115, 22, 0.04);
+}
+
+/* 색상 섹션 제목 */
+.colorSection h2 {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--tds-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.4;
+}
+
+.colorSection p {
+  font-size: var(--font-sm);
+  color: var(--tds-text-secondary);
+  line-height: 1.8;
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.colorSection p:last-child {
+  margin-bottom: 0;
+}
+
+/* 일반 섹션 (색상이 기분에 미치는 영향) */
+.section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.section h2 {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--tds-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.4;
+}
+
+.section p {
+  font-size: var(--font-sm);
+  color: var(--tds-text-secondary);
+  line-height: 1.8;
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.section p:last-child {
+  margin-bottom: 0;
+}
+
+.section ul {
+  margin: var(--spacing-sm) 0 0 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.section li {
+  font-size: var(--font-sm);
+  color: var(--tds-text-secondary);
+  line-height: 1.7;
+  margin-bottom: 4px;
+}
+
+.section li:last-child {
+  margin-bottom: 0;
+}
+
+/* 광고 영역 */
+.adContainer {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--tds-border);
+}
+
+/* 데스크톱 레이아웃 */
+@media (min-width: 768px) {
+  .content {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--spacing-lg) var(--spacing-lg);
+  }
+
+  .colorSection {
+    margin-bottom: 24px;
+    padding: 20px;
+  }
+
+  .colorSection h2,
+  .section h2 {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .colorSection p,
+  .section p,
+  .section li {
+    font-size: 15px;
+  }
+}
+
+/* 터치 디바이스 최적화 */
+@media (hover: none) {
+  .backBtn:hover {
+    background: transparent;
+  }
+}

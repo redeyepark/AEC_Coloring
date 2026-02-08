@@ -116,6 +116,7 @@ export function InterstitialAd({ isOpen, onClose }: InterstitialAdProps) {
             data-ad-client={AD_CONFIG.publisherId}
             data-ad-slot={AD_CONFIG.slots.interstitial}
             data-ad-format="rectangle"
+            data-tag-for-child-directed-treatment="1"
           />
         </div>
 

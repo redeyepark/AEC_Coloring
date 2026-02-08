@@ -1,0 +1,186 @@
+.guidePage {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--tds-card);
+  overflow: hidden;
+}
+
+/* 상단 헤더 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--tds-border);
+  flex-shrink: 0;
+  background: var(--tds-card);
+}
+
+@supports (padding: env(safe-area-inset-top)) {
+  .header {
+    padding-top: max(var(--spacing-md), env(safe-area-inset-top));
+  }
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--tds-primary);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.backBtn:hover {
+  background: rgba(49, 130, 246, 0.1);
+}
+
+.backBtn:active {
+  background: rgba(49, 130, 246, 0.2);
+}
+
+.title {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--tds-text-primary);
+  margin: 0;
+}
+
+.spacer {
+  width: 80px;
+}
+
+/* 스크롤 콘텐츠 영역 */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+  -webkit-overflow-scrolling: touch;
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  .content {
+    padding-bottom: max(var(--spacing-lg), calc(env(safe-area-inset-bottom) + var(--spacing-lg)));
+  }
+}
+
+/* 인트로 영역 */
+.intro {
+  font-size: var(--font-sm);
+  color: var(--tds-text-secondary);
+  line-height: 1.8;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--tds-border);
+}
+
+/* 섹션 */
+.section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.sectionTitle {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--tds-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.4;
+  padding-left: 12px;
+  border-left: 3px solid var(--tds-primary);
+}
+
+.section p {
+  font-size: var(--font-sm);
+  color: var(--tds-text-secondary);
+  line-height: 1.8;
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.section p:last-child {
+  margin-bottom: 0;
+}
+
+.section ul {
+  margin: var(--spacing-sm) 0 0 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.section li {
+  font-size: var(--font-sm);
+  color: var(--tds-text-secondary);
+  line-height: 1.8;
+  margin-bottom: 6px;
+}
+
+.section li:last-child {
+  margin-bottom: 0;
+}
+
+/* 팁 강조 박스 */
+.tipBox {
+  background: rgba(49, 130, 246, 0.06);
+  border-radius: 10px;
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+  border: 1px solid rgba(49, 130, 246, 0.12);
+}
+
+.tipBox p {
+  margin: 0;
+  font-size: var(--font-sm);
+  color: var(--tds-text-secondary);
+  line-height: 1.7;
+}
+
+.tipLabel {
+  font-weight: 600;
+  color: var(--tds-primary);
+}
+
+/* 하단 배너 광고 영역 */
+.adSection {
+  flex-shrink: 0;
+  border-top: 1px solid var(--tds-border);
+}
+
+/* 데스크톱 레이아웃 */
+@media (min-width: 768px) {
+  .content {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--spacing-lg) var(--spacing-lg);
+  }
+
+  .section {
+    margin-bottom: 24px;
+  }
+
+  .sectionTitle {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .section p,
+  .section li {
+    font-size: 15px;
+  }
+
+  .intro {
+    font-size: 15px;
+  }
+}
+
+/* 터치 디바이스 최적화 */
+@media (hover: none) {
+  .backBtn:hover {
+    background: transparent;
+  }
+}

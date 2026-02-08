@@ -16,11 +16,14 @@ interface IntroPageProps {
   onStart: () => void;
   onAdminOpen?: () => void;
   onPrivacy?: () => void;
+  onColorGuide?: () => void;
+  onColorStory?: () => void;
+  onAbout?: () => void;
 }
 
 // Supabase Storage에서만 갤러리 이미지를 로드
 // 비활성화된 이미지는 필터링하여 제외
-export function IntroPage({ onStart, onAdminOpen, onPrivacy }: IntroPageProps) {
+export function IntroPage({ onStart, onAdminOpen, onPrivacy, onColorGuide, onColorStory, onAbout }: IntroPageProps) {
   const [currentImage, setCurrentImage] = useState('');
   const [fortuneMessage, setFortuneMessage] = useState('');
 
@@ -69,6 +72,22 @@ export function IntroPage({ onStart, onAdminOpen, onPrivacy }: IntroPageProps) {
     onPrivacy?.();
   };
 
+  // 콘텐츠 페이지 클릭 핸들러 (이벤트 전파 방지)
+  const handleColorGuideClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onColorGuide?.();
+  };
+
+  const handleColorStoryClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onColorStory?.();
+  };
+
+  const handleAboutClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onAbout?.();
+  };
+
   return (
     <div className={styles.introPage} onClick={onStart}>
       {/* 관리 버튼 (우측 상단) */}
@@ -90,6 +109,23 @@ export function IntroPage({ onStart, onAdminOpen, onPrivacy }: IntroPageProps) {
         )}
         {fortuneMessage && (
           <p className={styles.fortuneMessage}>{fortuneMessage}</p>
+        )}
+      </div>
+      <div className={styles.contentNav}>
+        {onColorGuide && (
+          <button className={styles.contentNavBtn} onClick={handleColorGuideClick}>
+            색칠 가이드
+          </button>
+        )}
+        {onColorStory && (
+          <button className={styles.contentNavBtn} onClick={handleColorStoryClick}>
+            색상 이야기
+          </button>
+        )}
+        {onAbout && (
+          <button className={styles.contentNavBtn} onClick={handleAboutClick}>
+            앱 소개
+          </button>
         )}
       </div>
       <div className={styles.startHint}>

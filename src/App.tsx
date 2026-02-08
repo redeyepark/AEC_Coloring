@@ -6,13 +6,16 @@ import { IntroPage } from './components/IntroPage';
 import { ResultPage } from './components/ResultPage';
 import { AdminPage } from './components/AdminPage';
 import { PrivacyPage } from './components/PrivacyPage';
+import { ColorGuidePage } from './components/ColorGuidePage';
+import { ColorStoryPage } from './components/ColorStoryPage';
+import { AboutPage } from './components/AboutPage';
 import { useImages } from './hooks/useImages';
 import { useColoring } from './hooks/useColoring';
 import { saveAsImage, saveAsCalendar, saveAsWallpaper, saveAsDiary } from './utils/saveImage';
 import { ImageInfo } from './types';
 import './App.css';
 
-type AppPhase = 'intro' | 'coloring' | 'result' | 'admin' | 'privacy';
+type AppPhase = 'intro' | 'coloring' | 'result' | 'admin' | 'privacy' | 'colorguide' | 'colorstory' | 'about';
 
 export default function App() {
   const { images, isLoading: imagesLoading, error: imagesError } = useImages();
@@ -65,6 +68,12 @@ export default function App() {
   const handlePrivacyBack = useCallback(() => {
     setPhase('intro');
   }, []);
+
+  // 콘텐츠 페이지 네비게이션
+  const handleColorGuide = useCallback(() => { setPhase('colorguide'); }, []);
+  const handleColorStory = useCallback(() => { setPhase('colorstory'); }, []);
+  const handleAbout = useCallback(() => { setPhase('about'); }, []);
+  const handleContentBack = useCallback(() => { setPhase('intro'); }, []);
 
   // 색칠 완료 → 결과 전환
   const handleComplete = useCallback(() => {
@@ -138,7 +147,14 @@ export default function App() {
   if (phase === 'intro') {
     return (
       <div className="page-transition" key="intro">
-        <IntroPage onStart={handleStart} onAdminOpen={() => setShowAdmin(true)} onPrivacy={handlePrivacy} />
+        <IntroPage
+          onStart={handleStart}
+          onAdminOpen={() => setShowAdmin(true)}
+          onPrivacy={handlePrivacy}
+          onColorGuide={handleColorGuide}
+          onColorStory={handleColorStory}
+          onAbout={handleAbout}
+        />
         {adminOverlay}
       </div>
     );
@@ -149,6 +165,33 @@ export default function App() {
     return (
       <div className="page-transition" key="privacy">
         <PrivacyPage onBack={handlePrivacyBack} />
+      </div>
+    );
+  }
+
+  // 색칠 가이드 화면
+  if (phase === 'colorguide') {
+    return (
+      <div className="page-transition" key="colorguide">
+        <ColorGuidePage onBack={handleContentBack} />
+      </div>
+    );
+  }
+
+  // 색상 이야기 화면
+  if (phase === 'colorstory') {
+    return (
+      <div className="page-transition" key="colorstory">
+        <ColorStoryPage onBack={handleContentBack} />
+      </div>
+    );
+  }
+
+  // 앱 소개 화면
+  if (phase === 'about') {
+    return (
+      <div className="page-transition" key="about">
+        <AboutPage onBack={handleContentBack} />
       </div>
     );
   }

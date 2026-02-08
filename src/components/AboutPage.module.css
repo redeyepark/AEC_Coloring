@@ -1,0 +1,301 @@
+.aboutPage {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--tds-card);
+  overflow: hidden;
+}
+
+/* 상단 헤더 */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--tds-border);
+  flex-shrink: 0;
+  background: var(--tds-card);
+}
+
+@supports (padding: env(safe-area-inset-top)) {
+  .header {
+    padding-top: max(var(--spacing-md), env(safe-area-inset-top));
+  }
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--tds-primary);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.backBtn:hover {
+  background: rgba(49, 130, 246, 0.1);
+}
+
+.backBtn:active {
+  background: rgba(49, 130, 246, 0.2);
+}
+
+.title {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--tds-text-primary);
+  margin: 0;
+}
+
+.spacer {
+  width: 80px;
+}
+
+/* 스크롤 콘텐츠 영역 */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-lg);
+  -webkit-overflow-scrolling: touch;
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  .content {
+    padding-bottom: max(var(--spacing-lg), calc(env(safe-area-inset-bottom) + var(--spacing-lg)));
+  }
+}
+
+/* 앱 소개 배너 */
+.introBanner {
+  background: linear-gradient(135deg, #fff8f0 0%, #fef0e7 50%, #fce8d8 100%);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+  border: 1px solid rgba(251, 191, 146, 0.3);
+}
+
+.introEmoji {
+  font-size: 40px;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.introTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--tds-text-primary);
+  margin: 0 0 8px 0;
+}
+
+.introDesc {
+  font-size: var(--font-sm);
+  color: var(--tds-text-secondary);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* 섹션 */
+.section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.sectionIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.sectionIconBlue {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.sectionIconGreen {
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.sectionIconPurple {
+  background: rgba(168, 85, 247, 0.1);
+}
+
+.sectionIconOrange {
+  background: rgba(249, 115, 22, 0.1);
+}
+
+.sectionIconPink {
+  background: rgba(236, 72, 153, 0.1);
+}
+
+.section h2 {
+  font-size: var(--font-md);
+  font-weight: 600;
+  color: var(--tds-text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.section p {
+  font-size: var(--font-sm);
+  color: var(--tds-text-secondary);
+  line-height: 1.8;
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.section p:last-child {
+  margin-bottom: 0;
+}
+
+/* 교육적 가치 카드 */
+.benefitCards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: var(--spacing-sm);
+}
+
+.benefitCard {
+  background: var(--tds-background);
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid var(--tds-border);
+}
+
+.benefitCardIcon {
+  font-size: 22px;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+
+.benefitCardTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tds-text-primary);
+  margin: 0 0 4px 0;
+}
+
+.benefitCardDesc {
+  font-size: 12px;
+  color: var(--tds-text-tertiary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* 하이라이트 박스 */
+.highlightBox {
+  background: linear-gradient(135deg, #f0f7ff 0%, #e8f4f8 100%);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: var(--spacing-sm);
+  border-left: 3px solid var(--tds-primary);
+}
+
+.highlightBox p {
+  font-size: var(--font-sm);
+  color: var(--tds-text-secondary);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* 리스트 */
+.section ul {
+  margin: var(--spacing-sm) 0 0 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.section li {
+  font-size: var(--font-sm);
+  color: var(--tds-text-secondary);
+  line-height: 1.8;
+  margin-bottom: 6px;
+}
+
+.section li:last-child {
+  margin-bottom: 0;
+}
+
+/* 구분선 */
+.divider {
+  height: 1px;
+  background: var(--tds-border);
+  margin: var(--spacing-lg) 0;
+  border: none;
+}
+
+/* 하단 광고 영역 */
+.adSection {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--tds-border);
+}
+
+/* 데스크톱 레이아웃 */
+@media (min-width: 768px) {
+  .content {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--spacing-lg) var(--spacing-lg);
+  }
+
+  .introBanner {
+    padding: 28px;
+  }
+
+  .introTitle {
+    font-size: 20px;
+  }
+
+  .section {
+    margin-bottom: 24px;
+  }
+
+  .section h2 {
+    font-size: 18px;
+  }
+
+  .section p,
+  .section li {
+    font-size: 15px;
+  }
+
+  .benefitCards {
+    gap: 14px;
+  }
+
+  .benefitCard {
+    padding: 18px;
+  }
+
+  .benefitCardTitle {
+    font-size: 14px;
+  }
+
+  .benefitCardDesc {
+    font-size: 13px;
+  }
+}
+
+/* 터치 디바이스 최적화 */
+@media (hover: none) {
+  .backBtn:hover {
+    background: transparent;
+  }
+}
