@@ -54,7 +54,7 @@ interface AdminPageProps {
 const ADMIN_PASSWORD = 'a1234';
 
 // 앱 버전 정보
-const APP_VERSION = '1.0.4';
+const APP_VERSION = '1.0.5';
 
 export function AdminPage({ onClose }: AdminPageProps) {
   // 인증 상태
