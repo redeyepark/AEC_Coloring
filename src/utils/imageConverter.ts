@@ -64,9 +64,9 @@ export async function fetchImageAsPixels(
 }
 
 /**
- * 갤러리 이미지 URL을 SVG 파일로 변환
- * 어두운 색상(윤곽선)은 #000000으로, 나머지는 K-Means 원본 컬러 유지
- * 레이어 순서: 컬러 레이어 먼저, 검정 윤곽선 레이어가 맨 위
+ * 갤러리 이미지 URL을 색칠놀이용 SVG로 변환
+ * 블랙 계열(윤곽선)은 #000000, 나머지는 #FFFFFF(빈 영역)로 변환
+ * 레이어 순서: 흰색 영역 먼저, 검정 윤곽선 레이어가 맨 위
  */
 export async function convertGalleryToSvg(
   url: string,
@@ -127,57 +127,55 @@ export function isSupportedFormat(filename: string): boolean {
 }
 
 /**
- * HEX 색상의 밝기(luminance) 계산 (ITU-R BT.601)
+ * HEX 색상이 블랙 계열인지 판정 (RGB 각 채널이 모두 80 미만)
+ * 참조: JPG2SVG 명세 - "블랙 계열 색상(RGB 값이 모두 80 미만)"
  */
-function getLuminance(hex: string): number {
+function isDarkColor(hex: string): boolean {
   const cleanHex = hex.replace('#', '');
-  if (cleanHex.length !== 6) return 0;
+  if (cleanHex.length !== 6) return false;
   const r = parseInt(cleanHex.substring(0, 2), 16);
   const g = parseInt(cleanHex.substring(2, 4), 16);
   const b = parseInt(cleanHex.substring(4, 6), 16);
-  return 0.299 * r + 0.587 * g + 0.114 * b;
+  return r < 80 && g < 80 && b < 80;
 }
 
 /**
  * SVG를 색칠놀이용으로 후처리
- * 어두운 색상(윤곽선)은 #000000으로 변환하고, 나머지는 K-Means 원본 컬러 유지
- * 1. 레이어 색상 추출 → luminance 기반 판정
- * 2. 어두운 색상(luminance < 80) → #000000 (경계선/윤곽선)
- * 3. 그 외 색상 → 원본 K-Means 클러스터 컬러 유지
- * 4. 레이어 순서 재배치 (컬러 레이어 먼저, 검정 윤곽선 맨 위)
+ * - 블랙 계열(RGB 각 채널 < 80) → #000000 (윤곽선/경계선)
+ * - 그 외 모든 색상 → #FFFFFF (색칠할 빈 영역)
+ * - 레이어 순서: 흰색 영역 먼저, 검정 윤곽선 맨 위
  */
 function postProcessSvgForColoring(svgString: string): string {
-  // 어두운 색상 판정: luminance < 80 → 검정 윤곽선
-  const DARK_THRESHOLD = 80;
-  const isDark = (hex: string) => getLuminance(hex) < DARK_THRESHOLD;
-
   // Step 1: 레이어 추출 + fill 교체 + 분류 (단일 패스)
-  const coloredLayers: string[] = [];
-  const blackLayers: string[] = [];
+  const colorLayers: string[] = [];
+  const outlineLayers: string[] = [];
 
   let processed = svgString.replace(
     /\s*<g\s+id="layer-([^"]*)"[^>]*>[\s\S]*?<\/g>/g,
     (match, colorHex: string) => {
-      if (isDark(colorHex)) {
-        // 어두운 레이어: 모든 path fill을 #000000으로 변환 (윤곽선)
-        const processedLayer = match.trim().replace(
-          /<path\s+d="([^"]*)"(?:\s+fill="([^"]*)")?([^/]*)\/?>/g,
-          (_m: string, d: string, _fill: string | undefined, rest: string) => {
-            const fillRule = rest && rest.includes('fill-rule') ? rest.trim() : '';
-            return `<path d="${d}" fill="#000000"${fillRule ? ' ' + fillRule : ''}/>`;
-          }
-        );
-        blackLayers.push(processedLayer);
+      const dark = isDarkColor(colorHex);
+      const fillColor = dark ? '#000000' : '#FFFFFF';
+
+      // 모든 path의 fill을 대상 색상으로 교체
+      const processedLayer = match.trim().replace(
+        /<path\s+d="([^"]*)"(?:\s+fill="([^"]*)")?([^/]*)\/?>/g,
+        (_m: string, d: string, _fill: string | undefined, rest: string) => {
+          const fillRule = rest && rest.includes('fill-rule') ? rest.trim() : '';
+          return `<path d="${d}" fill="${fillColor}"${fillRule ? ' ' + fillRule : ''}/>`;
+        }
+      );
+
+      if (dark) {
+        outlineLayers.push(processedLayer);
       } else {
-        // 밝은 레이어: 원본 K-Means 클러스터 컬러 유지
-        coloredLayers.push(match.trim());
+        colorLayers.push(processedLayer);
       }
       return '';
     }
   );
 
-  // Step 2: 레이어 재배치 (컬러 레이어 먼저 → 검정 윤곽선 맨 위)
-  const reordered = [...coloredLayers, ...blackLayers]
+  // Step 2: 레이어 재배치 (흰색 영역 먼저 → 검정 윤곽선 맨 위)
+  const reordered = [...colorLayers, ...outlineLayers]
     .map((l) => '  ' + l)
     .join('\n');
   processed = processed.replace('</svg>', `${reordered}\n</svg>`);

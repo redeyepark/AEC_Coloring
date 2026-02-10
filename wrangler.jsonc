@@ -1,7 +1,5 @@
 {
-  "name": "aec-coloring",
+  "name": "aec-bg",
   "compatibility_date": "2026-02-01",
-  "assets": {
-    "directory": "./dist"
-  }
+  "pages_build_output_dir": "dist"
 }
