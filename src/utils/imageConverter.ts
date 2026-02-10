@@ -64,8 +64,9 @@ export async function fetchImageAsPixels(
 }
 
 /**
- * 갤러리 이미지 URL을 SVG 색칠하기 파일로 변환
- * 변환 후 색칠놀이용으로 후처리 적용 (블랙 라인 유지, 나머지 화이트 채우기)
+ * 갤러리 이미지 URL을 SVG 파일로 변환
+ * 어두운 색상(윤곽선)은 #000000으로, 나머지는 K-Means 원본 컬러 유지
+ * 레이어 순서: 컬러 레이어 먼저, 검정 윤곽선 레이어가 맨 위
  */
 export async function convertGalleryToSvg(
   url: string,
@@ -73,8 +74,6 @@ export async function convertGalleryToSvg(
 ): Promise<ConvertResult> {
   const { pixels, width, height } = await fetchImageAsPixels(url);
   const result = convertPixels(pixels, width, height, options);
-
-  // 색칠놀이용으로 SVG 후처리: 블랙 라인 제외 화이트 채우기 + 블랙 스트로크
   return {
     ...result,
     svg: postProcessSvgForColoring(result.svg),
@@ -140,88 +139,45 @@ function getLuminance(hex: string): number {
 }
 
 /**
- * 레이어 색상 목록에서 적응형 dark/light 임계값 계산
- * Natural Breaks: 인접 색상 간 가장 큰 밝기 차이를 기준으로 분리
- * → 이미지마다 최적의 흑백 분리점을 자동으로 결정
- */
-function findDarkLightThreshold(colors: string[]): number {
-  if (colors.length <= 1) return 128;
-
-  const luminances = colors.map(getLuminance).sort((a, b) => a - b);
-
-  // 연속 색상 간 가장 큰 밝기 차이(gap) 찾기
-  let maxGap = 0;
-  let gapIndex = 0;
-  for (let i = 1; i < luminances.length; i++) {
-    const gap = luminances[i] - luminances[i - 1];
-    if (gap > maxGap) {
-      maxGap = gap;
-      gapIndex = i;
-    }
-  }
-
-  // gap이 너무 작으면(< 30) 고정 임계값 사용
-  if (maxGap < 30) return 128;
-
-  // 모두 dark 또는 모두 light가 되는 경우 고정 임계값 사용
-  const threshold = (luminances[gapIndex - 1] + luminances[gapIndex]) / 2;
-  if (gapIndex === 0 || gapIndex >= luminances.length) return 128;
-
-  return threshold;
-}
-
-/**
  * SVG를 색칠놀이용으로 후처리
- * 1. 레이어 색상 추출 → 적응형 임계값 계산 (Natural Breaks)
- * 2. 레이어별 fill 교체 (dark → #000000, light → #FFFFFF)
- * 3. 레이어 순서 재배치 (흰색 먼저, 검정 맨 위)
+ * 어두운 색상(윤곽선)은 #000000으로 변환하고, 나머지는 K-Means 원본 컬러 유지
+ * 1. 레이어 색상 추출 → luminance 기반 판정
+ * 2. 어두운 색상(luminance < 80) → #000000 (경계선/윤곽선)
+ * 3. 그 외 색상 → 원본 K-Means 클러스터 컬러 유지
+ * 4. 레이어 순서 재배치 (컬러 레이어 먼저, 검정 윤곽선 맨 위)
  */
 function postProcessSvgForColoring(svgString: string): string {
-  // Step 1: 모든 레이어 색상 추출
-  const layerColors: string[] = [];
-  const layerColorRegex = /<g\s+id="layer-([^"]*)"[^>]*>/g;
-  let colorMatch;
-  while ((colorMatch = layerColorRegex.exec(svgString)) !== null) {
-    layerColors.push(colorMatch[1]);
-  }
+  // 어두운 색상 판정: luminance < 80 → 검정 윤곽선
+  const DARK_THRESHOLD = 80;
+  const isDark = (hex: string) => getLuminance(hex) < DARK_THRESHOLD;
 
-  // Step 2: 적응형 임계값 계산
-  const threshold = findDarkLightThreshold(layerColors);
-  const isDark = (hex: string) => getLuminance(hex) < threshold;
-
-  console.log('[SVG 후처리] 색상:', layerColors.map(c => `${c}(${Math.round(getLuminance(c))})`).join(', '));
-  console.log('[SVG 후처리] 임계값:', Math.round(threshold));
-
-  // Step 3: 레이어 추출 + fill 교체 + dark/light 분류 (단일 패스)
-  const whiteLayers: string[] = [];
+  // Step 1: 레이어 추출 + fill 교체 + 분류 (단일 패스)
+  const coloredLayers: string[] = [];
   const blackLayers: string[] = [];
 
   let processed = svgString.replace(
     /\s*<g\s+id="layer-([^"]*)"[^>]*>[\s\S]*?<\/g>/g,
     (match, colorHex: string) => {
-      // 레이어 내 모든 path fill 교체
-      const processedLayer = match.trim().replace(
-        /<path\s+d="([^"]*)"(?:\s+fill="([^"]*)")?([^/]*)\/?>/g,
-        (_m: string, d: string, _fill: string | undefined, rest: string) => {
-          const newFill = isDark(colorHex) ? '#000000' : '#FFFFFF';
-          const fillRule = rest && rest.includes('fill-rule') ? rest.trim() : '';
-          return `<path d="${d}" fill="${newFill}"${fillRule ? ' ' + fillRule : ''}/>`;
-        }
-      );
-
       if (isDark(colorHex)) {
+        // 어두운 레이어: 모든 path fill을 #000000으로 변환 (윤곽선)
+        const processedLayer = match.trim().replace(
+          /<path\s+d="([^"]*)"(?:\s+fill="([^"]*)")?([^/]*)\/?>/g,
+          (_m: string, d: string, _fill: string | undefined, rest: string) => {
+            const fillRule = rest && rest.includes('fill-rule') ? rest.trim() : '';
+            return `<path d="${d}" fill="#000000"${fillRule ? ' ' + fillRule : ''}/>`;
+          }
+        );
         blackLayers.push(processedLayer);
       } else {
-        whiteLayers.push(processedLayer);
+        // 밝은 레이어: 원본 K-Means 클러스터 컬러 유지
+        coloredLayers.push(match.trim());
       }
       return '';
     }
   );
 
-  console.log(`[SVG 후처리] 흰색 레이어: ${whiteLayers.length}, 검정 레이어: ${blackLayers.length}`);
-
-  // Step 4: 레이어 재배치 (흰색 먼저 → 검정 맨 위)
-  const reordered = [...whiteLayers, ...blackLayers]
+  // Step 2: 레이어 재배치 (컬러 레이어 먼저 → 검정 윤곽선 맨 위)
+  const reordered = [...coloredLayers, ...blackLayers]
     .map((l) => '  ' + l)
     .join('\n');
   processed = processed.replace('</svg>', `${reordered}\n</svg>`);

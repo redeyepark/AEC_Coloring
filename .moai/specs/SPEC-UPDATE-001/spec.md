@@ -2,7 +2,7 @@
 id: SPEC-UPDATE-001
 title: Gallery Tab Coloring SVG Conversion
 version: 1.0.0
-status: draft
+status: completed
 created: 2026-02-10
 updated: 2026-02-10
 author: JWPARK
