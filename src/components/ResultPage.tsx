@@ -3,7 +3,6 @@ import styles from './ResultPage.module.css';
 import {
   extractColorsFromSvg,
   analyzeColors,
-  getBrightnessLabel,
   type ColorAnalysisResult
 } from '../utils/colorAnalysis';
 import { useAds } from '../hooks/useAds';

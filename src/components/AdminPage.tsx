@@ -12,7 +12,6 @@ import {
   getScheduleStatusByFilename,
   getScheduleLabel,
   getCleanFilename,
-  ScheduleStatus,
 } from '../utils/scheduleUtils';
 import { convertGalleryToSvg } from '../utils/imageConverter';
 import type { ConvertResult } from '../utils/imageConverter';

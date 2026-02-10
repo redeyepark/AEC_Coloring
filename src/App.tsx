@@ -36,7 +36,6 @@ export default function App() {
   const {
     selectedColor,
     setSelectedColor,
-    history,
     fillPath,
     undo,
     redo,
