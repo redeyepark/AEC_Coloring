@@ -19,11 +19,12 @@ interface IntroPageProps {
   onColorGuide?: () => void;
   onColorStory?: () => void;
   onAbout?: () => void;
+  onArtist?: () => void;
 }
 
 // Supabase Storage에서만 갤러리 이미지를 로드
 // 비활성화된 이미지는 필터링하여 제외
-export function IntroPage({ onStart, onAdminOpen, onPrivacy, onColorGuide, onColorStory, onAbout }: IntroPageProps) {
+export function IntroPage({ onStart, onAdminOpen, onPrivacy, onColorGuide, onColorStory, onAbout, onArtist }: IntroPageProps) {
   const [currentImage, setCurrentImage] = useState('');
   const [fortuneMessage, setFortuneMessage] = useState('');
 
@@ -88,6 +89,11 @@ export function IntroPage({ onStart, onAdminOpen, onPrivacy, onColorGuide, onCol
     onAbout?.();
   };
 
+  const handleArtistClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onArtist?.();
+  };
+
   return (
     <div className={styles.introPage} onClick={onStart}>
       {/* 관리 버튼 (우측 상단) */}
@@ -125,6 +131,11 @@ export function IntroPage({ onStart, onAdminOpen, onPrivacy, onColorGuide, onCol
         {onAbout && (
           <button className={styles.contentNavBtn} onClick={handleAboutClick}>
             앱 소개
+          </button>
+        )}
+        {onArtist && (
+          <button className={styles.contentNavBtn} onClick={handleArtistClick}>
+            작가 소개
           </button>
         )}
       </div>

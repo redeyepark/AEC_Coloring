@@ -9,13 +9,14 @@ import { PrivacyPage } from './components/PrivacyPage';
 import { ColorGuidePage } from './components/ColorGuidePage';
 import { ColorStoryPage } from './components/ColorStoryPage';
 import { AboutPage } from './components/AboutPage';
+import { ArtistPage } from './components/ArtistPage';
 import { useImages } from './hooks/useImages';
 import { useColoring } from './hooks/useColoring';
 import { saveAsImage, saveAsCalendar, saveAsWallpaper, saveAsDiary } from './utils/saveImage';
 import { ImageInfo } from './types';
 import './App.css';
 
-type AppPhase = 'intro' | 'coloring' | 'result' | 'admin' | 'privacy' | 'colorguide' | 'colorstory' | 'about';
+type AppPhase = 'intro' | 'coloring' | 'result' | 'admin' | 'privacy' | 'colorguide' | 'colorstory' | 'about' | 'artist';
 
 export default function App() {
   const { images, isLoading: imagesLoading, error: imagesError } = useImages();
@@ -73,6 +74,7 @@ export default function App() {
   const handleColorGuide = useCallback(() => { setPhase('colorguide'); }, []);
   const handleColorStory = useCallback(() => { setPhase('colorstory'); }, []);
   const handleAbout = useCallback(() => { setPhase('about'); }, []);
+  const handleArtist = useCallback(() => { setPhase('artist'); }, []);
   const handleContentBack = useCallback(() => { setPhase('intro'); }, []);
 
   // 색칠 완료 → 결과 전환
@@ -154,6 +156,7 @@ export default function App() {
           onColorGuide={handleColorGuide}
           onColorStory={handleColorStory}
           onAbout={handleAbout}
+          onArtist={handleArtist}
         />
         {adminOverlay}
       </div>
@@ -192,6 +195,15 @@ export default function App() {
     return (
       <div className="page-transition" key="about">
         <AboutPage onBack={handleContentBack} />
+      </div>
+    );
+  }
+
+  // 작가 소개 화면
+  if (phase === 'artist') {
+    return (
+      <div className="page-transition" key="artist">
+        <ArtistPage onBack={handleContentBack} />
       </div>
     );
   }
