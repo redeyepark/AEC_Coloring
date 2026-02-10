@@ -80,6 +80,14 @@ export function AdminPage({ onClose }: AdminPageProps) {
   const [isSavingSvg, setIsSavingSvg] = useState(false);
   const [convertError, setConvertError] = useState<string | null>(null);
 
+  // Gallery 탭 변환 관련 상태
+  const [galleryConvertingImage, setGalleryConvertingImage] = useState<ImageItem | null>(null);
+  const [galleryConvertResult, setGalleryConvertResult] = useState<ConvertResult | null>(null);
+  const [galleryKColors, setGalleryKColors] = useState(6);
+  const [isGalleryConverting, setIsGalleryConverting] = useState(false);
+  const [galleryConvertError, setGalleryConvertError] = useState<string | null>(null);
+  const [isGallerySavingSvg, setIsGallerySavingSvg] = useState(false);
+
   // 스케줄 관련 상태
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<ImageItem | null>(null);
@@ -413,6 +421,94 @@ export function AdminPage({ onClose }: AdminPageProps) {
     }
   };
 
+  // Gallery 탭: 변환 패널 토글
+  const handleGalleryConvertToggle = (image: ImageItem) => {
+    if (galleryConvertingImage?.path === image.path) {
+      // 같은 이미지 클릭 시 패널 닫기
+      setGalleryConvertingImage(null);
+      setGalleryConvertResult(null);
+      setGalleryConvertError(null);
+      setGalleryKColors(6);
+    } else {
+      // 다른 이미지 클릭 시 상태 초기화 후 새 패널 열기
+      setGalleryConvertingImage(image);
+      setGalleryConvertResult(null);
+      setGalleryConvertError(null);
+      setGalleryKColors(6);
+    }
+  };
+
+  // Gallery 탭: 변환 실행
+  const handleGalleryConvert = async () => {
+    if (!galleryConvertingImage) return;
+
+    setIsGalleryConverting(true);
+    setGalleryConvertResult(null);
+    setGalleryConvertError(null);
+
+    try {
+      const result = await convertGalleryToSvg(galleryConvertingImage.url, { kColors: galleryKColors });
+      setGalleryConvertResult(result);
+    } catch (error) {
+      console.error('Gallery conversion error:', error);
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.';
+      setGalleryConvertError(`변환에 실패했습니다: ${errorMessage}`);
+    } finally {
+      setIsGalleryConverting(false);
+    }
+  };
+
+  // Gallery 탭: SVG 저장
+  const handleGallerySaveSvg = async () => {
+    if (!galleryConvertResult || !galleryConvertingImage) return;
+
+    setIsGallerySavingSvg(true);
+    try {
+      const originalName = galleryConvertingImage.name.replace(/\.[^.]+$/, '');
+      const filename = `converted_${originalName}.svg`;
+
+      // 중복 확인
+      const existingSvgs = await listImages('svg');
+      const isDuplicate = existingSvgs.some(img =>
+        img.name.includes(`converted_${originalName}`)
+      );
+
+      if (isDuplicate) {
+        const confirmSave = confirm('이미 변환된 파일이 존재합니다. 덮어쓰시겠습니까?');
+        if (!confirmSave) {
+          setIsGallerySavingSvg(false);
+          return;
+        }
+      }
+
+      const file = new File([galleryConvertResult.svg], filename, { type: 'image/svg+xml' });
+      const uploadResult = await uploadImage(file, 'svg');
+
+      if (uploadResult) {
+        setMessage({ type: 'success', text: 'SVG 파일이 저장되었습니다.' });
+      } else {
+        setMessage({ type: 'error', text: 'SVG 파일 저장에 실패했습니다.' });
+      }
+    } catch (error) {
+      console.error('Gallery save SVG error:', error);
+      setMessage({ type: 'error', text: 'SVG 파일 저장에 실패했습니다.' });
+    } finally {
+      setIsGallerySavingSvg(false);
+    }
+  };
+
+  // Gallery 탭: SVG 다운로드
+  const handleGalleryDownloadSvg = () => {
+    if (!galleryConvertResult || !galleryConvertingImage) return;
+    const blob = new Blob([galleryConvertResult.svg], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `converted_${galleryConvertingImage.name.replace(/\.[^.]+$/, '')}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // 비밀번호 입력 화면
   if (!isAuthenticated) {
     return (
@@ -518,6 +614,7 @@ export function AdminPage({ onClose }: AdminPageProps) {
                   <div
                     key={image.path}
                     className={`${styles.imageItem} ${!enabled ? styles.disabled : ''}`}
+                    style={activeTab === 'gallery' && galleryConvertingImage?.path === image.path ? { flexWrap: 'wrap' } : undefined}
                   >
                     <div className={styles.imagePreview}>
                       {activeTab === 'svg' ? (
@@ -546,6 +643,15 @@ export function AdminPage({ onClose }: AdminPageProps) {
                       </span>
                     </div>
                     <div className={styles.imageActions}>
+                      {/* 색칠놀이 변환 버튼 (갤러리 탭에서만) */}
+                      {activeTab === 'gallery' && (
+                        <button
+                          className={styles.galleryConvertBtn}
+                          onClick={() => handleGalleryConvertToggle(image)}
+                        >
+                          {galleryConvertingImage?.path === image.path ? '변환 닫기' : '색칠놀이 변환'}
+                        </button>
+                      )}
                       {/* 노출 설정 버튼 */}
                       <button
                         className={styles.scheduleBtn}
@@ -581,6 +687,103 @@ export function AdminPage({ onClose }: AdminPageProps) {
                         삭제
                       </button>
                     </div>
+
+                    {/* Gallery 탭: 인라인 변환 패널 */}
+                    {activeTab === 'gallery' && galleryConvertingImage?.path === image.path && (
+                      <div className={styles.galleryConvertPanel}>
+                        {/* k-colors 슬라이더 */}
+                        <div className={styles.galleryConvertOptions}>
+                          <div className={styles.sliderRow}>
+                            <span className={styles.sliderLabel}>색상 수</span>
+                            <input
+                              type="range"
+                              min={2}
+                              max={16}
+                              value={galleryKColors}
+                              onChange={(e) => setGalleryKColors(Number(e.target.value))}
+                              className={styles.slider}
+                            />
+                            <span className={styles.sliderValue}>{galleryKColors}</span>
+                          </div>
+                        </div>
+
+                        {/* 변환 시작 버튼 */}
+                        <button
+                          className={styles.galleryConvertStartBtn}
+                          onClick={handleGalleryConvert}
+                          disabled={isGalleryConverting}
+                        >
+                          {isGalleryConverting ? '변환 중...' : '변환 시작'}
+                        </button>
+
+                        {/* 로딩 인디케이터 */}
+                        {isGalleryConverting && (
+                          <div className={styles.convertLoading}>
+                            <div className={styles.convertLoadingSpinner} />
+                            <span className={styles.convertLoadingText}>이미지를 분석하고 변환하는 중...</span>
+                          </div>
+                        )}
+
+                        {/* 에러 메시지 */}
+                        {galleryConvertError && (
+                          <div className={styles.convertError}>{galleryConvertError}</div>
+                        )}
+
+                        {/* 변환 결과 미리보기 */}
+                        {galleryConvertResult && (
+                          <>
+                            <div className={styles.previewSection}>
+                              <div className={styles.previewHeader}>
+                                <p className={styles.previewTitle}>변환 결과</p>
+                                <span className={styles.previewMeta}>
+                                  {galleryConvertResult.metadata.width}x{galleryConvertResult.metadata.height} | {galleryConvertResult.metadata.colorCount}색 | {Math.round(galleryConvertResult.metadata.processingTimeMs)}ms
+                                </span>
+                              </div>
+                              <div className={styles.previewSvg}>
+                                <img
+                                  src={'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(galleryConvertResult.svg)}
+                                  alt="변환된 SVG 미리보기"
+                                />
+                              </div>
+                              <div className={styles.paletteInfo}>
+                                <p className={styles.paletteTitle}>색상 팔레트</p>
+                                <div className={styles.paletteColors}>
+                                  {galleryConvertResult.palette.map((color, index) => (
+                                    <div key={index} className={styles.paletteColor}>
+                                      <span
+                                        className={styles.colorSwatch}
+                                        style={{ backgroundColor: color.hex }}
+                                      />
+                                      <span className={styles.colorHex}>{color.hex}</span>
+                                      <span className={styles.colorPercent}>
+                                        {(color.percentage * 100).toFixed(1)}%
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* 저장/다운로드 버튼 */}
+                            <div className={styles.convertActions}>
+                              <button
+                                className={styles.saveSvgBtn}
+                                onClick={handleGallerySaveSvg}
+                                disabled={isGallerySavingSvg}
+                              >
+                                {isGallerySavingSvg ? '저장 중...' : 'SVG 저장'}
+                              </button>
+                              <button
+                                className={styles.downloadBtn}
+                                onClick={handleGalleryDownloadSvg}
+                              >
+                                다운로드
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })
@@ -737,7 +940,7 @@ export function AdminPage({ onClose }: AdminPageProps) {
             {activeTab === 'svg'
               ? '색칠할 SVG 파일을 업로드하세요. 업로드된 파일은 앱에서 자동으로 사용됩니다.'
               : activeTab === 'gallery'
-              ? '인트로 화면에 표시될 갤러리 이미지를 업로드하세요.'
+              ? '인트로 화면에 표시될 갤러리 이미지를 업로드하세요. 각 이미지의 "색칠놀이 변환" 버튼으로 SVG 변환도 가능합니다.'
               : '갤러리 이미지를 SVG 색칠하기 파일로 변환할 수 있습니다. 변환할 이미지를 선택하고 색상 수를 조절한 후 변환 버튼을 눌러주세요.'}
           </p>
         </div>

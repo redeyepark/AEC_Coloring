@@ -957,3 +957,60 @@
   font-size: 14px;
   margin-bottom: 16px;
 }
+
+/* Gallery 탭 색칠놀이 변환 버튼 */
+.galleryConvertBtn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #FFF8E1;
+  color: #F57F17;
+  border: 1px solid #F57F17;
+}
+
+.galleryConvertBtn:hover {
+  background: #F57F17;
+  color: white;
+}
+
+/* Gallery 탭 변환 패널 */
+.galleryConvertPanel {
+  width: 100%;
+  padding: 16px;
+  margin-top: 12px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #eee;
+}
+
+/* Gallery 변환 옵션 */
+.galleryConvertOptions {
+  margin-bottom: 12px;
+}
+
+/* Gallery 변환 시작 버튼 */
+.galleryConvertStartBtn {
+  width: 100%;
+  padding: 12px;
+  background: #F57F17;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-bottom: 12px;
+}
+
+.galleryConvertStartBtn:hover:not(:disabled) {
+  background: #E65100;
+}
+
+.galleryConvertStartBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
