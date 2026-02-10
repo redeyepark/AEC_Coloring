@@ -755,7 +755,7 @@ export function AdminPage({ onClose }: AdminPageProps) {
                                       />
                                       <span className={styles.colorHex}>{color.hex}</span>
                                       <span className={styles.colorPercent}>
-                                        {(color.percentage * 100).toFixed(1)}%
+                                        {color.percentage.toFixed(1)}%
                                       </span>
                                     </div>
                                   ))}
@@ -893,7 +893,7 @@ export function AdminPage({ onClose }: AdminPageProps) {
                               />
                               <span className={styles.colorHex}>{color.hex}</span>
                               <span className={styles.colorPercent}>
-                                {(color.percentage * 100).toFixed(1)}%
+                                {color.percentage.toFixed(1)}%
                               </span>
                             </div>
                           ))}

@@ -127,8 +127,8 @@ export function isSupportedFormat(filename: string): boolean {
 }
 
 /**
- * HEX 색상이 블랙 계열인지 판정 (RGB 각 채널이 모두 80 미만)
- * 참조: JPG2SVG 명세 - "블랙 계열 색상(RGB 값이 모두 80 미만)"
+ * HEX 색상이 블랙 계열인지 판정 (ITU-R BT.601 휘도 기준)
+ * coloring-svg 라이브러리의 clustering.ts와 동일한 휘도 공식 사용
  */
 function isDarkColor(hex: string): boolean {
   const cleanHex = hex.replace('#', '');
@@ -136,7 +136,9 @@ function isDarkColor(hex: string): boolean {
   const r = parseInt(cleanHex.substring(0, 2), 16);
   const g = parseInt(cleanHex.substring(2, 4), 16);
   const b = parseInt(cleanHex.substring(4, 6), 16);
-  return r < 80 && g < 80 && b < 80;
+  // ITU-R BT.601 휘도 기준 (coloring-svg 라이브러리와 동일)
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luminance < 80;
 }
 
 /**
@@ -156,8 +158,13 @@ function postProcessSvgForColoring(svgString: string): string {
       const dark = isDarkColor(colorHex);
       const fillColor = dark ? '#000000' : '#FFFFFF';
 
+      // g 태그의 id와 data-color 속성을 변환된 색상으로 업데이트
+      let processedLayer = match.trim()
+        .replace(/id="layer-[^"]*"/, `id="layer-${fillColor}"`)
+        .replace(/data-color="[^"]*"/, `data-color="${fillColor}"`);
+
       // 모든 path의 fill을 대상 색상으로 교체
-      const processedLayer = match.trim().replace(
+      processedLayer = processedLayer.replace(
         /<path\s+d="([^"]*)"(?:\s+fill="([^"]*)")?([^/]*)\/?>/g,
         (_m: string, d: string, _fill: string | undefined, rest: string) => {
           const fillRule = rest && rest.includes('fill-rule') ? rest.trim() : '';
@@ -178,6 +185,9 @@ function postProcessSvgForColoring(svgString: string): string {
   const reordered = [...colorLayers, ...outlineLayers]
     .map((l) => '  ' + l)
     .join('\n');
+
+  // Step 3: 빈 줄 정리 후 레이어 삽입
+  processed = processed.replace(/\n\s*\n/g, '\n');
   processed = processed.replace('</svg>', `${reordered}\n</svg>`);
 
   return processed;
