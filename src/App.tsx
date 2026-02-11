@@ -47,7 +47,19 @@ export default function App() {
     setSvgContainer
   } = useColoring();
 
-  const { playPopSound, isMuted, toggleMute } = useSound();
+  const { playPopSound, isMuted, toggleMute, startAmbient, stopAmbient } = useSound();
+
+  // 색칠 단계 진입/이탈 시 앰비언트 바람 사운드 제어
+  useEffect(() => {
+    if (phase === 'coloring') {
+      startAmbient();
+    } else {
+      stopAmbient();
+    }
+    return () => {
+      stopAmbient();
+    };
+  }, [phase, startAmbient, stopAmbient]);
 
   // 색칠 시 효과음 재생 래퍼
   const handlePathClick = useCallback((element: SVGPathElement): boolean => {
