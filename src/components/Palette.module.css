@@ -1,4 +1,4 @@
-/* 팔레트 섹션 - 카테고리 탭 + 색상 행 */
+/* 팔레트 섹션 - 그룹 탭 + 색상 그리드 */
 .paletteSection {
   background: var(--tds-card);
   border-radius: var(--spacing-sm);
@@ -10,25 +10,16 @@
   gap: 6px;
 }
 
-/* 카테고리 탭 행 - 가로 스크롤 */
+/* 그룹 탭 행 (4개 탭 → 스크롤 불필요) */
 .categoryTabs {
   display: flex;
   align-items: center;
   gap: 6px;
-  overflow-x: auto;
-  overflow-y: hidden;
   flex-shrink: 0;
   padding: 2px 0;
-  /* 스크롤바 숨기기 */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
 
-.categoryTabs::-webkit-scrollbar {
-  display: none;
-}
-
-/* 카테고리 탭 버튼 */
+/* 그룹 탭 버튼 */
 .categoryTab {
   display: flex;
   align-items: center;
@@ -44,7 +35,7 @@
   font-family: inherit;
 }
 
-/* 활성 카테고리 탭 */
+/* 활성 그룹 탭 */
 .categoryTab.activeTab {
   background: var(--tds-primary);
 }
@@ -53,7 +44,7 @@
   color: white;
 }
 
-/* 카테고리 대표 색상 원형 */
+/* 그룹 대표 색상 원형 */
 .tabSwatch {
   display: inline-block;
   width: 12px;
@@ -63,7 +54,7 @@
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* 카테고리 이름 텍스트 */
+/* 그룹 이름 텍스트 */
 .tabName {
   font-size: 11px;
   font-weight: 500;
@@ -71,24 +62,23 @@
   line-height: 1;
 }
 
-/* 색상 버튼 행 - 선택된 카테고리의 색상만 표시 */
-.colorRow {
-  display: flex;
-  align-items: center;
+/* 색상 버튼 그리드 - 7열 → ~3행 표시 */
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
   gap: min(6px, 1.5vmin);
   flex-shrink: 0;
   padding: 2px 0;
 }
 
 .colorBtn {
-  width: clamp(32px, 8vmin, 44px);
-  height: clamp(32px, 8vmin, 44px);
-  border-radius: min(8px, 2vmin);
+  aspect-ratio: 1;
+  width: 100%;
+  border-radius: min(6px, 1.5vmin);
   border: 2px solid transparent;
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  flex-shrink: 0;
 }
 
 .colorBtn:hover {
@@ -123,13 +113,8 @@
     gap: 4px;
   }
 
-  .colorRow {
+  .colorGrid {
     gap: 3px;
-  }
-
-  .colorBtn {
-    width: clamp(28px, 7vmin, 36px);
-    height: clamp(28px, 7vmin, 36px);
   }
 
   .categoryTab {
@@ -153,9 +138,11 @@
     gap: 8px;
   }
 
+  .colorGrid {
+    grid-template-columns: repeat(8, 1fr);
+  }
+
   .colorBtn {
-    width: clamp(36px, 6vmin, 48px);
-    height: clamp(36px, 6vmin, 48px);
     border-radius: 8px;
     border-width: 2.5px;
   }
@@ -193,7 +180,6 @@
 
   .categoryTabs {
     flex-wrap: wrap;
-    overflow-x: visible;
     gap: 4px;
   }
 
@@ -210,14 +196,12 @@
     height: 10px;
   }
 
-  .colorRow {
-    flex-wrap: wrap;
+  .colorGrid {
+    grid-template-columns: repeat(6, 1fr);
     gap: clamp(4px, 0.8vh, 6px);
   }
 
   .colorBtn {
-    width: clamp(32px, 4.5vh, 44px);
-    height: clamp(32px, 4.5vh, 44px);
     border-radius: clamp(4px, 0.6vh, 8px);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
@@ -251,12 +235,6 @@
     width: 9px;
     height: 9px;
   }
-
-  .colorBtn {
-    width: clamp(28px, 4vh, 38px);
-    height: clamp(28px, 4vh, 38px);
-    border-radius: clamp(3px, 0.5vh, 6px);
-  }
 }
 
 /* 매우 낮은 높이 (700px 미만) */
@@ -272,11 +250,5 @@
   .tabSwatch {
     width: 8px;
     height: 8px;
-  }
-
-  .colorBtn {
-    width: clamp(24px, 3.5vh, 32px);
-    height: clamp(24px, 3.5vh, 32px);
-    border-radius: 3px;
   }
 }

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { ColorInfo } from '../types';
 import { COLORS } from '../constants/colors';
 import styles from './Palette.module.css';
@@ -8,37 +8,62 @@ interface PaletteProps {
   onColorSelect: (color: ColorInfo) => void;
 }
 
-// 카테고리 정의 (colors.ts의 그룹 순서에 맞춤)
-interface ColorCategory {
+// 4개 대그룹 정의 (12개 카테고리를 병합)
+interface ColorGroup {
   name: string;
   representative: string; // 대표 색상 (탭 아이콘용)
-  startIndex: number;
-  count: number;
+  indices: number[]; // COLORS 배열 내 인덱스 목록
 }
 
-const CATEGORIES: ColorCategory[] = [
-  { name: '빨강', representative: '#EF5350', startIndex: 0, count: 5 },
-  { name: '주황', representative: '#FFA726', startIndex: 5, count: 5 },
-  { name: '노랑', representative: '#FFEB3B', startIndex: 10, count: 6 },
-  { name: '초록', representative: '#66BB6A', startIndex: 16, count: 5 },
-  { name: '시안', representative: '#26C6DA', startIndex: 21, count: 4 },
-  { name: '파랑', representative: '#42A5F5', startIndex: 25, count: 5 },
-  { name: '보라', representative: '#AB47BC', startIndex: 30, count: 5 },
-  { name: '핑크', representative: '#EC407A', startIndex: 35, count: 5 },
-  { name: '갈색', representative: '#8D6E63', startIndex: 40, count: 7 },
-  { name: '피부', representative: '#E8C4B8', startIndex: 47, count: 4 },
-  { name: '머터리얼', representative: '#E53935', startIndex: 51, count: 8 },
-  { name: '무채색', representative: '#9E9E9E', startIndex: 59, count: 6 },
+// 연속 인덱스 범위를 배열로 생성
+function range(start: number, count: number): number[] {
+  return Array.from({ length: count }, (_, i) => start + i);
+}
+
+const GROUPS: ColorGroup[] = [
+  {
+    name: '따뜻한 색',
+    representative: '#EF5350',
+    indices: [
+      ...range(0, 5),   // 빨강
+      ...range(5, 5),   // 주황
+      ...range(10, 6),  // 노랑
+      ...range(35, 5),  // 핑크
+    ],
+  },
+  {
+    name: '차가운 색',
+    representative: '#42A5F5',
+    indices: [
+      ...range(16, 5),  // 초록
+      ...range(21, 4),  // 시안
+      ...range(25, 5),  // 파랑
+      ...range(30, 5),  // 보라
+    ],
+  },
+  {
+    name: '자연색',
+    representative: '#8D6E63',
+    indices: [
+      ...range(40, 7),  // 갈색
+      ...range(47, 4),  // 피부
+      ...range(59, 6),  // 무채색
+    ],
+  },
+  {
+    name: '비비드',
+    representative: '#E53935',
+    indices: [...range(51, 8)], // 머터리얼
+  },
 ];
 
-// 색상 hex로 해당 카테고리 인덱스 찾기
-function findCategoryIndex(colorHex: string): number {
+// 색상 hex로 해당 그룹 인덱스 찾기
+function findGroupIndex(colorHex: string): number {
   const colorIndex = COLORS.findIndex(c => c.hex === colorHex);
   if (colorIndex === -1) return 0;
 
-  for (let i = 0; i < CATEGORIES.length; i++) {
-    const cat = CATEGORIES[i];
-    if (colorIndex >= cat.startIndex && colorIndex < cat.startIndex + cat.count) {
+  for (let i = 0; i < GROUPS.length; i++) {
+    if (GROUPS[i].indices.includes(colorIndex)) {
       return i;
     }
   }
@@ -46,68 +71,40 @@ function findCategoryIndex(colorHex: string): number {
 }
 
 export function Palette({ selectedColor, onColorSelect }: PaletteProps) {
-  // 현재 선택된 색상의 카테고리로 초기화
-  const [selectedCategoryIndex, setSelectedCategoryIndex] = useState<number>(
-    () => findCategoryIndex(selectedColor.hex)
+  // 현재 선택된 색상의 그룹으로 초기화
+  const [selectedGroupIndex, setSelectedGroupIndex] = useState<number>(
+    () => findGroupIndex(selectedColor.hex)
   );
 
-  // 탭 스크롤 컨테이너 ref
-  const tabsRef = useRef<HTMLDivElement>(null);
-  // 활성 탭 ref (스크롤 위치 조정용)
-  const activeTabRef = useRef<HTMLButtonElement>(null);
-
-  // 선택된 카테고리의 색상 목록
-  const currentCategory = CATEGORIES[selectedCategoryIndex];
-  const categoryColors = COLORS.slice(
-    currentCategory.startIndex,
-    currentCategory.startIndex + currentCategory.count
-  );
-
-  // 활성 탭이 보이도록 스크롤 조정
-  useEffect(() => {
-    if (activeTabRef.current && tabsRef.current) {
-      const tab = activeTabRef.current;
-      const container = tabsRef.current;
-      const tabLeft = tab.offsetLeft;
-      const tabWidth = tab.offsetWidth;
-      const containerWidth = container.offsetWidth;
-      const scrollLeft = container.scrollLeft;
-
-      // 탭이 보이지 않으면 스크롤
-      if (tabLeft < scrollLeft) {
-        container.scrollTo({ left: tabLeft - 8, behavior: 'smooth' });
-      } else if (tabLeft + tabWidth > scrollLeft + containerWidth) {
-        container.scrollTo({ left: tabLeft + tabWidth - containerWidth + 8, behavior: 'smooth' });
-      }
-    }
-  }, [selectedCategoryIndex]);
+  // 선택된 그룹의 색상 목록
+  const currentGroup = GROUPS[selectedGroupIndex];
+  const groupColors = currentGroup.indices.map(i => COLORS[i]);
 
   return (
     // 'paletteSection' 클래스: App.css 그리드 배치용, styles.paletteSection: 스타일링용
     <section className={`paletteSection ${styles.paletteSection}`}>
-      {/* 카테고리 탭 행 */}
-      <div className={styles.categoryTabs} ref={tabsRef}>
-        {CATEGORIES.map((cat, index) => (
+      {/* 그룹 탭 행 (4개 → 스크롤 불필요) */}
+      <div className={styles.categoryTabs}>
+        {GROUPS.map((group, index) => (
           <button
-            key={cat.name}
-            ref={index === selectedCategoryIndex ? activeTabRef : null}
-            className={`${styles.categoryTab} ${index === selectedCategoryIndex ? styles.activeTab : ''}`}
-            onClick={() => setSelectedCategoryIndex(index)}
-            aria-label={`${cat.name} 계열 색상`}
-            aria-pressed={index === selectedCategoryIndex}
+            key={group.name}
+            className={`${styles.categoryTab} ${index === selectedGroupIndex ? styles.activeTab : ''}`}
+            onClick={() => setSelectedGroupIndex(index)}
+            aria-label={`${group.name} 계열 색상`}
+            aria-pressed={index === selectedGroupIndex}
           >
             <span
               className={styles.tabSwatch}
-              style={{ backgroundColor: cat.representative }}
+              style={{ backgroundColor: group.representative }}
             />
-            <span className={styles.tabName}>{cat.name}</span>
+            <span className={styles.tabName}>{group.name}</span>
           </button>
         ))}
       </div>
 
-      {/* 선택된 카테고리의 색상 버튼 */}
-      <div className={styles.colorRow}>
-        {categoryColors.map((color) => (
+      {/* 선택된 그룹의 색상 버튼 (그리드 ~3행) */}
+      <div className={styles.colorGrid}>
+        {groupColors.map((color) => (
           <button
             key={color.hex}
             className={`${styles.colorBtn} ${selectedColor.hex === color.hex ? styles.selected : ''}`}
