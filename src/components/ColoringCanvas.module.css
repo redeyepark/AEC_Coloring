@@ -9,6 +9,8 @@
   min-height: 0;
   min-width: 0;
   border-radius: var(--spacing-xs);
+  position: relative;
+  touch-action: none; /* 브라우저 기본 줌/스크롤 방지 */
 }
 
 .polaroidFrame {
@@ -30,6 +32,7 @@
   overflow: hidden;
   pointer-events: all;
   cursor: pointer;
+  will-change: transform; /* GPU 가속 최적화 */
 }
 
 .coloringSvg :global(svg) {
@@ -138,6 +141,38 @@
   margin-top: var(--spacing-xs);
   color: var(--tds-text-tertiary);
   font-size: var(--font-xs);
+}
+
+/* 줌 리셋 버튼 - 줌 상태일 때만 표시 */
+.zoomResetButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.zoomResetButton:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.zoomResetButton:active {
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(0.95);
 }
 
 /* 가로 모드 */

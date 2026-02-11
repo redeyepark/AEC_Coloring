@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { ImageInfo } from '../types';
+import { useCanvasZoom } from '../hooks/useCanvasZoom';
 import styles from './ColoringCanvas.module.css';
 
 interface ColoringCanvasProps {
@@ -22,6 +23,10 @@ export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selec
   const svgElementRef = useRef<SVGSVGElement | null>(null);
   // 선택된 색상을 ref로 저장하여 항상 최신 값 참조
   const selectedColorRef = useRef<string>(selectedColorHex);
+  // 줌 컨테이너 ref (svgContainer 외부 div)
+  const zoomContainerRef = useRef<HTMLDivElement>(null);
+  // 캔버스 줌 훅
+  const { isZoomed, isGestureActive, containerStyle, handlers, resetZoom } = useCanvasZoom(zoomContainerRef);
 
   // 선택된 색상이 변경될 때마다 ref 업데이트
   useEffect(() => {
@@ -213,8 +218,11 @@ export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selec
     );
   }
 
-  // 컨테이너 클릭 핸들러
+  // 컨테이너 클릭 핸들러 (줌 제스처 중에는 클릭 억제)
   const handleContainerClick = (e: React.MouseEvent) => {
+    // 핀치/팬 제스처 진행 중이면 클릭 무시
+    if (isGestureActive()) return;
+
     const target = e.target as Element;
 
     if (target.tagName.toLowerCase() === 'path') {
@@ -238,11 +246,25 @@ export function ColoringCanvas({ image, onPathClick, isBlackColor, svgRef, selec
   };
 
   return (
-    <div className={styles.svgContainer}>
+    <div
+      ref={zoomContainerRef}
+      className={styles.svgContainer}
+      {...handlers}
+    >
+      {isZoomed && (
+        <button
+          className={styles.zoomResetButton}
+          onClick={resetZoom}
+          aria-label="줌 초기화"
+        >
+          1:1
+        </button>
+      )}
       <div className={styles.polaroidFrame}>
         <div
           ref={containerRef}
           className={styles.coloringSvg}
+          style={containerStyle}
           onClick={handleContainerClick}
           dangerouslySetInnerHTML={{ __html: svgContent }}
         />
