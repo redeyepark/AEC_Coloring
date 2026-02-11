@@ -39,11 +39,13 @@ function ColoringIcon() {
   );
 }
 
-// 내 작품 아이콘 (별 모양)
-function MyWorksIcon() {
+// 더보기 아이콘 (가로 점 3개)
+function MoreIcon() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+      <circle cx="5" cy="12" r="1.5" fill="currentColor" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+      <circle cx="19" cy="12" r="1.5" fill="currentColor" />
     </svg>
   );
 }
@@ -53,7 +55,7 @@ const tabs: { key: TabType; label: string; icon: React.ComponentType }[] = [
   { key: 'home', label: '홈', icon: HomeIcon },
   { key: 'gallery', label: '갤러리', icon: GalleryIcon },
   { key: 'coloring', label: '색칠하기', icon: ColoringIcon },
-  { key: 'myworks', label: '내 작품', icon: MyWorksIcon },
+  { key: 'more', label: '더보기', icon: MoreIcon },
 ];
 
 export function BottomTabBar({ activeTab, onTabChange, visible }: BottomTabBarProps) {

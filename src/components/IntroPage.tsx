@@ -15,16 +15,11 @@ function getDisabledImages(): string[] {
 interface IntroPageProps {
   onStart: () => void;
   onAdminOpen?: () => void;
-  onPrivacy?: () => void;
-  onColorGuide?: () => void;
-  onColorStory?: () => void;
-  onAbout?: () => void;
-  onArtist?: () => void;
 }
 
 // Supabase Storage에서만 갤러리 이미지를 로드
 // 비활성화된 이미지는 필터링하여 제외
-export function IntroPage({ onStart, onAdminOpen, onPrivacy, onColorGuide, onColorStory, onAbout, onArtist }: IntroPageProps) {
+export function IntroPage({ onStart, onAdminOpen }: IntroPageProps) {
   const [currentImage, setCurrentImage] = useState('');
   const [fortuneMessage, setFortuneMessage] = useState('');
 
@@ -67,32 +62,6 @@ export function IntroPage({ onStart, onAdminOpen, onPrivacy, onColorGuide, onCol
     onAdminOpen?.();
   };
 
-  // 개인정보처리방침 클릭 (이벤트 전파 방지)
-  const handlePrivacyClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onPrivacy?.();
-  };
-
-  // 콘텐츠 페이지 클릭 핸들러 (이벤트 전파 방지)
-  const handleColorGuideClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onColorGuide?.();
-  };
-
-  const handleColorStoryClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onColorStory?.();
-  };
-
-  const handleAboutClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onAbout?.();
-  };
-
-  const handleArtistClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onArtist?.();
-  };
 
   return (
     <div className={styles.introPage} onClick={onStart}>
@@ -117,38 +86,9 @@ export function IntroPage({ onStart, onAdminOpen, onPrivacy, onColorGuide, onCol
           <p className={styles.fortuneMessage}>{fortuneMessage}</p>
         )}
       </div>
-      <div className={styles.contentNav}>
-        {onColorGuide && (
-          <button className={styles.contentNavBtn} onClick={handleColorGuideClick}>
-            색칠 가이드
-          </button>
-        )}
-        {onColorStory && (
-          <button className={styles.contentNavBtn} onClick={handleColorStoryClick}>
-            색상 이야기
-          </button>
-        )}
-        {onAbout && (
-          <button className={styles.contentNavBtn} onClick={handleAboutClick}>
-            앱 소개
-          </button>
-        )}
-        {onArtist && (
-          <button className={styles.contentNavBtn} onClick={handleArtistClick}>
-            작가 소개
-          </button>
-        )}
-      </div>
       <div className={styles.startHint}>
         <span className={styles.hintText}>화면을 터치하여 시작</span>
       </div>
-      {onPrivacy && (
-        <div className={styles.privacyLink}>
-          <button className={styles.privacyBtn} onClick={handlePrivacyClick}>
-            개인정보처리방침
-          </button>
-        </div>
-      )}
     </div>
   );
 }

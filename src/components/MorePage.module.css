@@ -1,0 +1,98 @@
+/* 더보기 페이지 컨테이너 */
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+}
+
+/* 헤더 */
+.header {
+  padding: 20px 20px 12px;
+  flex-shrink: 0;
+}
+
+@supports (padding: env(safe-area-inset-top)) {
+  .header {
+    padding-top: max(20px, env(safe-area-inset-top));
+  }
+}
+
+.headerTitle {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #191F28;
+  margin: 0;
+}
+
+/* 메뉴 목록 */
+.menuList {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 메뉴 아이템 */
+.menuItem {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.menuItem:active {
+  background-color: #F2F4F6;
+}
+
+@media (hover: hover) {
+  .menuItem:hover {
+    background-color: #F7F8FA;
+  }
+}
+
+/* 메뉴 아이콘 */
+.menuIcon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8B95A1;
+  flex-shrink: 0;
+}
+
+/* 메뉴 라벨 */
+.menuLabel {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333D4B;
+}
+
+/* 구분선 */
+.divider {
+  height: 1px;
+  background: #E5E8EB;
+  margin: 4px 20px;
+  flex-shrink: 0;
+}
+
+/* 버전 정보 */
+.versionInfo {
+  padding: 24px 20px 16px;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12px;
+  color: #B0B8C1;
+  text-align: center;
+  flex-shrink: 0;
+}

@@ -13,13 +13,14 @@ import { ArtistPage } from './components/ArtistPage';
 import { BottomTabBar } from './components/BottomTabBar';
 import { ImageGallery } from './components/ImageGallery';
 import { MyWorksPage } from './components/MyWorksPage';
+import { MorePage } from './components/MorePage';
 import { useImages } from './hooks/useImages';
 import { useColoring } from './hooks/useColoring';
 import { saveAsImage, saveAsCalendar, saveAsWallpaper, saveAsDiary } from './utils/saveImage';
 import { ImageInfo, TabType } from './types';
 import './App.css';
 
-type AppPhase = 'intro' | 'gallery' | 'coloring' | 'result' | 'admin' | 'privacy' | 'colorguide' | 'colorstory' | 'about' | 'artist' | 'myworks';
+type AppPhase = 'intro' | 'gallery' | 'coloring' | 'result' | 'admin' | 'privacy' | 'colorguide' | 'colorstory' | 'about' | 'artist' | 'more' | 'myworks';
 
 export default function App() {
   const { images, isLoading: imagesLoading, error: imagesError } = useImages();
@@ -64,7 +65,7 @@ export default function App() {
           setPhase('coloring');
         }
         break;
-      case 'myworks': setPhase('myworks'); break;
+      case 'more': setPhase('more'); break;
     }
   }, [currentImage]);
 
@@ -87,9 +88,10 @@ export default function App() {
     setPhase('privacy');
   }, []);
 
-  // 개인정보처리방침 → 인트로 전환
+  // 개인정보처리방침 → 더보기 전환
   const handlePrivacyBack = useCallback(() => {
-    setPhase('intro');
+    setPhase('more');
+    setActiveTab('more');
   }, []);
 
   // 콘텐츠 페이지 네비게이션
@@ -97,7 +99,7 @@ export default function App() {
   const handleColorStory = useCallback(() => { setPhase('colorstory'); }, []);
   const handleAbout = useCallback(() => { setPhase('about'); }, []);
   const handleArtist = useCallback(() => { setPhase('artist'); }, []);
-  const handleContentBack = useCallback(() => { setPhase('intro'); }, []);
+  const handleContentBack = useCallback(() => { setPhase('more'); setActiveTab('more'); }, []);
 
   // 색칠 완료 → 결과 전환
   const handleComplete = useCallback(() => {
@@ -175,11 +177,6 @@ export default function App() {
         <IntroPage
           onStart={handleStart}
           onAdminOpen={() => setShowAdmin(true)}
-          onPrivacy={handlePrivacy}
-          onColorGuide={handleColorGuide}
-          onColorStory={handleColorStory}
-          onAbout={handleAbout}
-          onArtist={handleArtist}
         />
         <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} visible={true} />
         {adminOverlay}
@@ -203,11 +200,29 @@ export default function App() {
     );
   }
 
+  // 더보기 화면
+  if (phase === 'more') {
+    return (
+      <div className="page-transition" key="more">
+        <MorePage
+          onMyWorks={() => setPhase('myworks')}
+          onColorGuide={handleColorGuide}
+          onColorStory={handleColorStory}
+          onAbout={handleAbout}
+          onArtist={handleArtist}
+          onPrivacy={handlePrivacy}
+        />
+        <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} visible={true} />
+        {adminOverlay}
+      </div>
+    );
+  }
+
   // 내 작품 화면
   if (phase === 'myworks') {
     return (
       <div className="page-transition" key="myworks">
-        <MyWorksPage />
+        <MyWorksPage onBack={() => { setPhase('more'); setActiveTab('more'); }} />
         <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} visible={true} />
         {adminOverlay}
       </div>

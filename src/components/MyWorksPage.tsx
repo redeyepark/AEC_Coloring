@@ -1,8 +1,20 @@
 import styles from './MyWorksPage.module.css';
 
-export function MyWorksPage() {
+interface MyWorksPageProps {
+  onBack?: () => void;
+}
+
+export function MyWorksPage({ onBack }: MyWorksPageProps) {
   return (
     <div className={styles.container}>
+      {/* 뒤로가기 버튼 */}
+      {onBack && (
+        <button className={styles.backBtn} onClick={onBack} aria-label="뒤로가기">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+      )}
       {/* 별 아이콘 */}
       <svg
         className={styles.icon}
