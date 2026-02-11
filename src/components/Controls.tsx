@@ -7,8 +7,6 @@ interface ControlsProps {
   onRedo: () => void;
   onReset: () => void;
   onComplete: () => void;
-  isMuted: boolean;
-  onToggleMute: () => void;
 }
 
 // 되돌리기 아이콘 (왼쪽 화살표)
@@ -70,59 +68,13 @@ function RefreshIcon({ disabled }: { disabled: boolean }) {
   );
 }
 
-// 스피커 ON 아이콘 (소리 켜짐)
-function SpeakerOnIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M11 5L6 9H2V15H6L11 19V5Z"
-        stroke="#3182F6"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M19.07 4.93C20.9447 6.80528 21.9979 9.34836 21.9979 12C21.9979 14.6516 20.9447 17.1947 19.07 19.07M15.54 8.46C16.4774 9.39764 17.004 10.6692 17.004 11.995C17.004 13.3208 16.4774 14.5924 15.54 15.53"
-        stroke="#3182F6"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-// 스피커 OFF 아이콘 (음소거)
-function SpeakerOffIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M11 5L6 9H2V15H6L11 19V5Z"
-        stroke="#B0B8C1"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M23 9L17 15M17 9L23 15"
-        stroke="#B0B8C1"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 export function Controls({
   canUndo,
   canRedo,
   onUndo,
   onRedo,
   onReset,
-  onComplete,
-  isMuted,
-  onToggleMute
+  onComplete
 }: ControlsProps) {
   return (
     // 'controls' 클래스: App.css 그리드 배치용, styles.controls: 스타일링용
@@ -150,14 +102,6 @@ export function Controls({
         title="처음으로"
       >
         <RefreshIcon disabled={!canUndo} />
-      </button>
-      {/* 음소거 토글 버튼 */}
-      <button
-        className={styles.iconBtn}
-        onClick={onToggleMute}
-        title={isMuted ? '소리 켜기' : '소리 끄기'}
-      >
-        {isMuted ? <SpeakerOffIcon /> : <SpeakerOnIcon />}
       </button>
       <button
         className={styles.completeBtn}
