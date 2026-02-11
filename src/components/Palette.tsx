@@ -28,32 +28,32 @@ const GROUPS: ColorGroup[] = [
       ...range(0, 5),   // 빨강
       ...range(5, 5),   // 주황
       ...range(10, 6),  // 노랑
-      ...range(35, 5),  // 핑크
+      ...range(37, 5),  // 핑크
     ],
   },
   {
     name: '차가운 색',
     representative: '#42A5F5',
     indices: [
-      ...range(16, 5),  // 초록
-      ...range(21, 4),  // 시안
-      ...range(25, 5),  // 파랑
-      ...range(30, 5),  // 보라
+      ...range(16, 6),  // 초록
+      ...range(22, 5),  // 시안
+      ...range(27, 5),  // 파랑
+      ...range(32, 5),  // 보라
     ],
   },
   {
     name: '자연색',
     representative: '#8D6E63',
     indices: [
-      ...range(40, 7),  // 갈색
-      ...range(47, 4),  // 피부
-      ...range(59, 6),  // 무채색
+      ...range(42, 7),  // 갈색
+      ...range(49, 6),  // 피부
+      ...range(76, 8),  // 무채색
     ],
   },
   {
     name: '비비드',
     representative: '#E53935',
-    indices: [...range(51, 8)], // 머터리얼
+    indices: [...range(55, 21)], // 머터리얼
   },
 ];
 
