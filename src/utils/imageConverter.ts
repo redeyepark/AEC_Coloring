@@ -128,9 +128,8 @@ export function isSupportedFormat(filename: string): boolean {
 
 /**
  * HEX 색상이 블랙 계열인지 판정 (ITU-R BT.601 휘도 기준)
- * luminance < 40 → 윤곽선(#000000), 그 외 → 빈 영역(#FFFFFF)
- * 임계값 40은 약 #262626까지만 윤곽선으로 분류하여
- * #303030 같은 짙은 회색이 #000000과 병합되는 문제를 방지
+ * luminance < 30 → 윤곽선(#000000), 그 외 → 빈 영역(#FFFFFF)
+ * 임계값 30은 약 #1E1E1E까지만 윤곽선으로 분류
  */
 function isDarkColor(hex: string): boolean {
   const cleanHex = hex.replace('#', '');
@@ -138,14 +137,14 @@ function isDarkColor(hex: string): boolean {
   const r = parseInt(cleanHex.substring(0, 2), 16);
   const g = parseInt(cleanHex.substring(2, 4), 16);
   const b = parseInt(cleanHex.substring(4, 6), 16);
-  // ITU-R BT.601 휘도 기준 (임계값 40: 매우 어두운 색상만 윤곽선으로 분류)
+  // ITU-R BT.601 휘도 기준 (임계값 30: 거의 순수 검정만 윤곽선으로 분류)
   const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-  return luminance < 40;
+  return luminance < 30;
 }
 
 /**
  * SVG를 색칠놀이용으로 후처리
- * - 블랙 계열(휘도 < 40, 약 #262626 이하) → #000000 (윤곽선/경계선)
+ * - 블랙 계열(휘도 < 30, 약 #1E1E1E 이하) → #000000 (윤곽선/경계선)
  * - 그 외 모든 색상 → #FFFFFF (색칠할 빈 영역)
  * - 레이어 순서: 흰색 영역 먼저, 검정 윤곽선 맨 위
  */
