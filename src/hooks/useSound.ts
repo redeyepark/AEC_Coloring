@@ -47,7 +47,7 @@ export function useSound(): UseSoundReturn {
     }
   }, []);
 
-  /** 팝 효과음 재생 (800Hz -> 400Hz 하강, 0.1초) */
+  /** 힐링 챙 효과음 재생 (윈드차임 스타일, 0.25초) */
   const playPopSound = useCallback(() => {
     // 음소거 상태면 즉시 반환
     if (isMuted) return;
@@ -63,24 +63,39 @@ export function useSound(): UseSoundReturn {
 
       const now = ctx.currentTime;
 
-      // 오실레이터 설정: 사인파 800Hz -> 400Hz (0.08초)
-      const oscillator = ctx.createOscillator();
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(800, now);
-      oscillator.frequency.exponentialRampToValueAtTime(400, now + 0.08);
+      // 기본 톤: 사인파 1047Hz(C6) → 988Hz(B5) 부드러운 하강
+      const osc1 = ctx.createOscillator();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(1047, now);
+      osc1.frequency.exponentialRampToValueAtTime(988, now + 0.2);
 
-      // 게인 설정: 0.3 -> 0.0 (0.1초)
-      const gainNode = ctx.createGain();
-      gainNode.gain.setValueAtTime(0.3, now);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      // 배음 톤: 1568Hz(G6, 5도 위) 은은한 하모닉
+      const osc2 = ctx.createOscillator();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(1568, now);
+      osc2.frequency.exponentialRampToValueAtTime(1480, now + 0.2);
 
-      // 연결: 오실레이터 -> 게인 -> 출력
-      oscillator.connect(gainNode);
-      gainNode.connect(ctx.destination);
+      // 기본 톤 게인: 0.12 → 0 (0.25초, 부드러운 감쇠)
+      const gain1 = ctx.createGain();
+      gain1.gain.setValueAtTime(0.12, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+      // 배음 톤 게인: 0.05 → 0 (은은하게)
+      const gain2 = ctx.createGain();
+      gain2.gain.setValueAtTime(0.05, now);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+      // 연결: 오실레이터 → 게인 → 출력
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
 
       // 재생 시작 및 자동 종료
-      oscillator.start(now);
-      oscillator.stop(now + 0.1);
+      osc1.start(now);
+      osc1.stop(now + 0.25);
+      osc2.start(now);
+      osc2.stop(now + 0.2);
     } catch {
       // 오디오 재생 실패 시 무시 (graceful degradation)
     }

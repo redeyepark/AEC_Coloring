@@ -183,7 +183,7 @@ describe('useSound', () => {
         result.current.playPopSound();
       });
 
-      expect(mockCtx.ctx.createOscillator).toHaveBeenCalledTimes(1);
+      expect(mockCtx.ctx.createOscillator).toHaveBeenCalledTimes(2);
     });
 
     it('OscillatorNode type이 sine이어야 한다', () => {
@@ -200,7 +200,7 @@ describe('useSound', () => {
       expect(mockCtx.oscillator.type).toBe('sine');
     });
 
-    it('주파수가 800Hz에서 시작해야 한다', () => {
+    it('기본 톤 주파수가 1047Hz(C6)에서 시작해야 한다', () => {
       const { result } = renderHook(() => useSound());
 
       act(() => {
@@ -208,12 +208,12 @@ describe('useSound', () => {
       });
 
       expect(mockCtx.oscillator.frequency.setValueAtTime).toHaveBeenCalledWith(
-        800,
+        1047,
         expect.any(Number)
       );
     });
 
-    it('주파수가 400Hz로 하강해야 한다', () => {
+    it('기본 톤 주파수가 988Hz(B5)로 하강해야 한다', () => {
       const { result } = renderHook(() => useSound());
 
       act(() => {
@@ -222,10 +222,10 @@ describe('useSound', () => {
 
       expect(
         mockCtx.oscillator.frequency.exponentialRampToValueAtTime
-      ).toHaveBeenCalledWith(400, expect.any(Number));
+      ).toHaveBeenCalledWith(988, expect.any(Number));
     });
 
-    it('GainNode gain이 0.3에서 시작해야 한다', () => {
+    it('기본 톤 GainNode gain이 0.12에서 시작해야 한다', () => {
       const { result } = renderHook(() => useSound());
 
       act(() => {
@@ -233,7 +233,7 @@ describe('useSound', () => {
       });
 
       expect(mockCtx.gainNode.gain.setValueAtTime).toHaveBeenCalledWith(
-        0.3,
+        0.12,
         expect.any(Number)
       );
     });
@@ -314,7 +314,7 @@ describe('useSound', () => {
         result.current.playPopSound();
       });
 
-      expect(mockCtx.ctx.createGain).toHaveBeenCalledTimes(1);
+      expect(mockCtx.ctx.createGain).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -407,7 +407,7 @@ describe('useSound', () => {
         result.current.playPopSound();
       });
 
-      expect(mockCtx.ctx.createOscillator).toHaveBeenCalledTimes(1);
+      expect(mockCtx.ctx.createOscillator).toHaveBeenCalledTimes(2);
     });
   });
 
