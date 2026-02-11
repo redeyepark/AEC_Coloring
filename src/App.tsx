@@ -12,6 +12,7 @@ import { AboutPage } from './components/AboutPage';
 import { ArtistPage } from './components/ArtistPage';
 import { useImages } from './hooks/useImages';
 import { useColoring } from './hooks/useColoring';
+import { useSound } from './hooks/useSound';
 import { saveAsImage, saveAsCalendar, saveAsWallpaper, saveAsDiary } from './utils/saveImage';
 import { ImageInfo } from './types';
 import './App.css';
@@ -45,6 +46,17 @@ export default function App() {
     canRedo,
     setSvgContainer
   } = useColoring();
+
+  const { playPopSound, isMuted, toggleMute } = useSound();
+
+  // 색칠 시 효과음 재생 래퍼
+  const handlePathClick = useCallback((element: SVGPathElement): boolean => {
+    const changed = fillPath(element);
+    if (changed) {
+      playPopSound();
+    }
+    return changed;
+  }, [fillPath, playPopSound]);
 
   // 랜덤 이미지 선택 (색칠 화면 진입 시)
   useEffect(() => {
@@ -261,7 +273,7 @@ export default function App() {
     <main className="main-container coloring-page page-transition" key="coloring">
       <ColoringCanvas
         image={currentImage}
-        onPathClick={fillPath}
+        onPathClick={handlePathClick}
         isBlackColor={isBlackColor}
         svgRef={svgRef}
         selectedColorHex={selectedColor.hex}
@@ -280,6 +292,8 @@ export default function App() {
         onRedo={redo}
         onReset={handleReset}
         onComplete={handleComplete}
+        isMuted={isMuted}
+        onToggleMute={toggleMute}
       />
     </main>
   );
