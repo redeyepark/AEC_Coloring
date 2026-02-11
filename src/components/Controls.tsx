@@ -6,7 +6,6 @@ interface ControlsProps {
   onUndo: () => void;
   onRedo: () => void;
   onReset: () => void;
-  onComplete: () => void;
 }
 
 // 되돌리기 아이콘 (왼쪽 화살표)
@@ -74,41 +73,48 @@ export function Controls({
   onUndo,
   onRedo,
   onReset,
-  onComplete
 }: ControlsProps) {
+  // 리셋 확인 다이얼로그
+  const handleResetWithConfirm = () => {
+    if (canUndo && window.confirm('색칠을 처음부터 다시 하시겠습니까?')) {
+      onReset();
+    }
+  };
+
   return (
     // 'controls' 클래스: App.css 그리드 배치용, styles.controls: 스타일링용
     <div className={`controls ${styles.controls}`}>
-      <button
-        className={`${styles.iconBtn} ${!canUndo ? styles.disabled : ''}`}
-        onClick={onUndo}
-        disabled={!canUndo}
-        title="되돌리기"
-      >
-        <UndoIcon disabled={!canUndo} />
-      </button>
-      <button
-        className={`${styles.iconBtn} ${!canRedo ? styles.disabled : ''}`}
-        onClick={onRedo}
-        disabled={!canRedo}
-        title="다시하기"
-      >
-        <RedoIcon disabled={!canRedo} />
-      </button>
-      <button
-        className={`${styles.iconBtn} ${!canUndo ? styles.disabled : ''}`}
-        onClick={() => canUndo && onReset()}
-        disabled={!canUndo}
-        title="처음으로"
-      >
-        <RefreshIcon disabled={!canUndo} />
-      </button>
-      <button
-        className={styles.completeBtn}
-        onClick={onComplete}
-      >
-        완료
-      </button>
+      <div className={styles.leftGroup}>
+        <button
+          className={`${styles.iconBtn} ${!canUndo ? styles.disabled : ''}`}
+          onClick={onUndo}
+          disabled={!canUndo}
+          title="되돌리기"
+          aria-label="되돌리기"
+        >
+          <UndoIcon disabled={!canUndo} />
+        </button>
+        <button
+          className={`${styles.iconBtn} ${!canRedo ? styles.disabled : ''}`}
+          onClick={onRedo}
+          disabled={!canRedo}
+          title="다시하기"
+          aria-label="다시하기"
+        >
+          <RedoIcon disabled={!canRedo} />
+        </button>
+      </div>
+      <div className={styles.rightGroup}>
+        <button
+          className={`${styles.iconBtn} ${!canUndo ? styles.disabled : ''}`}
+          onClick={handleResetWithConfirm}
+          disabled={!canUndo}
+          title="처음으로"
+          aria-label="처음으로"
+        >
+          <RefreshIcon disabled={!canUndo} />
+        </button>
+      </div>
     </div>
   );
 }

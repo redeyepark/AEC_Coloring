@@ -1,0 +1,82 @@
+/* 색칠 화면 상단 네비게이션 바 */
+.header {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  flex-shrink: 0;
+  padding: 0 8px;
+  background: var(--tds-card);
+  border-bottom: 1px solid var(--tds-border);
+  /* 안전 영역 (노치 디스플레이) */
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* 뒤로가기 버튼 */
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.backBtn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.backBtn:active {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* 이미지 제목 */
+.title {
+  flex: 1;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tds-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 8px;
+}
+
+/* 완료 버튼 */
+.completeBtn {
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: var(--tds-primary);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease, transform 0.1s ease;
+  font-family: inherit;
+}
+
+.completeBtn:hover {
+  background: var(--tds-primary-dark);
+}
+
+.completeBtn:active {
+  transform: scale(0.97);
+}
+
+/* 터치 디바이스 */
+@media (hover: none) {
+  .backBtn:hover {
+    background: transparent;
+  }
+
+  .completeBtn:hover {
+    background: var(--tds-primary);
+  }
+}

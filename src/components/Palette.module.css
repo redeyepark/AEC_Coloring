@@ -1,4 +1,4 @@
-/* 팔레트 섹션 - 색상 그리드만 표시 */
+/* 팔레트 섹션 - 카테고리 탭 + 색상 행 */
 .paletteSection {
   background: var(--tds-card);
   border-radius: var(--spacing-sm);
@@ -7,31 +7,92 @@
   flex-direction: column;
   overflow: hidden;
   flex-shrink: 0;
+  gap: 6px;
 }
 
-/* 색상 팔레트 - CSS Grid로 자동 맞춤 */
-.colorPalette {
-  display: grid;
-  /* 세로 모드: 10열 고정, 버튼 크기 자동 조정 */
-  grid-template-columns: repeat(10, 1fr);
-  gap: min(4px, 1vmin);
-  flex: 1;
-  align-content: start;
-  overflow: hidden;
+/* 카테고리 탭 행 - 가로 스크롤 */
+.categoryTabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-shrink: 0;
+  padding: 2px 0;
+  /* 스크롤바 숨기기 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.categoryTabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* 카테고리 탭 버튼 */
+.categoryTab {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 16px;
+  background: #F2F4F6;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+  font-family: inherit;
+}
+
+/* 활성 카테고리 탭 */
+.categoryTab.activeTab {
+  background: var(--tds-primary);
+}
+
+.categoryTab.activeTab .tabName {
+  color: white;
+}
+
+/* 카테고리 대표 색상 원형 */
+.tabSwatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* 카테고리 이름 텍스트 */
+.tabName {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tds-text-primary);
+  line-height: 1;
+}
+
+/* 색상 버튼 행 - 선택된 카테고리의 색상만 표시 */
+.colorRow {
+  display: flex;
+  align-items: center;
+  gap: min(6px, 1.5vmin);
+  flex-shrink: 0;
+  padding: 2px 0;
 }
 
 .colorBtn {
-  aspect-ratio: 1;
-  width: 100%;
-  border-radius: min(6px, 1.5vmin);
-  border: 1.5px solid transparent;
+  width: clamp(32px, 8vmin, 44px);
+  height: clamp(32px, 8vmin, 44px);
+  border-radius: min(8px, 2vmin);
+  border: 2px solid transparent;
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .colorBtn:hover {
-  transform: scale(1.1);
+  transform: scale(1.12);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   z-index: 1;
 }
@@ -42,30 +103,46 @@
 
 .colorBtn.selected {
   border-color: var(--tds-primary);
-  transform: scale(1.1);
-  box-shadow: 0 2px 6px rgba(49, 130, 246, 0.4);
+  transform: scale(1.12);
+  box-shadow: 0 2px 8px rgba(49, 130, 246, 0.4);
   z-index: 2;
 }
 
 .colorBtn[data-color="#FFFFFF"] {
-  border: 1.5px solid var(--tds-border);
+  border: 2px solid var(--tds-border);
 }
 
-/* 가로 모드 - 8열로 조정 */
-@media (orientation: landscape) {
-  .colorPalette {
-    grid-template-columns: repeat(8, 1fr);
-  }
+.colorBtn[data-color="#FFFFFF"].selected {
+  border-color: var(--tds-primary);
 }
 
 /* 매우 작은 화면 */
 @media (max-width: 360px), (max-height: 500px) {
   .paletteSection {
     padding: 4px;
+    gap: 4px;
   }
 
-  .colorPalette {
-    gap: 2px;
+  .colorRow {
+    gap: 3px;
+  }
+
+  .colorBtn {
+    width: clamp(28px, 7vmin, 36px);
+    height: clamp(28px, 7vmin, 36px);
+  }
+
+  .categoryTab {
+    padding: 3px 8px;
+  }
+
+  .tabSwatch {
+    width: 10px;
+    height: 10px;
+  }
+
+  .tabName {
+    font-size: 10px;
   }
 }
 
@@ -73,26 +150,35 @@
 @media (min-width: 768px) {
   .paletteSection {
     padding: var(--spacing-md);
-  }
-
-  .colorPalette {
     gap: 8px;
-    grid-template-columns: repeat(8, 1fr);
   }
 
   .colorBtn {
-    min-width: 36px;
-    min-height: 36px;
+    width: clamp(36px, 6vmin, 48px);
+    height: clamp(36px, 6vmin, 48px);
     border-radius: 8px;
-    border-width: 2px;
+    border-width: 2.5px;
   }
 
   .colorBtn.selected {
     border-width: 3px;
   }
+
+  .categoryTab {
+    padding: 5px 12px;
+  }
+
+  .tabName {
+    font-size: 12px;
+  }
+
+  .tabSwatch {
+    width: 14px;
+    height: 14px;
+  }
 }
 
-/* 데스크톱 가로 모드 - 뷰포트 내에 맞춤 (스크롤 없음) */
+/* 데스크톱 가로 모드 - 뷰포트 내에 맞춤 */
 @media (min-width: 1024px) and (orientation: landscape) {
   .paletteSection {
     padding: 8px;
@@ -102,28 +188,36 @@
     overflow: hidden;
     flex-shrink: 1;
     min-height: 0;
+    gap: 8px;
   }
 
-  .colorPalette {
-    /* 6열 그리드로 65개 색상 = 11행 */
-    grid-template-columns: repeat(6, 1fr);
-    /* 간격을 뷰포트 높이 기준으로 동적 조정 */
-    gap: clamp(3px, 0.8vh, 6px);
-    flex: 1;
-    align-content: start;
-    overflow: hidden;
-    min-height: 0;
+  .categoryTabs {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    gap: 4px;
+  }
+
+  .categoryTab {
+    padding: 4px 8px;
+  }
+
+  .tabName {
+    font-size: 11px;
+  }
+
+  .tabSwatch {
+    width: 10px;
+    height: 10px;
+  }
+
+  .colorRow {
+    flex-wrap: wrap;
+    gap: clamp(4px, 0.8vh, 6px);
   }
 
   .colorBtn {
-    /* 뷰포트 기반 크기로 자동 축소 - aspect-ratio로 정사각형 유지 */
-    aspect-ratio: 1;
-    min-width: 0;
-    min-height: 0;
-    width: 100%;
-    /* 높이 기준으로 버튼 크기 제한 (65색 / 6열 = 11행 필요) */
-    /* 가용 높이에서 컨트롤(80px) + 패딩(16px) + 간격(10*gap) 제외 */
-    max-height: calc((100vh - 140px) / 12);
+    width: clamp(32px, 4.5vh, 44px);
+    height: clamp(32px, 4.5vh, 44px);
     border-radius: clamp(4px, 0.6vh, 8px);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
@@ -138,45 +232,51 @@
   }
 }
 
-/* 더 큰 화면 (1440px+, 높이 900px+) - 더 큰 버튼 허용 */
-@media (min-width: 1440px) and (min-height: 900px) {
-  .colorPalette {
-    grid-template-columns: repeat(5, 1fr);
-    gap: clamp(5px, 1vh, 8px);
-  }
-
-  .colorBtn {
-    max-height: calc((100vh - 160px) / 14);
-    border-radius: clamp(6px, 0.8vh, 10px);
-  }
-}
-
-/* 낮은 높이의 화면 (800px 미만) - 더 작은 버튼, 더 많은 열 */
+/* 낮은 높이의 화면 (800px 미만) */
 @media (min-width: 1024px) and (orientation: landscape) and (max-height: 800px) {
   .paletteSection {
     padding: 6px;
+    gap: 6px;
   }
 
-  .colorPalette {
-    grid-template-columns: repeat(7, 1fr);
-    gap: clamp(2px, 0.5vh, 4px);
+  .categoryTab {
+    padding: 3px 6px;
+  }
+
+  .tabName {
+    font-size: 10px;
+  }
+
+  .tabSwatch {
+    width: 9px;
+    height: 9px;
   }
 
   .colorBtn {
-    max-height: calc((100vh - 120px) / 10);
+    width: clamp(28px, 4vh, 38px);
+    height: clamp(28px, 4vh, 38px);
     border-radius: clamp(3px, 0.5vh, 6px);
   }
 }
 
-/* 매우 낮은 높이 (700px 미만) - 최소 크기 */
+/* 매우 낮은 높이 (700px 미만) */
 @media (min-width: 1024px) and (orientation: landscape) and (max-height: 700px) {
-  .colorPalette {
-    grid-template-columns: repeat(8, 1fr);
-    gap: 2px;
+  .categoryTab {
+    padding: 2px 5px;
+  }
+
+  .tabName {
+    font-size: 9px;
+  }
+
+  .tabSwatch {
+    width: 8px;
+    height: 8px;
   }
 
   .colorBtn {
-    max-height: calc((100vh - 100px) / 9);
+    width: clamp(24px, 3.5vh, 32px);
+    height: clamp(24px, 3.5vh, 32px);
     border-radius: 3px;
   }
 }

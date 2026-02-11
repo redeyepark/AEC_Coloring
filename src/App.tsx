@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ColoringCanvas } from './components/ColoringCanvas';
 import { Palette } from './components/Palette';
 import { Controls } from './components/Controls';
+import { ColoringHeader } from './components/ColoringHeader';
 import { IntroPage } from './components/IntroPage';
 import { ResultPage } from './components/ResultPage';
 import { AdminPage } from './components/AdminPage';
@@ -100,6 +101,12 @@ export default function App() {
   const handleAbout = useCallback(() => { setPhase('about'); }, []);
   const handleArtist = useCallback(() => { setPhase('artist'); }, []);
   const handleContentBack = useCallback(() => { setPhase('more'); setActiveTab('more'); }, []);
+
+  // 색칠 화면 → 갤러리 복귀
+  const handleBackToGallery = useCallback(() => {
+    setPhase('gallery');
+    setActiveTab('gallery');
+  }, []);
 
   // 색칠 완료 → 결과 전환
   const handleComplete = useCallback(() => {
@@ -325,29 +332,35 @@ export default function App() {
 
   // 색칠 화면
   return (
-    <main className="main-container coloring-page page-transition" key="coloring">
-      <ColoringCanvas
-        image={currentImage}
-        onPathClick={fillPath}
-        isBlackColor={isBlackColor}
-        svgRef={svgRef}
-        selectedColorHex={selectedColor.hex}
-        onContainerReady={setSvgContainer}
-      />
-
-      <Palette
-        selectedColor={selectedColor}
-        onColorSelect={setSelectedColor}
-      />
-
-      <Controls
-        canUndo={canUndo}
-        canRedo={canRedo}
-        onUndo={undo}
-        onRedo={redo}
-        onReset={handleReset}
+    <div className="coloring-wrapper page-transition" key="coloring">
+      <ColoringHeader
+        title={currentImage?.name || ''}
+        onBack={handleBackToGallery}
         onComplete={handleComplete}
       />
-    </main>
+      <main className="main-container coloring-page">
+        <ColoringCanvas
+          image={currentImage}
+          onPathClick={fillPath}
+          isBlackColor={isBlackColor}
+          svgRef={svgRef}
+          selectedColorHex={selectedColor.hex}
+          onContainerReady={setSvgContainer}
+        />
+
+        <Palette
+          selectedColor={selectedColor}
+          onColorSelect={setSelectedColor}
+        />
+
+        <Controls
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onUndo={undo}
+          onRedo={redo}
+          onReset={handleReset}
+        />
+      </main>
+    </div>
   );
 }
