@@ -1,0 +1,34 @@
+/* 내 작품 페이지 컨테이너 */
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+}
+
+/* 플레이스홀더 아이콘 */
+.icon {
+  width: 48px;
+  height: 48px;
+  color: #B0B8C1;
+  margin-bottom: 16px;
+}
+
+/* 제목 */
+.title {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #191F28;
+  margin-bottom: 8px;
+}
+
+/* 부제목 */
+.subtitle {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  color: #8B95A1;
+}

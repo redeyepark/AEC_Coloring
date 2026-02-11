@@ -10,18 +10,22 @@ import { ColorGuidePage } from './components/ColorGuidePage';
 import { ColorStoryPage } from './components/ColorStoryPage';
 import { AboutPage } from './components/AboutPage';
 import { ArtistPage } from './components/ArtistPage';
+import { BottomTabBar } from './components/BottomTabBar';
+import { ImageGallery } from './components/ImageGallery';
+import { MyWorksPage } from './components/MyWorksPage';
 import { useImages } from './hooks/useImages';
 import { useColoring } from './hooks/useColoring';
 import { saveAsImage, saveAsCalendar, saveAsWallpaper, saveAsDiary } from './utils/saveImage';
-import { ImageInfo } from './types';
+import { ImageInfo, TabType } from './types';
 import './App.css';
 
-type AppPhase = 'intro' | 'coloring' | 'result' | 'admin' | 'privacy' | 'colorguide' | 'colorstory' | 'about' | 'artist';
+type AppPhase = 'intro' | 'gallery' | 'coloring' | 'result' | 'admin' | 'privacy' | 'colorguide' | 'colorstory' | 'about' | 'artist' | 'myworks';
 
 export default function App() {
   const { images, isLoading: imagesLoading, error: imagesError } = useImages();
   const [currentImage, setCurrentImage] = useState<ImageInfo | null>(null);
   const [phase, setPhase] = useState<AppPhase>('intro');
+  const [activeTab, setActiveTab] = useState<TabType>('home');
   const [showAdmin, setShowAdmin] = useState(false);
   const svgRef = useRef<SVGSVGElement | null>(null);
 
@@ -46,17 +50,36 @@ export default function App() {
     setSvgContainer
   } = useColoring();
 
-  // 랜덤 이미지 선택 (색칠 화면 진입 시)
-  useEffect(() => {
-    if (images.length > 0 && !currentImage && phase === 'coloring') {
-      const randomIndex = Math.floor(Math.random() * images.length);
-      setCurrentImage(images[randomIndex]);
+  // 탭 변경 핸들러
+  const handleTabChange = useCallback((tab: TabType) => {
+    setActiveTab(tab);
+    switch (tab) {
+      case 'home': setPhase('intro'); break;
+      case 'gallery': setPhase('gallery'); break;
+      case 'coloring':
+        if (!currentImage) {
+          setPhase('gallery');
+          setActiveTab('gallery');
+        } else {
+          setPhase('coloring');
+        }
+        break;
+      case 'myworks': setPhase('myworks'); break;
     }
-  }, [images, currentImage, phase]);
+  }, [currentImage]);
 
-  // 인트로 → 색칠 전환
-  const handleStart = useCallback(() => {
+  // 갤러리에서 이미지 선택 핸들러
+  const handleImageSelect = useCallback((image: ImageInfo) => {
+    setCurrentImage(image);
+    clearHistory();
     setPhase('coloring');
+    setActiveTab('coloring');
+  }, [clearHistory]);
+
+  // 인트로 → 갤러리 전환
+  const handleStart = useCallback(() => {
+    setPhase('gallery');
+    setActiveTab('gallery');
   }, []);
 
   // 인트로 → 개인정보처리방침 전환
@@ -84,6 +107,7 @@ export default function App() {
   // 새로 시작 (결과 → 인트로)
   const handleRestart = useCallback(() => {
     setPhase('intro');
+    setActiveTab('home');
     setCurrentImage(null);
     clearHistory();
   }, [clearHistory]);
@@ -157,6 +181,34 @@ export default function App() {
           onAbout={handleAbout}
           onArtist={handleArtist}
         />
+        <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} visible={true} />
+        {adminOverlay}
+      </div>
+    );
+  }
+
+  // 갤러리 화면
+  if (phase === 'gallery') {
+    return (
+      <div className="page-transition" key="gallery">
+        <ImageGallery
+          images={images}
+          isLoading={imagesLoading}
+          error={imagesError}
+          onImageSelect={handleImageSelect}
+        />
+        <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} visible={true} />
+        {adminOverlay}
+      </div>
+    );
+  }
+
+  // 내 작품 화면
+  if (phase === 'myworks') {
+    return (
+      <div className="page-transition" key="myworks">
+        <MyWorksPage />
+        <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} visible={true} />
         {adminOverlay}
       </div>
     );

@@ -1,0 +1,60 @@
+/* 하단 탭 바 컨테이너 */
+.tabBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(56px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: #FFFFFF;
+  border-top: 1px solid #E5E8EB;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  z-index: 100;
+}
+
+/* 탭 바 숨김 */
+.hidden {
+  display: none;
+}
+
+/* 개별 탭 버튼 */
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.2s ease;
+  color: #B0B8C1;
+}
+
+/* 활성 탭 */
+.tab.active {
+  color: #3182F6;
+}
+
+/* 탭 아이콘 */
+.tabIcon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 탭 라벨 */
+.tabLabel {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+}

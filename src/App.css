@@ -221,3 +221,8 @@ body {
   width: 100%;
   height: 100%;
 }
+
+/* 탭 바 표시 시 하단 여백 확보 */
+.with-tab-bar {
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+}
