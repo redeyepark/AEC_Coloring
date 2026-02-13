@@ -17,7 +17,7 @@ import { MyWorksPage } from './components/MyWorksPage';
 import { MorePage } from './components/MorePage';
 import { useImages } from './hooks/useImages';
 import { useColoring } from './hooks/useColoring';
-import { saveAsImage, saveAsCalendar, saveAsWallpaper, saveAsDiary } from './utils/saveImage';
+import { saveAsImage, saveAsCalendar, saveAsWallpaper, saveAsDiary, shareImage } from './utils/saveImage';
 import { ImageInfo, TabType } from './types';
 import './App.css';
 
@@ -161,6 +161,14 @@ export default function App() {
     }
   }, [currentImage]);
 
+  // 공유 핸들러
+  const handleShareImage = useCallback(async (): Promise<'shared' | 'copied'> => {
+    if (svgRef.current && currentImage) {
+      return await shareImage(svgRef.current, currentImage.name);
+    }
+    throw new Error('공유할 이미지가 없습니다.');
+  }, [currentImage]);
+
   // 관리 페이지 (오버레이)
   const adminOverlay = showAdmin ? (
     <AdminPage onClose={() => {
@@ -283,6 +291,7 @@ export default function App() {
           onSaveCalendar={handleSaveCalendar}
           onSaveWallpaper={handleSaveWallpaper}
           onSaveDiary={handleSaveDiary}
+          onShareImage={handleShareImage}
           onRestart={handleRestart}
         />
       </div>
