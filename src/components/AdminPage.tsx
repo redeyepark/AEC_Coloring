@@ -13,6 +13,10 @@ import {
   getScheduleLabel,
   getCleanFilename,
 } from '../utils/scheduleUtils';
+import {
+  buildMyWorkFilename,
+  parseMyWorkFilename,
+} from '../utils/myworksUtils';
 import styles from './AdminPage.module.css';
 
 // localStorage 키
@@ -77,6 +81,58 @@ export function AdminPage({ onClose }: AdminPageProps) {
     noLimit: true,
   });
   const [isSavingSchedule, setIsSavingSchedule] = useState(false);
+
+  // 내 작품 전용 상태
+  const [myworkFile, setMyworkFile] = useState<File | null>(null);
+  const [myworkTitle, setMyworkTitle] = useState('');
+  const [myworkArtist, setMyworkArtist] = useState('');
+  const myworkFileInputRef = useRef<HTMLInputElement>(null);
+
+  // 내 작품 파일 선택 핸들러
+  const handleMyworkFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (file && file.size > 10 * 1024 * 1024) {
+      setMessage({ type: 'error', text: '파일 크기는 10MB 이하만 가능합니다.' });
+      e.target.value = '';
+      return;
+    }
+    setMyworkFile(file);
+  };
+
+  // 내 작품 업로드 핸들러
+  const handleMyworkUpload = async () => {
+    if (!myworkFile || !myworkTitle.trim() || !myworkArtist.trim()) return;
+
+    setIsUploading(true);
+    setMessage(null);
+
+    try {
+      // 파일 확장자 추출
+      const ext = myworkFile.name.split('.').pop() || 'png';
+      const encodedFilename = buildMyWorkFilename(myworkTitle.trim(), myworkArtist.trim(), ext);
+
+      // 인코딩된 파일명으로 새 File 객체 생성
+      const newFile = new File([myworkFile], encodedFilename, { type: myworkFile.type });
+      const result = await uploadImage(newFile, 'myworks');
+
+      if (result) {
+        setMessage({ type: 'success', text: '작품이 업로드되었습니다.' });
+        // 폼 초기화
+        setMyworkFile(null);
+        setMyworkTitle('');
+        setMyworkArtist('');
+        if (myworkFileInputRef.current) myworkFileInputRef.current.value = '';
+        loadImages();
+      } else {
+        setMessage({ type: 'error', text: '작품 업로드에 실패했습니다.' });
+      }
+    } catch (error) {
+      console.error('Mywork upload error:', error);
+      setMessage({ type: 'error', text: '작품 업로드에 실패했습니다.' });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   // 비밀번호 확인
   const handlePasswordSubmit = (e: React.FormEvent) => {
@@ -378,6 +434,12 @@ export function AdminPage({ onClose }: AdminPageProps) {
           >
             갤러리 이미지
           </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'myworks' ? styles.active : ''}`}
+            onClick={() => setActiveTab('myworks')}
+          >
+            내 작품
+          </button>
         </div>
 
         {/* 메시지 */}
@@ -387,21 +449,62 @@ export function AdminPage({ onClose }: AdminPageProps) {
           </div>
         )}
 
-        {/* 업로드 버튼 */}
-        <div className={styles.uploadSection}>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={activeTab === 'svg' ? '.svg' : 'image/*'}
-            multiple
-            onChange={handleUpload}
-            className={styles.fileInput}
-            id="file-upload"
-          />
-          <label htmlFor="file-upload" className={styles.uploadBtn}>
-            {isUploading ? '업로드 중...' : `+ ${activeTab === 'svg' ? 'SVG' : '이미지'} 업로드`}
-          </label>
-        </div>
+        {/* 업로드 섹션 */}
+        {activeTab === 'myworks' ? (
+          <div className={styles.uploadSection}>
+            <div className={styles.myworkForm}>
+              <input
+                ref={myworkFileInputRef}
+                type="file"
+                accept="image/png,image/jpeg"
+                onChange={handleMyworkFileChange}
+                className={styles.fileInput}
+                id="mywork-file-upload"
+              />
+              <label htmlFor="mywork-file-upload" className={styles.myworkFileBtn}>
+                {myworkFile ? myworkFile.name : '이미지 선택 (PNG, JPEG)'}
+              </label>
+              <input
+                type="text"
+                maxLength={50}
+                placeholder="작품 제목"
+                value={myworkTitle}
+                onChange={(e) => setMyworkTitle(e.target.value)}
+                className={styles.myworkInput}
+              />
+              <input
+                type="text"
+                maxLength={30}
+                placeholder="작가명"
+                value={myworkArtist}
+                onChange={(e) => setMyworkArtist(e.target.value)}
+                className={styles.myworkInput}
+              />
+              <button
+                className={styles.uploadBtn}
+                onClick={handleMyworkUpload}
+                disabled={isUploading || !myworkFile || !myworkTitle.trim() || !myworkArtist.trim()}
+              >
+                {isUploading ? '업로드 중...' : '+ 작품 업로드'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className={styles.uploadSection}>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={activeTab === 'svg' ? '.svg' : 'image/*'}
+              multiple
+              onChange={handleUpload}
+              className={styles.fileInput}
+              id="file-upload"
+            />
+            <label htmlFor="file-upload" className={styles.uploadBtn}>
+              {isUploading ? '업로드 중...' : `+ ${activeTab === 'svg' ? 'SVG' : '이미지'} 업로드`}
+            </label>
+          </div>
+        )}
 
         {/* 이미지 목록 */}
         <div className={styles.imageList}>
@@ -409,9 +512,44 @@ export function AdminPage({ onClose }: AdminPageProps) {
             <div className={styles.loading}>로딩 중...</div>
           ) : images.length === 0 ? (
             <div className={styles.empty}>
-              업로드된 {activeTab === 'svg' ? 'SVG 파일' : '이미지'}이 없습니다.
+              {activeTab === 'myworks'
+                ? '등록된 작품이 없습니다.'
+                : `업로드된 ${activeTab === 'svg' ? 'SVG 파일' : '이미지'}이 없습니다.`}
             </div>
+          ) : activeTab === 'myworks' ? (
+            /* 내 작품 탭 전용 목록 */
+            images.map((image) => {
+              const parsed = parseMyWorkFilename(image.name);
+              return (
+                <div key={image.path} className={styles.imageItem}>
+                  <div className={styles.imagePreview}>
+                    <img src={image.url} alt={parsed.title} />
+                  </div>
+                  <div className={styles.imageInfo}>
+                    <span className={styles.imageName}>{parsed.title}</span>
+                    <span className={styles.imageDate}>{parsed.artist}</span>
+                  </div>
+                  <div className={styles.imageActions}>
+                    <a
+                      href={image.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.viewBtn}
+                    >
+                      보기
+                    </a>
+                    <button
+                      className={styles.deleteBtn}
+                      onClick={() => handleDelete(image.path, parsed.title)}
+                    >
+                      삭제
+                    </button>
+                  </div>
+                </div>
+              );
+            })
           ) : (
+            /* SVG / 갤러리 탭 기존 목록 */
             images.map((image) => {
               const enabled = !disabledImages.includes(image.path);
               const { schedule, status } = getImageScheduleInfo(image.name);
@@ -494,7 +632,9 @@ export function AdminPage({ onClose }: AdminPageProps) {
           <p>
             {activeTab === 'svg'
               ? '색칠할 SVG 파일을 업로드하세요. 업로드된 파일은 앱에서 자동으로 사용됩니다.'
-              : '인트로 화면에 표시될 갤러리 이미지를 업로드하세요.'}
+              : activeTab === 'myworks'
+                ? '아이들의 색칠 작품을 등록하세요. 작품 제목과 작가명을 함께 입력해주세요.'
+                : '인트로 화면에 표시될 갤러리 이미지를 업로드하세요.'}
           </p>
         </div>
 

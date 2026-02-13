@@ -11,14 +11,23 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export const BUCKET_NAME = 'images';
 
 // 이미지 타입
-export type ImageType = 'svg' | 'gallery';
+export type ImageType = 'svg' | 'gallery' | 'myworks';
+
+// 이미지 타입에 따른 폴더 매핑
+function getFolderForType(type: ImageType): string {
+  switch (type) {
+    case 'svg': return 'svg';
+    case 'myworks': return 'myworks';
+    default: return 'gallery';
+  }
+}
 
 // 이미지 업로드
 export async function uploadImage(
   file: File,
   type: ImageType
 ): Promise<{ url: string; path: string } | null> {
-  const folder = type === 'svg' ? 'svg' : 'gallery';
+  const folder = getFolderForType(type);
   const fileName = `${folder}/${Date.now()}_${file.name}`;
 
   const { data, error } = await supabase.storage
@@ -51,7 +60,7 @@ export async function listImages(type: ImageType): Promise<Array<{
   path: string;
   createdAt: string;
 }>> {
-  const folder = type === 'svg' ? 'svg' : 'gallery';
+  const folder = getFolderForType(type);
 
   const { data, error } = await supabase.storage
     .from(BUCKET_NAME)
@@ -166,7 +175,7 @@ export async function renameImage(
 export interface ImageSchedule {
   id: string;
   image_path: string;
-  image_type: 'svg' | 'gallery';
+  image_type: ImageType;
   start_date: string | null;
   end_date: string | null;
   is_active: boolean;

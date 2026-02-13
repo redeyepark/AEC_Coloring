@@ -28,6 +28,14 @@ export interface AppState {
   images: ImageInfo[];
 }
 
+// 내 작품 아이템 타입
+export interface MyWorkItem {
+  file: string;
+  path: string;
+  title: string;
+  artist: string;
+}
+
 // 디바이스 해상도 타입
 export interface DeviceResolution {
   width: number;

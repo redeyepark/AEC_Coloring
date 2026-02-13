@@ -2,19 +2,19 @@
 .container {
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px;
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  -webkit-overflow-scrolling: touch;
   position: relative;
 }
 
 /* 뒤로가기 버튼 */
 .backBtn {
-  position: absolute;
-  top: 16px;
-  left: 16px;
+  position: sticky;
+  top: 0;
+  left: 0;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -28,6 +28,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: all 0.2s;
   z-index: 10;
+  margin-bottom: 8px;
 }
 
 .backBtn:hover {
@@ -40,32 +41,146 @@
   transform: scale(0.95);
 }
 
-@supports (padding: env(safe-area-inset-top)) {
-  .backBtn {
-    top: max(16px, env(safe-area-inset-top));
-  }
-}
-
-/* 플레이스홀더 아이콘 */
-.icon {
-  width: 48px;
-  height: 48px;
-  color: #B0B8C1;
+/* 헤더 */
+.header {
   margin-bottom: 16px;
 }
 
-/* 제목 */
-.title {
+.headerTitle {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 20px;
   font-weight: 700;
   color: #191F28;
-  margin-bottom: 8px;
 }
 
-/* 부제목 */
-.subtitle {
+.headerSubtitle {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  color: #8B95A1;
+  margin-top: 4px;
+}
+
+/* 갤러리 그리드 */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+/* 작품 카드 */
+.card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  border: 1px solid #F2F4F6;
+  text-align: left;
+  padding: 0;
+  width: 100%;
+}
+
+.card:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* 이미지 래퍼 */
+.imageWrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #F9FAFB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* 이미지 */
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 카드 정보 */
+.cardInfo {
+  padding: 8px 10px;
+  border-top: 1px solid #F2F4F6;
+}
+
+.cardTitle {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #191F28;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardArtist {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
+  color: #8B95A1;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 상태 메시지 (로딩, 에러, 빈 상태) */
+.stateMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: #8B95A1;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
-  color: #8B95A1;
+  text-align: center;
+  gap: 12px;
+}
+
+.stateMessage.error {
+  color: #F04452;
+}
+
+/* 빈 상태 아이콘 */
+.emptyIcon {
+  color: #B0B8C1;
+  margin-bottom: 4px;
+}
+
+/* 재시도 버튼 */
+.retryBtn {
+  margin-top: 8px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 1px solid #E5E8EB;
+  background: #fff;
+  color: #4E5968;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.retryBtn:hover {
+  background: #F9FAFB;
+  border-color: #D1D6DB;
+}
+
+.retryBtn:active {
+  transform: scale(0.97);
 }

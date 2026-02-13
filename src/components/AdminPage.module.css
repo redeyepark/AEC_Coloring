@@ -1014,3 +1014,63 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ========================================
+   내 작품 (myworks) 탭 전용 스타일
+   ======================================== */
+
+/* 내 작품 업로드 폼 */
+.myworkForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.myworkFileBtn {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border: 2px dashed #d0d5dd;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #666;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.myworkFileBtn:hover {
+  border-color: #3182F6;
+  color: #3182F6;
+  background: #F0F6FF;
+}
+
+.myworkInput {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e5e8eb;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.myworkInput:focus {
+  border-color: #3182F6;
+}
+
+.myworkInput::placeholder {
+  color: #adb5bd;
+}
+
+/* 업로드 버튼 비활성화 */
+.uploadBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
