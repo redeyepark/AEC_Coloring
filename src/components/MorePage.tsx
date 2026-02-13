@@ -4,21 +4,11 @@ import styles from './MorePage.module.css';
 const APP_VERSION = '1.0.7';
 
 interface MorePageProps {
-  onMyWorks: () => void;
   onColorGuide: () => void;
   onColorStory: () => void;
   onAbout: () => void;
   onArtist: () => void;
   onPrivacy: () => void;
-}
-
-// 별 아이콘 (명예의 전당)
-function StarIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
-  );
 }
 
 // 팔레트 아이콘 (색칠 가이드)
@@ -75,7 +65,7 @@ function ShieldIcon() {
 }
 
 // 더보기 페이지 컴포넌트
-export function MorePage({ onMyWorks, onColorGuide, onColorStory, onAbout, onArtist, onPrivacy }: MorePageProps) {
+export function MorePage({ onColorGuide, onColorStory, onAbout, onArtist, onPrivacy }: MorePageProps) {
   return (
     <div className={styles.container}>
       {/* 헤더 */}
@@ -85,10 +75,6 @@ export function MorePage({ onMyWorks, onColorGuide, onColorStory, onAbout, onArt
 
       {/* 메인 메뉴 목록 */}
       <div className={styles.menuList}>
-        <button className={styles.menuItem} onClick={onMyWorks}>
-          <span className={styles.menuIcon}><StarIcon /></span>
-          <span className={styles.menuLabel}>명예의 전당</span>
-        </button>
         <button className={styles.menuItem} onClick={onColorGuide}>
           <span className={styles.menuIcon}><PaletteIcon /></span>
           <span className={styles.menuLabel}>색칠 가이드</span>

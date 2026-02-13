@@ -29,12 +29,16 @@ function GalleryIcon() {
   );
 }
 
-// 색칠하기 아이콘 (붓 모양)
-function ColoringIcon() {
+// 트로피 아이콘 (명예의 전당)
+function TrophyIcon() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18.37 2.63a1.5 1.5 0 0 1 2.12 0l.88.88a1.5 1.5 0 0 1 0 2.12L9.41 17.59a2 2 0 0 1-.95.53l-3.54.88.88-3.54a2 2 0 0 1 .53-.95L18.37 2.63z" />
-      <path d="M2 22c1.5-1 3-2 4-3" />
+      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+      <path d="M4 22h16" />
+      <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
     </svg>
   );
 }
@@ -54,7 +58,7 @@ function MoreIcon() {
 const tabs: { key: TabType; label: string; icon: React.ComponentType }[] = [
   { key: 'home', label: '홈', icon: HomeIcon },
   { key: 'gallery', label: '갤러리', icon: GalleryIcon },
-  { key: 'coloring', label: '색칠하기', icon: ColoringIcon },
+  { key: 'myworks', label: '명예의 전당', icon: TrophyIcon },
   { key: 'more', label: '더보기', icon: MoreIcon },
 ];
 

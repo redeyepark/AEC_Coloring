@@ -1,5 +1,5 @@
 // 탭 타입
-export type TabType = 'home' | 'gallery' | 'coloring' | 'more';
+export type TabType = 'home' | 'gallery' | 'myworks' | 'more';
 
 // 이미지 정보 타입
 export interface ImageInfo {

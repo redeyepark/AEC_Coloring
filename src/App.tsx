@@ -58,14 +58,7 @@ export default function App() {
     switch (tab) {
       case 'home': setPhase('intro'); break;
       case 'gallery': setPhase('gallery'); break;
-      case 'coloring':
-        if (!currentImage) {
-          setPhase('gallery');
-          setActiveTab('gallery');
-        } else {
-          setPhase('coloring');
-        }
-        break;
+      case 'myworks': setPhase('myworks'); break;
       case 'more': setPhase('more'); break;
     }
   }, [currentImage]);
@@ -75,7 +68,7 @@ export default function App() {
     setCurrentImage(image);
     clearHistory();
     setPhase('coloring');
-    setActiveTab('coloring');
+    setActiveTab('gallery');
   }, [clearHistory]);
 
   // 인트로 → 갤러리 전환
@@ -212,7 +205,6 @@ export default function App() {
     return (
       <div className="page-transition" key="more">
         <MorePage
-          onMyWorks={() => setPhase('myworks')}
           onColorGuide={handleColorGuide}
           onColorStory={handleColorStory}
           onAbout={handleAbout}
@@ -229,7 +221,7 @@ export default function App() {
   if (phase === 'myworks') {
     return (
       <div className="page-transition" key="myworks">
-        <MyWorksPage onBack={() => { setPhase('more'); setActiveTab('more'); }} />
+        <MyWorksPage />
         <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} visible={true} />
         {adminOverlay}
       </div>
