@@ -82,13 +82,13 @@ export function AdminPage({ onClose }: AdminPageProps) {
   });
   const [isSavingSchedule, setIsSavingSchedule] = useState(false);
 
-  // 내 작품 전용 상태
+  // 명예의 전당 전용 상태
   const [myworkFile, setMyworkFile] = useState<File | null>(null);
   const [myworkTitle, setMyworkTitle] = useState('');
   const [myworkArtist, setMyworkArtist] = useState('');
   const myworkFileInputRef = useRef<HTMLInputElement>(null);
 
-  // 내 작품 파일 선택 핸들러
+  // 명예의 전당 파일 선택 핸들러
   const handleMyworkFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     if (file && file.size > 10 * 1024 * 1024) {
@@ -99,7 +99,7 @@ export function AdminPage({ onClose }: AdminPageProps) {
     setMyworkFile(file);
   };
 
-  // 내 작품 업로드 핸들러
+  // 명예의 전당 업로드 핸들러
   const handleMyworkUpload = async () => {
     if (!myworkFile || !myworkTitle.trim() || !myworkArtist.trim()) return;
 
@@ -438,7 +438,7 @@ export function AdminPage({ onClose }: AdminPageProps) {
             className={`${styles.tab} ${activeTab === 'myworks' ? styles.active : ''}`}
             onClick={() => setActiveTab('myworks')}
           >
-            내 작품
+            명예의 전당
           </button>
         </div>
 
@@ -517,7 +517,7 @@ export function AdminPage({ onClose }: AdminPageProps) {
                 : `업로드된 ${activeTab === 'svg' ? 'SVG 파일' : '이미지'}이 없습니다.`}
             </div>
           ) : activeTab === 'myworks' ? (
-            /* 내 작품 탭 전용 목록 */
+            /* 명예의 전당 탭 전용 목록 */
             images.map((image) => {
               const parsed = parseMyWorkFilename(image.name);
               return (

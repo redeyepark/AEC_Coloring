@@ -12,7 +12,7 @@ interface MorePageProps {
   onPrivacy: () => void;
 }
 
-// 별 아이콘 (내 작품)
+// 별 아이콘 (명예의 전당)
 function StarIcon() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -87,7 +87,7 @@ export function MorePage({ onMyWorks, onColorGuide, onColorStory, onAbout, onArt
       <div className={styles.menuList}>
         <button className={styles.menuItem} onClick={onMyWorks}>
           <span className={styles.menuIcon}><StarIcon /></span>
-          <span className={styles.menuLabel}>내 작품</span>
+          <span className={styles.menuLabel}>명예의 전당</span>
         </button>
         <button className={styles.menuItem} onClick={onColorGuide}>
           <span className={styles.menuIcon}><PaletteIcon /></span>

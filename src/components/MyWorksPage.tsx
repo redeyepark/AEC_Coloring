@@ -107,8 +107,8 @@ export function MyWorksPage({ onBack }: MyWorksPageProps) {
         </button>
       )}
       <div className={styles.header}>
-        <div className={styles.headerTitle}>내 작품</div>
-        <div className={styles.headerSubtitle}>멋진 작품들을 감상해보세요</div>
+        <div className={styles.headerTitle}>명예의 전당</div>
+        <div className={styles.headerSubtitle}>색칠 명예의 전당에 오신 것을 환영합니다</div>
       </div>
       <div className={styles.grid}>
         {works.map((work) => (
