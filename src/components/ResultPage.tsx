@@ -15,7 +15,6 @@ interface ResultPageProps {
   onSaveCalendar: () => Promise<void>;
   onSaveWallpaper: () => Promise<void>;
   onSaveDiary: (text: string) => Promise<void>;
-  onShareImage: () => Promise<'shared' | 'copied'>;
   onRestart: () => void;
 }
 
@@ -25,14 +24,12 @@ export function ResultPage({
   onSaveCalendar,
   onSaveWallpaper,
   onSaveDiary,
-  onShareImage,
   onRestart
 }: ResultPageProps) {
   const [savedImage, setSavedImage] = useState(false);
   const [savedCalendar, setSavedCalendar] = useState(false);
   const [savedWallpaper, setSavedWallpaper] = useState(false);
   const [savedDiary, setSavedDiary] = useState(false);
-  const [isSharing, setIsSharing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   // 그림일기 모달 상태
@@ -121,28 +118,6 @@ export function ResultPage({
       showMessage('갤러리에 저장해주세요!');
     } catch {
       showMessage('저장 실패. 다시 시도해주세요.');
-    }
-  };
-
-  // 공유 핸들러
-  const handleShareImage = async () => {
-    if (isSharing) return;
-    setIsSharing(true);
-    try {
-      const result = await onShareImage();
-      if (result === 'shared') {
-        showMessage('공유 완료!');
-      } else if (result === 'copied') {
-        showMessage('클립보드에 복사됨!');
-      }
-    } catch (error: unknown) {
-      if (error instanceof Error && (error.name === 'AbortError' || error.message.includes('cancel'))) {
-        // 사용자가 공유를 취소한 경우 - 무시
-      } else {
-        showMessage('공유 실패. 다시 시도해주세요.');
-      }
-    } finally {
-      setIsSharing(false);
     }
   };
 
@@ -265,18 +240,6 @@ export function ResultPage({
             disabled={savedDiary}
           >
             {savedDiary ? '그림일기 저장됨' : '그림일기 저장'}
-          </button>
-          <button
-            className={styles.shareBtn}
-            onClick={handleShareImage}
-            disabled={isSharing}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '8px', verticalAlign: 'middle'}}>
-              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-              <polyline points="16 6 12 2 8 6" />
-              <line x1="12" y1="2" x2="12" y2="15" />
-            </svg>
-            {isSharing ? '공유 중...' : '공유하기'}
           </button>
           <button
             className={styles.restartBtn}

@@ -123,15 +123,15 @@
 .actionButtons {
   display: flex;
   flex-direction: column;
-  gap: clamp(6px, 1.5vmin, 8px);
+  gap: clamp(8px, 2vmin, 12px);
   padding: var(--spacing-md);
   flex-shrink: 0;
 }
 
 .saveBtn {
   width: 100%;
-  padding: 12px;
-  font-size: 15px;
+  padding: 16px;
+  font-size: 16px;
   font-weight: 600;
   color: white;
   background: var(--tds-primary);
@@ -160,40 +160,10 @@
   cursor: default;
 }
 
-.shareBtn {
-  width: 100%;
-  padding: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  color: white;
-  background: #25D366;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.shareBtn:hover {
-  background: #1da851;
-}
-
-.shareBtn:active {
-  transform: scale(0.98);
-}
-
-.shareBtn:disabled {
-  opacity: 0.7;
-  cursor: default;
-}
-
 .restartBtn {
   width: 100%;
-  padding: 12px;
-  font-size: 15px;
+  padding: 16px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--tds-primary);
   background: transparent;
