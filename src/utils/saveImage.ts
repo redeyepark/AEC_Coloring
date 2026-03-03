@@ -666,53 +666,42 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, pcWidth, pcHeight);
 
-        // 2단계: 타원형 클리핑 프레임 설정 (좌측 하단)
-        const ovalCenterX = pcWidth * 0.22; // 좌측 22% 지점
-        const ovalCenterY = pcHeight * 0.55; // 세로 55% 지점 (약간 아래쪽)
-        const ovalRadiusX = pcHeight * 0.32; // 가로 반지름
-        const ovalRadiusY = pcHeight * 0.38; // 세로 반지름 (세로가 약간 더 긴 타원)
+        // 2단계: 원본 비율 유지하며 축소된 이미지 그리기 (가운데 정렬)
+        const calendarLineY = pcHeight - 35; // 달력 라인 Y 위치
+        const availableHeight = calendarLineY - 20; // 상단 여백 20px 제외한 사용 가능 높이
+        const maxImgHeight = availableHeight * 0.65; // 사용 가능 높이의 65%
+        const maxImgWidth = pcWidth * 0.85; // 캔버스 너비의 85%
 
-        // 타원 테두리 그리기 (클리핑 전에 그려야 함)
-        ctx.save();
-        ctx.beginPath();
-        ctx.ellipse(ovalCenterX, ovalCenterY, ovalRadiusX + 4, ovalRadiusY + 4, 0, 0, Math.PI * 2);
-        ctx.strokeStyle = borderColor;
-        ctx.lineWidth = 6;
-        ctx.stroke();
-        ctx.restore();
-
-        // 3단계: 타원 안에 SVG 이미지 클리핑하여 그리기
-        ctx.save();
-        ctx.beginPath();
-        ctx.ellipse(ovalCenterX, ovalCenterY, ovalRadiusX, ovalRadiusY, 0, 0, Math.PI * 2);
-        ctx.clip();
-
-        // 이미지를 타원 영역에 맞게 center-cover 방식으로 그리기
-        const clipBoundsX = ovalCenterX - ovalRadiusX;
-        const clipBoundsY = ovalCenterY - ovalRadiusY;
-        const clipBoundsW = ovalRadiusX * 2;
-        const clipBoundsH = ovalRadiusY * 2;
-
+        // 원본 비율 유지하며 축소 크기 계산
         const imgAspect = img.width / img.height;
-        const clipAspect = clipBoundsW / clipBoundsH;
-        let drawWidth, drawHeight, drawX, drawY;
+        let drawWidth, drawHeight;
 
-        if (imgAspect > clipAspect) {
-          // 이미지가 더 넓음: 세로에 맞추고 가로 중앙 자르기
-          drawHeight = clipBoundsH;
-          drawWidth = clipBoundsH * imgAspect;
-          drawX = clipBoundsX - (drawWidth - clipBoundsW) / 2;
-          drawY = clipBoundsY;
+        if (img.width / maxImgWidth > img.height / maxImgHeight) {
+          // 가로가 제한 요소: 가로 기준으로 축소
+          drawWidth = maxImgWidth;
+          drawHeight = maxImgWidth / imgAspect;
         } else {
-          // 이미지가 더 높음: 가로에 맞추고 세로 중앙 자르기
-          drawWidth = clipBoundsW;
-          drawHeight = clipBoundsW / imgAspect;
-          drawX = clipBoundsX;
-          drawY = clipBoundsY - (drawHeight - clipBoundsH) / 2;
+          // 세로가 제한 요소: 세로 기준으로 축소
+          drawHeight = maxImgHeight;
+          drawWidth = maxImgHeight * imgAspect;
         }
 
+        // 가로 중앙 정렬, 세로는 달력 위 영역의 중앙
+        const drawX = (pcWidth - drawWidth) / 2;
+        const drawY = (availableHeight - drawHeight) / 2 + 10; // 상단 여백 10px 포함
+
+        // 흰색 매트/프레임 배경 (이미지보다 약간 크게)
+        const framePadding = 10;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(
+          drawX - framePadding,
+          drawY - framePadding,
+          drawWidth + framePadding * 2,
+          drawHeight + framePadding * 2
+        );
+
+        // 원본 비율 그대로 이미지 그리기 (클리핑 없음)
         ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-        ctx.restore(); // 클리핑 해제
 
         // 4단계: 하단 달력 한 줄 그리기
         const now = new Date();
