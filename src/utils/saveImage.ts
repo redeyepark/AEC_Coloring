@@ -554,84 +554,6 @@ export async function saveAsDiary(svg: SVGSVGElement, imageName: string, userTex
   });
 }
 
-// hex 색상을 RGB 값으로 분리하는 헬퍼
-function hexToRgb(hex: string): { r: number; g: number; b: number } {
-  hex = hex.replace('#', '');
-  if (hex.length === 3) {
-    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-  }
-  return {
-    r: parseInt(hex.substring(0, 2), 16),
-    g: parseInt(hex.substring(2, 4), 16),
-    b: parseInt(hex.substring(4, 6), 16)
-  };
-}
-
-// RGB를 hex 문자열로 변환하는 헬퍼
-function rgbToHex(r: number, g: number, b: number): string {
-  return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
-}
-
-// 색상을 어둡게 만드는 헬퍼 (factor 0~1, 0에 가까울수록 어두움)
-function darkenColor(hex: string, factor: number): string {
-  const { r, g, b } = hexToRgb(hex);
-  return rgbToHex(r * factor, g * factor, b * factor);
-}
-
-// 색상을 밝게 만드는 헬퍼 (amount 만큼 밝기 추가)
-function lightenColor(hex: string, amount: number): string {
-  const { r, g, b } = hexToRgb(hex);
-  return rgbToHex(r + amount, g + amount, b + amount);
-}
-
-// SVG에서 가장 많이 사용된 색상(dominant color) 추출
-function getDominantColorFromSvg(svg: SVGSVGElement): string {
-  const colors = extractColorsFromSvg(svg);
-  console.log('[getDominantColor] 추출된 색상 목록:', colors);
-
-  if (colors.length === 0) {
-    return '#4A6B4A'; // 폴백: 어두운 녹색
-  }
-
-  // 색상별 출현 빈도 계산 (fill 속성 기준)
-  const colorCount: Record<string, number> = {};
-  const allElements = svg.querySelectorAll('*');
-  allElements.forEach(element => {
-    const fill = element.getAttribute('fill');
-    if (fill && fill !== 'none' && fill !== 'transparent' && !fill.startsWith('url')) {
-      const normalized = fill.trim().toUpperCase();
-      // 흰색, 검정색 제외
-      if (normalized !== '#FFFFFF' && normalized !== '#FFF' && normalized !== '#000000' && normalized !== '#000') {
-        colorCount[normalized] = (colorCount[normalized] || 0) + 1;
-      }
-    }
-    // style 속성의 fill도 확인
-    const style = element.getAttribute('style');
-    if (style) {
-      const fillMatch = style.match(/fill:\s*([^;]+)/);
-      if (fillMatch) {
-        const val = fillMatch[1].trim().toUpperCase();
-        if (val !== '#FFFFFF' && val !== '#FFF' && val !== 'NONE' && val !== 'TRANSPARENT') {
-          colorCount[val] = (colorCount[val] || 0) + 1;
-        }
-      }
-    }
-  });
-
-  // 가장 많이 사용된 색상 찾기
-  let maxCount = 0;
-  let dominant = colors[0];
-  for (const [color, count] of Object.entries(colorCount)) {
-    if (count > maxCount) {
-      maxCount = count;
-      dominant = color;
-    }
-  }
-
-  console.log('[getDominantColor] 최다 사용 색상:', dominant, '빈도:', maxCount);
-  return dominant;
-}
-
 // PC 달력 배경화면 저장 함수 (1920x1080 FHD, 레퍼런스 디자인 기반)
 export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): Promise<void> {
   console.log('[saveAsPcCalendar] 시작', { svg, imageName });
@@ -642,11 +564,9 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
       const pcWidth = 1920;
       const pcHeight = 1080;
 
-      // SVG에서 dominant color 추출 후 어둡게 변환하여 배경색 생성
-      const dominantColor = getDominantColorFromSvg(svg);
-      const bgColor = darkenColor(dominantColor, 0.35); // 35%로 어둡게
-      const borderColor = lightenColor(bgColor, 40); // 테두리는 배경보다 약간 밝게
-      console.log('[saveAsPcCalendar] 배경색:', bgColor, '테두리색:', borderColor, '원본:', dominantColor);
+      // 배경색: 흰색 고정
+      const bgColor = '#FFFFFF';
+      console.log('[saveAsPcCalendar] 배경색:', bgColor);
 
       const svgData = new XMLSerializer().serializeToString(svg);
       console.log('[saveAsPcCalendar] SVG 직렬화 완료, 길이:', svgData.length);
@@ -662,14 +582,14 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
         canvas.height = pcHeight;
         const ctx = canvas.getContext('2d')!;
 
-        // 1단계: 전체 캔버스를 어두운 배경색으로 채우기
+        // 1단계: 전체 캔버스를 흰색 배경으로 채우기
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, pcWidth, pcHeight);
 
         // 2단계: 원본 비율 유지하며 축소된 이미지 그리기 (가운데 정렬)
-        const calendarLineY = pcHeight - 35; // 달력 라인 Y 위치
-        const availableHeight = calendarLineY - 20; // 상단 여백 20px 제외한 사용 가능 높이
-        const maxImgHeight = availableHeight * 0.65; // 사용 가능 높이의 65%
+        // 캔버스 높이의 약 80%를 이미지 영역으로 사용 (나머지는 달력 영역)
+        const imageAreaHeight = pcHeight * 0.80;
+        const maxImgHeight = imageAreaHeight - 40; // 상하 여백 각 20px
         const maxImgWidth = pcWidth * 0.85; // 캔버스 너비의 85%
 
         // 원본 비율 유지하며 축소 크기 계산
@@ -686,24 +606,19 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
           drawWidth = maxImgHeight * imgAspect;
         }
 
-        // 가로 중앙 정렬, 세로는 달력 위 영역의 중앙
+        // 가로 중앙 정렬, 세로는 이미지 영역 내 중앙
         const drawX = (pcWidth - drawWidth) / 2;
-        const drawY = (availableHeight - drawHeight) / 2 + 10; // 상단 여백 10px 포함
+        const drawY = (imageAreaHeight - drawHeight) / 2;
 
-        // 흰색 매트/프레임 배경 (이미지보다 약간 크게)
-        const framePadding = 10;
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(
-          drawX - framePadding,
-          drawY - framePadding,
-          drawWidth + framePadding * 2,
-          drawHeight + framePadding * 2
-        );
+        // 이미지 주변에 연한 회색 테두리 그리기 (매트 프레임 대체)
+        ctx.strokeStyle = '#DDDDDD';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(drawX - 1, drawY - 1, drawWidth + 2, drawHeight + 2);
 
         // 원본 비율 그대로 이미지 그리기 (클리핑 없음)
         ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
 
-        // 4단계: 하단 달력 한 줄 그리기
+        // 3단계: 달력 데이터 준비
         const now = new Date();
         const year = now.getFullYear();
         const month = now.getMonth(); // 0-indexed
@@ -731,27 +646,63 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
           }
         }
 
-        // 달력 텍스트 위치 (하단, 패딩 포함)
-        const calendarY = pcHeight - 35;
+        // 달력 스타일 설정
         const calendarFontSize = 22;
-        const textColor = '#E8DCC8'; // 밝은 크림/베이지색
+        const textColor = '#333333'; // 흰색 배경에서 잘 보이는 어두운 회색
         const sundayColor = '#CC3333'; // 일요일 빨간색
 
+        // 4단계: 달력 전체 너비를 먼저 계산 (중앙 정렬용 pre-calculation)
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.font = `bold ${calendarFontSize}px "Pretendard", "Segoe UI", sans-serif`;
 
-        // 시작 x 위치 (좌측 여백)
-        let currentX = 50;
+        // 월 레이블 너비 계산 (bold 폰트)
+        ctx.font = `bold ${calendarFontSize}px "Pretendard", "Segoe UI", sans-serif`;
+        const monthLabel = `${monthNumber} ${monthName}`;
+        const monthLabelWidth = ctx.measureText(monthLabel).width;
+        const monthGap = 20; // 월 레이블과 날짜 사이 간격
+
+        // 날짜 부분 너비 계산 (regular 폰트)
+        ctx.font = `${calendarFontSize}px "Pretendard", "Segoe UI", sans-serif`;
+        let datesWidth = 0;
+        const slashWidth = ctx.measureText('/').width;
+        const dateSpacing = 8; // 같은 주 내 날짜 간 간격
+        const weekSeparatorWidth = dateSpacing + slashWidth + dateSpacing; // 주 구분자 "/ " 전체 너비
+
+        for (let weekIdx = 0; weekIdx < weeks.length; weekIdx++) {
+          const week = weeks[weekIdx];
+          for (let i = 0; i < week.length; i++) {
+            datesWidth += ctx.measureText(week[i].toString()).width;
+            // 같은 주 내 날짜 간 간격
+            if (i < week.length - 1) {
+              datesWidth += dateSpacing;
+            }
+          }
+          // 주 구분자 너비 (마지막 주 제외)
+          if (weekIdx < weeks.length - 1) {
+            datesWidth += weekSeparatorWidth;
+          }
+        }
+
+        // 달력 전체 너비 및 시작 X 계산 (중앙 정렬)
+        const totalCalendarWidth = monthLabelWidth + monthGap + datesWidth;
+        const calendarStartX = (pcWidth - totalCalendarWidth) / 2;
+
+        // 달력 Y 위치: 이미지 바로 아래 + 간격
+        const calendarGap = 35; // 이미지와 달력 사이 간격
+        const calendarY = drawY + drawHeight + calendarGap;
+        console.log('[saveAsPcCalendar] 달력 위치:', { calendarStartX, calendarY, totalCalendarWidth });
+
+        // 5단계: 달력 텍스트 실제 그리기
+        let currentX = calendarStartX;
 
         // "월번호 월이름" 그리기 (예: "3 March")
+        ctx.font = `bold ${calendarFontSize}px "Pretendard", "Segoe UI", sans-serif`;
         ctx.fillStyle = textColor;
-        const monthLabel = `${monthNumber} ${monthName}`;
         ctx.fillText(monthLabel, currentX, calendarY);
-        currentX += ctx.measureText(monthLabel).width;
+        currentX += monthLabelWidth;
 
         // 월이름 뒤 여백
-        currentX += 20;
+        currentX += monthGap;
 
         // 각 주의 날짜 그리기
         ctx.font = `${calendarFontSize}px "Pretendard", "Segoe UI", sans-serif`;
@@ -762,7 +713,7 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
             const date = week[i];
             const dayOfWeek = new Date(year, month, date).getDay();
 
-            // 일요일이면 빨간색, 아니면 크림색
+            // 일요일이면 빨간색, 아니면 어두운 회색
             ctx.fillStyle = dayOfWeek === 0 ? sundayColor : textColor;
 
             const dateStr = date.toString();
@@ -771,17 +722,17 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
 
             // 날짜 간 간격 (같은 주 내)
             if (i < week.length - 1) {
-              currentX += 8;
+              currentX += dateSpacing;
             }
           }
 
           // 주 구분자 "/"  (마지막 주 뒤에는 그리지 않음)
           if (weekIdx < weeks.length - 1) {
-            currentX += 8;
+            currentX += dateSpacing;
             ctx.fillStyle = textColor;
             ctx.fillText('/', currentX, calendarY);
-            currentX += ctx.measureText('/').width;
-            currentX += 8;
+            currentX += slashWidth;
+            currentX += dateSpacing;
           }
         }
 
