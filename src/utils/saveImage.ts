@@ -606,9 +606,9 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
           drawWidth = maxImgHeight * imgAspect;
         }
 
-        // 가로 중앙 정렬, 세로는 이미지 영역 내 중앙
+        // 캔버스 전체 기준 상하좌우 정중앙 배치
         const drawX = (pcWidth - drawWidth) / 2;
-        const drawY = (imageAreaHeight - drawHeight) / 2;
+        const drawY = (pcHeight - drawHeight) / 2;
 
         // 원본 비율 그대로 이미지 그리기 (테두리 없음)
         ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
