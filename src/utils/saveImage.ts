@@ -610,19 +610,13 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
         const drawX = (pcWidth - drawWidth) / 2;
         const drawY = (imageAreaHeight - drawHeight) / 2;
 
-        // 이미지 주변에 연한 회색 테두리 그리기 (매트 프레임 대체)
-        ctx.strokeStyle = '#DDDDDD';
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(drawX - 1, drawY - 1, drawWidth + 2, drawHeight + 2);
-
-        // 원본 비율 그대로 이미지 그리기 (클리핑 없음)
+        // 원본 비율 그대로 이미지 그리기 (테두리 없음)
         ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
 
         // 3단계: 달력 데이터 준비
         const now = new Date();
         const year = now.getFullYear();
         const month = now.getMonth(); // 0-indexed
-        const monthNumber = month + 1;
         const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                             'July', 'August', 'September', 'October', 'November', 'December'];
         const monthName = monthNames[month];
@@ -657,7 +651,7 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
 
         // 월 레이블 너비 계산 (bold 폰트)
         ctx.font = `bold ${calendarFontSize}px "Pretendard", "Segoe UI", sans-serif`;
-        const monthLabel = `${monthNumber} ${monthName}`;
+        const monthLabel = `${monthName}`;
         const monthLabelWidth = ctx.measureText(monthLabel).width;
         const monthGap = 20; // 월 레이블과 날짜 사이 간격
 
@@ -695,7 +689,7 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
         // 5단계: 달력 텍스트 실제 그리기
         let currentX = calendarStartX;
 
-        // "월번호 월이름" 그리기 (예: "3 March")
+        // 월이름 그리기 (예: "March")
         ctx.font = `bold ${calendarFontSize}px "Pretendard", "Segoe UI", sans-serif`;
         ctx.fillStyle = textColor;
         ctx.fillText(monthLabel, currentX, calendarY);
