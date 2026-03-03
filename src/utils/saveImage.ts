@@ -564,10 +564,6 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
       const pcWidth = 1920;
       const pcHeight = 1080;
 
-      // 배경색: 흰색 고정
-      const bgColor = '#FFFFFF';
-      console.log('[saveAsPcCalendar] 배경색:', bgColor);
-
       const svgData = new XMLSerializer().serializeToString(svg);
       console.log('[saveAsPcCalendar] SVG 직렬화 완료, 길이:', svgData.length);
 
@@ -577,13 +573,46 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
       const img = new Image();
       img.onload = () => {
         console.log('[saveAsPcCalendar] 이미지 로드 완료', { width: img.width, height: img.height });
+
+        // 이미지 외곽 색상 샘플링을 위한 임시 캔버스
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = img.width;
+        tempCanvas.height = img.height;
+        const tempCtx = tempCanvas.getContext('2d')!;
+        tempCtx.fillStyle = '#FFFFFF';
+        tempCtx.fillRect(0, 0, img.width, img.height);
+        tempCtx.drawImage(img, 0, 0);
+
+        // 외곽 픽셀 색상 샘플링 (네 모서리 + 각 변 중앙, 총 8개 지점)
+        const samplePoints = [
+          [0, 0], [img.width - 1, 0], // 좌상, 우상
+          [0, img.height - 1], [img.width - 1, img.height - 1], // 좌하, 우하
+          [Math.floor(img.width / 2), 0], [Math.floor(img.width / 2), img.height - 1], // 상중, 하중
+          [0, Math.floor(img.height / 2)], [img.width - 1, Math.floor(img.height / 2)], // 좌중, 우중
+        ];
+
+        let totalR = 0, totalG = 0, totalB = 0;
+        let sampleCount = 0;
+        for (const [sx, sy] of samplePoints) {
+          const pixel = tempCtx.getImageData(sx, sy, 1, 1).data;
+          totalR += pixel[0];
+          totalG += pixel[1];
+          totalB += pixel[2];
+          sampleCount++;
+        }
+        const avgR = Math.round(totalR / sampleCount);
+        const avgG = Math.round(totalG / sampleCount);
+        const avgB = Math.round(totalB / sampleCount);
+        const edgeColor = `rgb(${avgR}, ${avgG}, ${avgB})`;
+        console.log('[saveAsPcCalendar] 외곽 색상 샘플링:', edgeColor);
+
         const canvas = document.createElement('canvas');
         canvas.width = pcWidth;
         canvas.height = pcHeight;
         const ctx = canvas.getContext('2d')!;
 
-        // 1단계: 전체 캔버스를 흰색 배경으로 채우기
-        ctx.fillStyle = bgColor;
+        // 1단계: 전체 캔버스를 이미지 외곽 색상으로 채우기
+        ctx.fillStyle = edgeColor;
         ctx.fillRect(0, 0, pcWidth, pcHeight);
 
         // 2단계: 원본 비율 유지하며 축소된 이미지 그리기 (가운데 정렬)
@@ -640,10 +669,11 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
           }
         }
 
-        // 달력 스타일 설정
+        // 달력 스타일 설정 (배경 밝기에 따라 텍스트 색상 자동 조정)
         const calendarFontSize = 22;
-        const textColor = '#333333'; // 흰색 배경에서 잘 보이는 어두운 회색
-        const sundayColor = '#CC3333'; // 일요일 빨간색
+        const brightness = (avgR * 299 + avgG * 587 + avgB * 114) / 1000;
+        const textColor = brightness > 128 ? '#333333' : '#EEEEEE';
+        const sundayColor = brightness > 128 ? '#CC3333' : '#FF6666';
 
         // 4단계: 달력 전체 너비를 먼저 계산 (중앙 정렬용 pre-calculation)
         ctx.textAlign = 'left';
