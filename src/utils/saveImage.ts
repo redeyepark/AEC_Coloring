@@ -587,10 +587,10 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
         ctx.fillRect(0, 0, pcWidth, pcHeight);
 
         // 2단계: 원본 비율 유지하며 축소된 이미지 그리기 (가운데 정렬)
-        // 캔버스 높이의 약 80%를 이미지 영역으로 사용 (나머지는 달력 영역)
-        const imageAreaHeight = pcHeight * 0.80;
+        // 캔버스 높이의 약 56%를 이미지 영역으로 사용 (기존 80%에서 30% 축소)
+        const imageAreaHeight = pcHeight * 0.56;
         const maxImgHeight = imageAreaHeight - 40; // 상하 여백 각 20px
-        const maxImgWidth = pcWidth * 0.85; // 캔버스 너비의 85%
+        const maxImgWidth = pcWidth * 0.60; // 캔버스 너비의 60% (기존 85%에서 30% 축소)
 
         // 원본 비율 유지하며 축소 크기 계산
         const imgAspect = img.width / img.height;
