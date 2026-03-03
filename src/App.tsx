@@ -17,7 +17,7 @@ import { MyWorksPage } from './components/MyWorksPage';
 import { MorePage } from './components/MorePage';
 import { useImages } from './hooks/useImages';
 import { useColoring } from './hooks/useColoring';
-import { saveAsImage, saveAsCalendar, saveAsWallpaper, saveAsDiary } from './utils/saveImage';
+import { saveAsImage, saveAsCalendar, saveAsWallpaper, saveAsPcCalendar, saveAsDiary } from './utils/saveImage';
 import { ImageInfo, TabType } from './types';
 import './App.css';
 
@@ -147,6 +147,15 @@ export default function App() {
   const handleSaveWallpaper = useCallback(async (): Promise<void> => {
     if (svgRef.current && currentImage) {
       await saveAsWallpaper(svgRef.current, currentImage.name);
+    } else {
+      throw new Error('저장할 이미지가 없습니다.');
+    }
+  }, [currentImage]);
+
+  // PC 달력 배경화면 저장 핸들러
+  const handleSavePcCalendar = useCallback(async (): Promise<void> => {
+    if (svgRef.current && currentImage) {
+      await saveAsPcCalendar(svgRef.current, currentImage.name);
     } else {
       throw new Error('저장할 이미지가 없습니다.');
     }
@@ -282,6 +291,7 @@ export default function App() {
           onSaveImage={handleSaveImage}
           onSaveCalendar={handleSaveCalendar}
           onSaveWallpaper={handleSaveWallpaper}
+          onSavePcCalendar={handleSavePcCalendar}
           onSaveDiary={handleSaveDiary}
           onRestart={handleRestart}
         />

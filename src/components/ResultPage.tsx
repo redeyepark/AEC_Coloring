@@ -14,6 +14,7 @@ interface ResultPageProps {
   onSaveImage: () => Promise<void>;
   onSaveCalendar: () => Promise<void>;
   onSaveWallpaper: () => Promise<void>;
+  onSavePcCalendar: () => Promise<void>;
   onSaveDiary: (text: string) => Promise<void>;
   onRestart: () => void;
 }
@@ -23,6 +24,7 @@ export function ResultPage({
   onSaveImage,
   onSaveCalendar,
   onSaveWallpaper,
+  onSavePcCalendar,
   onSaveDiary,
   onRestart
 }: ResultPageProps) {
@@ -30,6 +32,7 @@ export function ResultPage({
   const [savedCalendar, setSavedCalendar] = useState(false);
   const [savedWallpaper, setSavedWallpaper] = useState(false);
   const [savedDiary, setSavedDiary] = useState(false);
+  const [savedPcCalendar, setSavedPcCalendar] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   // 그림일기 모달 상태
@@ -93,6 +96,19 @@ export function ResultPage({
     try {
       await onSaveWallpaper();
       setSavedWallpaper(true);
+      showMessage('갤러리에 저장해주세요!');
+      // 저장 성공 후 광고 표시
+      showAdAfterSave();
+    } catch {
+      showMessage('저장 실패. 다시 시도해주세요.');
+    }
+  };
+
+  const handleSavePcCalendar = async () => {
+    if (savedPcCalendar) return;
+    try {
+      await onSavePcCalendar();
+      setSavedPcCalendar(true);
       showMessage('갤러리에 저장해주세요!');
       // 저장 성공 후 광고 표시
       showAdAfterSave();
@@ -233,6 +249,13 @@ export function ResultPage({
             disabled={savedWallpaper}
           >
             {savedWallpaper ? '배경화면 저장됨' : '배경화면으로 저장'}
+          </button>
+          <button
+            className={`${styles.saveBtn} ${savedPcCalendar ? styles.saved : ''}`}
+            onClick={handleSavePcCalendar}
+            disabled={savedPcCalendar}
+          >
+            {savedPcCalendar ? 'PC 달력 저장됨' : 'PC 달력 배경화면'}
           </button>
           <button
             className={`${styles.saveBtn} ${savedDiary ? styles.saved : ''}`}

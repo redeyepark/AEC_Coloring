@@ -554,6 +554,86 @@ export async function saveAsDiary(svg: SVGSVGElement, imageName: string, userTex
   });
 }
 
+// PC 달력 배경화면 저장 함수 (1920x1080 FHD 가로 레이아웃)
+export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): Promise<void> {
+  console.log('[saveAsPcCalendar] 시작', { svg, imageName });
+
+  return new Promise((resolve, reject) => {
+    try {
+      // FHD 가로 해상도
+      const pcWidth = 1920;
+      const pcHeight = 1080;
+      // 좌측 ~55%에 이미지, 우측 ~45%에 달력
+      const imageAreaWidth = Math.floor(pcWidth * 0.55);
+      const calendarAreaWidth = pcWidth - imageAreaWidth;
+      console.log('[saveAsPcCalendar] 레이아웃:', { pcWidth, pcHeight, imageAreaWidth, calendarAreaWidth });
+
+      const svgData = new XMLSerializer().serializeToString(svg);
+      console.log('[saveAsPcCalendar] SVG 직렬화 완료, 길이:', svgData.length);
+
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.onload = () => {
+        console.log('[saveAsPcCalendar] 이미지 로드 완료', { width: img.width, height: img.height });
+        const canvas = document.createElement('canvas');
+        canvas.width = pcWidth;
+        canvas.height = pcHeight;
+        const ctx = canvas.getContext('2d')!;
+
+        // 전체 흰색 배경
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, pcWidth, pcHeight);
+
+        // 좌측 이미지 영역: 중앙 맞춤 (center fit)
+        const imgAspect = img.width / img.height;
+        let drawWidth, drawHeight, drawX, drawY;
+
+        if (imgAspect > imageAreaWidth / pcHeight) {
+          // 이미지가 더 넓은 경우: 가로 맞춤
+          drawWidth = imageAreaWidth;
+          drawHeight = imageAreaWidth / imgAspect;
+          drawX = 0;
+          drawY = (pcHeight - drawHeight) / 2;
+        } else {
+          // 이미지가 더 높은 경우: 세로 맞춤
+          drawHeight = pcHeight;
+          drawWidth = pcHeight * imgAspect;
+          drawX = (imageAreaWidth - drawWidth) / 2;
+          drawY = 0;
+        }
+        ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+
+        // 우측 달력 영역: 기존 drawCalendar 재사용
+        drawCalendar(ctx, imageAreaWidth, 0, calendarAreaWidth, pcHeight);
+
+        const pngUrl = canvas.toDataURL('image/png');
+        console.log('[saveAsPcCalendar] PNG 생성 완료');
+
+        const link = document.createElement('a');
+        link.href = pngUrl;
+        const now = new Date();
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        link.download = `pc_calendar_${imageName.replace(/\s/g, '_')}_${monthNames[now.getMonth()]}_${Date.now()}.png`;
+        console.log('[saveAsPcCalendar] 다운로드 시작:', link.download);
+        link.click();
+
+        URL.revokeObjectURL(svgUrl);
+        resolve();
+      };
+      img.onerror = (e) => {
+        console.error('[saveAsPcCalendar] 이미지 로드 실패', e);
+        reject(new Error('이미지 로드 실패'));
+      };
+      img.src = svgUrl;
+    } catch (error) {
+      console.error('[saveAsPcCalendar] 예외 발생', error);
+      reject(error);
+    }
+  });
+}
+
 export async function saveAsWallpaper(svg: SVGSVGElement, imageName: string): Promise<void> {
   console.log('[saveAsWallpaper] 시작', { svg, imageName });
 
