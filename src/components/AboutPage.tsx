@@ -1,4 +1,3 @@
-import { BannerAd } from './ads/BannerAd';
 import styles from './AboutPage.module.css';
 
 interface AboutPageProps {
@@ -213,10 +212,6 @@ export function AboutPage({ onBack }: AboutPageProps) {
           </p>
         </section>
 
-        {/* 하단 배너 광고 */}
-        <div className={styles.adSection}>
-          <BannerAd />
-        </div>
       </main>
     </div>
   );

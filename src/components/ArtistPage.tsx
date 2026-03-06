@@ -1,4 +1,3 @@
-import { BannerAd } from './ads/BannerAd';
 import styles from './ArtistPage.module.css';
 
 interface ArtistPageProps {
@@ -146,10 +145,6 @@ export function ArtistPage({ onBack }: ArtistPageProps) {
           </div>
         </section>
 
-        {/* 하단 배너 광고 */}
-        <div className={styles.adSection}>
-          <BannerAd />
-        </div>
       </main>
     </div>
   );

@@ -5,10 +5,6 @@ import {
   analyzeColors,
   type ColorAnalysisResult
 } from '../utils/colorAnalysis';
-import { useAds } from '../hooks/useAds';
-import { BannerAd } from './ads/BannerAd';
-import { InterstitialAd } from './ads/InterstitialAd';
-
 interface ResultPageProps {
   svgRef: React.RefObject<SVGSVGElement | null>;
   onSaveImage: () => Promise<void>;
@@ -40,11 +36,6 @@ export function ResultPage({
   const [diaryText, setDiaryText] = useState('');
   const MAX_DIARY_CHARS = 98;
 
-  // 광고 상태
-  const [showInterstitial, setShowInterstitial] = useState(false);
-  const [pendingRestart, setPendingRestart] = useState(false);
-  const { canShowInterstitial, recordInterstitialShown } = useAds();
-
   // 색상 분석 결과 (SVG가 있을 때만 분석)
   const colorAnalysis: ColorAnalysisResult | null = useMemo(() => {
     if (!svgRef.current) return null;
@@ -57,22 +48,12 @@ export function ResultPage({
     setTimeout(() => setMessage(null), 2000);
   };
 
-  // 저장 성공 후 광고 표시 (조건 충족 시)
-  const showAdAfterSave = () => {
-    if (canShowInterstitial()) {
-      setShowInterstitial(true);
-      recordInterstitialShown();
-    }
-  };
-
   const handleSaveImage = async () => {
     if (savedImage) return;
     try {
       await onSaveImage();
       setSavedImage(true);
       showMessage('갤러리에 저장해주세요!');
-      // 저장 성공 후 광고 표시
-      showAdAfterSave();
     } catch {
       showMessage('저장 실패. 다시 시도해주세요.');
     }
@@ -84,8 +65,6 @@ export function ResultPage({
       await onSaveCalendar();
       setSavedCalendar(true);
       showMessage('갤러리에 저장해주세요!');
-      // 저장 성공 후 광고 표시
-      showAdAfterSave();
     } catch {
       showMessage('저장 실패. 다시 시도해주세요.');
     }
@@ -97,8 +76,6 @@ export function ResultPage({
       await onSaveWallpaper();
       setSavedWallpaper(true);
       showMessage('갤러리에 저장해주세요!');
-      // 저장 성공 후 광고 표시
-      showAdAfterSave();
     } catch {
       showMessage('저장 실패. 다시 시도해주세요.');
     }
@@ -110,8 +87,6 @@ export function ResultPage({
       await onSavePcCalendar();
       setSavedPcCalendar(true);
       showMessage('갤러리에 저장해주세요!');
-      // 저장 성공 후 광고 표시
-      showAdAfterSave();
     } catch {
       showMessage('저장 실패. 다시 시도해주세요.');
     }
@@ -145,24 +120,8 @@ export function ResultPage({
     }
   };
 
-  // 새로 시작하기 핸들러 (광고 표시 후 재시작)
   const handleRestart = () => {
-    if (canShowInterstitial()) {
-      setPendingRestart(true);
-      setShowInterstitial(true);
-      recordInterstitialShown();
-    } else {
-      onRestart();
-    }
-  };
-
-  // 전면 광고 닫힘 핸들러
-  const handleInterstitialClose = () => {
-    setShowInterstitial(false);
-    if (pendingRestart) {
-      setPendingRestart(false);
-      onRestart();
-    }
+    onRestart();
   };
 
   return (
@@ -272,15 +231,7 @@ export function ResultPage({
           </button>
         </div>
 
-        {/* 배너 광고 */}
-        <BannerAd />
       </div>
-
-      {/* 전면 광고 */}
-      <InterstitialAd
-        isOpen={showInterstitial}
-        onClose={handleInterstitialClose}
-      />
     </div>
   );
 }

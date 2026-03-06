@@ -186,13 +186,6 @@
   margin-bottom: 0;
 }
 
-/* 광고 영역 */
-.adContainer {
-  margin-top: var(--spacing-md);
-  padding-top: var(--spacing-md);
-  border-top: 1px solid var(--tds-border);
-}
-
 /* 데스크톱 레이아웃 */
 @media (min-width: 768px) {
   .content {

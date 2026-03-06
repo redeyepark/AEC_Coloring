@@ -145,12 +145,6 @@
   color: var(--tds-primary);
 }
 
-/* 하단 배너 광고 영역 */
-.adSection {
-  flex-shrink: 0;
-  border-top: 1px solid var(--tds-border);
-}
-
 /* 데스크톱 레이아웃 */
 @media (min-width: 768px) {
   .content {

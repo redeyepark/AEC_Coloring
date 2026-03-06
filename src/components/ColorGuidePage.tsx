@@ -1,4 +1,3 @@
-import { BannerAd } from './ads/BannerAd';
 import styles from './ColorGuidePage.module.css';
 
 interface ColorGuidePageProps {
@@ -184,10 +183,6 @@ export function ColorGuidePage({ onBack }: ColorGuidePageProps) {
         </section>
       </main>
 
-      {/* 하단 배너 광고 */}
-      <div className={styles.adSection}>
-        <BannerAd />
-      </div>
     </div>
   );
 }

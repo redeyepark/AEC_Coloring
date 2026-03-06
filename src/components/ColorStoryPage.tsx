@@ -1,4 +1,3 @@
-import { BannerAd } from './ads/BannerAd';
 import styles from './ColorStoryPage.module.css';
 
 interface ColorStoryPageProps {
@@ -180,10 +179,6 @@ export function ColorStoryPage({ onBack }: ColorStoryPageProps) {
           </ul>
         </section>
 
-        {/* 하단 배너 광고 */}
-        <div className={styles.adContainer}>
-          <BannerAd />
-        </div>
       </main>
     </div>
   );
