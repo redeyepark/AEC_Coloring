@@ -187,7 +187,6 @@ export default function App() {
           onStart={handleStart}
           onAdminOpen={() => setShowAdmin(true)}
         />
-        <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} visible={true} />
         {adminOverlay}
       </div>
     );
