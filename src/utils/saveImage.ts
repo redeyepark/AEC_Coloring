@@ -76,12 +76,12 @@ function drawCalendar(ctx: CanvasRenderingContext2D, x: number, y: number, width
   const dateFontSize = Math.round(40 * scale);
 
   ctx.fillStyle = '#333333';
-  ctx.font = `bold ${titleFontSize}px Pretendard, sans-serif`;
+  ctx.font = `bold ${titleFontSize}px "Nanum Myeongjo", serif`;
   ctx.textAlign = 'center';
   ctx.fillText(`${monthNames[month]} ${year}`, x + width / 2, y + padding + headerHeight * 0.4);
 
   const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-  ctx.font = `bold ${dayHeaderFontSize}px Pretendard, sans-serif`;
+  ctx.font = `bold ${dayHeaderFontSize}px "Nanum Myeongjo", serif`;
   const headerY = y + headerHeight + padding;
 
   days.forEach((day, i) => {
@@ -92,7 +92,7 @@ function drawCalendar(ctx: CanvasRenderingContext2D, x: number, y: number, width
   const firstDay = new Date(year, month, 1).getDay();
   const lastDate = new Date(year, month + 1, 0).getDate();
 
-  ctx.font = `${dateFontSize}px Pretendard, sans-serif`;
+  ctx.font = `${dateFontSize}px "Nanum Myeongjo", serif`;
   let date = 1;
   for (let row = 0; row < 6 && date <= lastDate; row++) {
     for (let col = 0; col < 7 && date <= lastDate; col++) {
@@ -130,13 +130,13 @@ function drawDailyCalendar(ctx: CanvasRenderingContext2D, x: number, y: number, 
   // 월 (상단)
   const monthFontSize = Math.round(56 * scale);
   ctx.fillStyle = '#1A1A1A';
-  ctx.font = `600 ${monthFontSize}px "Times New Roman", Georgia, serif`;
+  ctx.font = `600 ${monthFontSize}px "Nanum Myeongjo", serif`;
   ctx.textAlign = 'center';
   ctx.fillText(monthNames[month], x + width / 2, y + padding + monthFontSize);
 
   // 날짜 (중앙 - 큰 숫자)
   const dateFontSize = Math.round(280 * scale);
-  ctx.font = `bold ${dateFontSize}px "Times New Roman", Georgia, serif`;
+  ctx.font = `bold ${dateFontSize}px "Nanum Myeongjo", serif`;
   ctx.fillText(day.toString(), x + width / 2, y + height / 2 + dateFontSize * 0.25);
 
   // 요일 (하단)
@@ -149,7 +149,7 @@ function drawDailyCalendar(ctx: CanvasRenderingContext2D, x: number, y: number, 
   } else {
     ctx.fillStyle = '#1A1A1A';
   }
-  ctx.font = `500 ${dayFontSize}px "Times New Roman", Georgia, serif`;
+  ctx.font = `500 ${dayFontSize}px "Nanum Myeongjo", serif`;
   ctx.fillText(dayNames[dayOfWeek], x + width / 2, y + height - padding - dayFontSize * 0.5);
 }
 
@@ -680,13 +680,13 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
         ctx.textBaseline = 'middle';
 
         // 월 레이블 너비 계산 (bold 폰트)
-        ctx.font = `bold ${calendarFontSize}px "Pretendard", "Segoe UI", sans-serif`;
+        ctx.font = `bold ${calendarFontSize}px "Nanum Myeongjo", serif`;
         const monthLabel = `${monthName}`;
         const monthLabelWidth = ctx.measureText(monthLabel).width;
         const monthGap = 20; // 월 레이블과 날짜 사이 간격
 
         // 날짜 부분 너비 계산 (regular 폰트)
-        ctx.font = `${calendarFontSize}px "Pretendard", "Segoe UI", sans-serif`;
+        ctx.font = `${calendarFontSize}px "Nanum Myeongjo", serif`;
         let datesWidth = 0;
         const slashWidth = ctx.measureText('/').width;
         const dateSpacing = 8; // 같은 주 내 날짜 간 간격
@@ -720,7 +720,7 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
         let currentX = calendarStartX;
 
         // 월이름 그리기 (예: "March")
-        ctx.font = `bold ${calendarFontSize}px "Pretendard", "Segoe UI", sans-serif`;
+        ctx.font = `bold ${calendarFontSize}px "Nanum Myeongjo", serif`;
         ctx.fillStyle = textColor;
         ctx.fillText(monthLabel, currentX, calendarY);
         currentX += monthLabelWidth;
@@ -729,7 +729,7 @@ export async function saveAsPcCalendar(svg: SVGSVGElement, imageName: string): P
         currentX += monthGap;
 
         // 각 주의 날짜 그리기
-        ctx.font = `${calendarFontSize}px "Pretendard", "Segoe UI", sans-serif`;
+        ctx.font = `${calendarFontSize}px "Nanum Myeongjo", serif`;
         for (let weekIdx = 0; weekIdx < weeks.length; weekIdx++) {
           const week = weeks[weekIdx];
 
