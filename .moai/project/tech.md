@@ -8,8 +8,8 @@
 |------|-----|
 | 프로젝트명 | 오늘의 컬러링 (Today's Coloring) |
 | 문서 유형 | 기술 스택 문서 |
-| 최종 업데이트 | 2026-02-05 |
-| 버전 | 3.0.0 |
+| 최종 업데이트 | 2026-03-04 |
+| 버전 | 4.0.0 |
 | 아키텍처 | React + TypeScript SPA |
 
 ---
@@ -78,8 +78,8 @@
 | 이미지 처리 | Canvas API | HTML5 | PNG 생성, 합성 |
 | 색상 분석 | HSL 변환 | - | 색상 심리 분석 |
 | 날씨 API | Open-Meteo | v1 | 실시간 날씨 조회 |
-| 광고 | Google AdSense | - | 배너/전면 광고 수익화 |
-| 폰트 | Pretendard | CDN | 한글 웹폰트 |
+| 폰트 | Pretendard | CDN | 한글 웹폰트 (UI) |
+| 폰트 | Nanum Myeongjo | CDN | 달력 한글 명조 서체 |
 | 배포 | Cloudflare Workers | - | 정적 호스팅, CDN |
 
 ---
@@ -407,106 +407,12 @@ A4 비율 원고지 스타일 그림일기 생성 기술 상세
 
 | 영역 | 폰트 | 크기 (scale 기준) |
 |------|------|-------------------|
-| 날짜 헤더 | Pretendard 500 | cellSize * 0.5 |
+| 날짜 헤더 | Nanum Myeongjo | cellSize * 0.5 |
 | 날씨 이모지 | sans-serif | cellSize * 0.6 |
-| 메시지 본문 | Pretendard 500 | cellSize * 0.6 |
+| 메시지 본문 | Nanum Myeongjo | cellSize * 0.6 |
 | 첫 이모지 | sans-serif | cellSize * 0.7 |
 
----
-
-## 3.6 Google AdSense 광고 시스템
-
-어린이 대상 앱에서 수익화를 위한 Google AdSense 통합 기술 상세
-
-### AdSense 설정 정보
-
-| 항목 | 값 |
-|------|-----|
-| Publisher ID | ca-pub-9204948456666925 |
-| ads.txt 위치 | /public/ads.txt |
-| 스크립트 로드 | index.html `<head>` 태그 |
-| 테스트 모드 | adConfig.ts에서 설정 |
-
-### 광고 컴포넌트 구조
-
-```
-src/components/ads/
-├── BannerAd.tsx           # 배너 광고 컴포넌트
-├── BannerAd.module.css    # 배너 광고 스타일
-├── InterstitialAd.tsx     # 전면 광고 컴포넌트
-└── InterstitialAd.module.css  # 전면 광고 스타일
-```
-
-### 배너 광고 (BannerAd)
-
-| 속성 | 값 | 설명 |
-|------|-----|------|
-| 위치 | ResultPage 하단 | 결과 페이지에만 표시 |
-| 모바일 크기 | 320 x 100 | 모바일 디바이스용 |
-| 데스크톱 크기 | 728 x 90 | PC/태블릿용 |
-| 포맷 | auto | data-full-width-responsive |
-
-### 전면 광고 (InterstitialAd)
-
-| 속성 | 값 | 설명 |
-|------|-----|------|
-| 트리거 | 저장 버튼, 새로 시작 버튼 | 사용자 액션 기반 |
-| 카운트다운 | 5초 | 닫기 버튼 활성화까지 대기 |
-| 크기 | 300 x 250 | 중간 직사각형 포맷 |
-| 배경 | 반투명 오버레이 | rgba 기반 모달 |
-
-### 광고 빈도 제한 (useAds 훅)
-
-| 설정 | 값 | 설명 |
-|------|-----|------|
-| maxPerSession | 3 | 세션당 최대 전면 광고 횟수 |
-| cooldownSeconds | 60 | 광고 간 최소 대기 시간 |
-| 저장소 | sessionStorage | 세션 종료 시 초기화 |
-| 키 | aec_ad_session | 세션 데이터 키 |
-
-### useAds 훅 인터페이스
-
-```typescript
-interface UseAdsReturn {
-  isEnabled: boolean;              // 광고 활성화 여부
-  isTestMode: boolean;             // 테스트 모드 여부
-  canShowInterstitial: () => boolean;  // 전면 광고 표시 가능 여부
-  recordInterstitialShown: () => void; // 전면 광고 표시 기록
-  getRemainingCooldown: () => number;  // 남은 쿨다운 시간 (초)
-  interstitialCount: number;       // 현재 세션 전면 광고 횟수
-  resetSession: () => void;        // 세션 초기화 (테스트용)
-}
-```
-
-### 광고 설정 (adConfig.ts)
-
-```typescript
-const AD_CONFIG = {
-  enabled: true,                   // 광고 기능 활성화
-  testMode: false,                 // 테스트 모드 (개발용)
-  publisherId: 'ca-pub-XXXXXXXXXX',
-  slots: {
-    banner: 'XXXXXXXXXX',          // 배너 슬롯 ID
-    interstitial: 'XXXXXXXXXX'     // 전면 광고 슬롯 ID
-  },
-  interstitial: {
-    maxPerSession: 3,
-    cooldownSeconds: 60,
-    countdownSeconds: 5
-  },
-  banner: {
-    mobile: { width: 320, height: 100 },
-    desktop: { width: 728, height: 90 }
-  }
-};
-```
-
-### COPPA 준수 사항
-
-- 어린이 대상 콘텐츠로 맞춤형 광고 비활성화
-- 테스트 모드에서 추적 스크립트 미로드
-- 개인정보처리방침 페이지 제공
-- 쿠키 사용 안내 포함
+> 참고: 달력 저장(월력/일력/PC 달력) 및 그림일기 저장에서 나눔명조(Nanum Myeongjo) 서체를 사용합니다. index.html에서 네이버 한글 CDN(hangeul.pstatic.net)을 통해 로드됩니다.
 
 ---
 
@@ -781,3 +687,4 @@ Storage 정책:
 | 2.2.0 | 2026-02-05 | manager-docs | 페이지 전환 애니메이션 (fadeSlideIn) 기술 문서화 |
 | 2.3.0 | 2026-02-05 | manager-docs | Open-Meteo API, 그림일기 렌더링 엔진 기술 문서화 |
 | 3.0.0 | 2026-02-05 | manager-docs | Google AdSense 광고 시스템 기술 문서화 (배너/전면/빈도 제한/COPPA) |
+| 4.0.0 | 2026-03-04 | manager-docs | AdSense 광고 시스템 제거, 나눔명조 폰트 추가 (달력/그림일기) |

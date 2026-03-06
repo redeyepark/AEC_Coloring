@@ -299,6 +299,7 @@ images/
 - 출력 해상도: 1080x2340 픽셀
 - 레이아웃: 상단 55% 이미지 + 하단 45% 달력
 - 달력 표기: 영문 (January~December, SUN~SAT)
+- 달력 폰트: 나눔명조 (Nanum Myeongjo) - 모바일 월간/일간 달력, PC 달력 공통 (2026-03-04: Pretendard/Times New Roman에서 변경)
 - 파일명: `calendar_[이미지명]_[연월].png`
 
 #### 5.6.3 배경화면 저장
@@ -454,3 +455,4 @@ tags:
 | 5.0.0 | 2026-02-05 | manager-docs | 색상 심리 분석 기능 추가, 65+ 색상 팔레트 |
 | 5.1.0 | 2026-02-05 | manager-docs | 페이지 전환 애니메이션 추가 (REQ-E-11), LoadingIcon 보류 상태 문서화 |
 | 6.0.0 | 2026-02-05 | manager-docs | 그림일기 저장 기능 추가 (REQ-E-12~14), Open-Meteo 날씨 API 연동, A4 비율 레이아웃, 원고지 스타일 격자 |
+| 6.1.0 | 2026-03-04 | JWPARK | Google AdSense 광고 완전 삭제 반영, 달력 폰트를 나눔명조(Nanum Myeongjo)로 통일 (모바일/PC 달력 공통), 홈 화면 하단 탭 바 삭제 반영 |

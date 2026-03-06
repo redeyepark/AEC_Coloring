@@ -1,10 +1,10 @@
 ---
 id: SPEC-UI-004
 title: SNS Share Feature
-version: 0.1.0
+version: 0.1.1
 status: reverted
 created: 2026-02-13
-updated: 2026-02-13
+updated: 2026-03-04
 author: JWPARK
 priority: medium
 tags: share, web-share-api, clipboard, sns, result-page
@@ -155,7 +155,7 @@ export async function shareImage(
 ```
 위치: Canvas 우측 하단 (right: 10px, bottom: 10px 마진)
 텍스트: "오늘의 컬러링"
-폰트: bold {canvas.width * 0.035}px Pretendard, sans-serif
+폰트: bold {canvas.width * 0.035}px 'Nanum Myeongjo', serif (2026-03-04: Pretendard에서 나눔명조로 변경됨)
 색상: rgba(0, 0, 0, 0.4)
 정렬: ctx.textAlign = 'right', ctx.textBaseline = 'bottom'
 ```
@@ -192,7 +192,7 @@ export async function shareImage(
 - 외부 SDK 임포트 금지 (COPPA 준수)
 - 서버 사이드 처리 없음 (모든 처리는 클라이언트에서)
 - 기존 saveImage.ts 패턴 유지 (SVG -> Canvas -> Blob 흐름)
-- 광고는 공유 동작에 표시하지 않음 (사용자 경험 우선)
+- ~~광고는 공유 동작에 표시하지 않음 (사용자 경험 우선)~~ (2026-03-04: Google AdSense 광고가 완전히 삭제되어 해당 제약사항은 더 이상 적용되지 않음)
 
 ---
 

@@ -8,8 +8,8 @@
 |------|-----|
 | 프로젝트명 | 오늘의 컬러링 (Today's Coloring) |
 | 문서 유형 | 프로젝트 구조 문서 |
-| 최종 업데이트 | 2026-02-05 |
-| 버전 | 3.0.0 |
+| 최종 업데이트 | 2026-03-04 |
+| 버전 | 4.0.0 |
 | 아키텍처 | React + TypeScript SPA |
 
 ---
@@ -32,29 +32,19 @@ AEC_BG/
 │   │   ├── Palette.module.css
 │   │   ├── Controls.tsx          # 컨트롤 버튼 (Undo/Redo/Reset/Complete)
 │   │   ├── Controls.module.css
-│   │   ├── ResultPage.tsx        # 결과 페이지 (저장 옵션, 배너 광고)
+│   │   ├── ResultPage.tsx        # 결과 페이지 (저장 옵션)
 │   │   ├── ResultPage.module.css
 │   │   ├── AdminPage.tsx         # 관리자 페이지 (비밀번호 보호)
 │   │   ├── AdminPage.module.css
 │   │   ├── PrivacyPage.tsx       # 개인정보처리방침 페이지
 │   │   ├── PrivacyPage.module.css # 개인정보처리방침 스타일
 │   │   ├── LoadingIcon.tsx       # 로딩 아이콘 컴포넌트 (보류)
-│   │   ├── LoadingIcon.module.css # 로딩 아이콘 스타일 (보류)
-│   │   │
-│   │   └── ads/                  # 광고 컴포넌트
-│   │       ├── BannerAd.tsx      # 배너 광고 컴포넌트
-│   │       ├── BannerAd.module.css # 배너 광고 스타일
-│   │       ├── InterstitialAd.tsx # 전면 광고 컴포넌트
-│   │       └── InterstitialAd.module.css # 전면 광고 스타일
-│   │
-│   ├── config/                   # 설정 파일
-│   │   └── adConfig.ts           # Google AdSense 광고 설정
+│   │   └── LoadingIcon.module.css # 로딩 아이콘 스타일 (보류)
 │   │
 │   ├── hooks/                    # 커스텀 React 훅
 │   │   ├── useColoring.ts        # 색칠 상태 관리 (히스토리, Undo/Redo)
 │   │   ├── useImages.ts          # Supabase 이미지 목록 관리
-│   │   ├── useDeviceResolution.ts# 디바이스 해상도 감지
-│   │   └── useAds.ts             # 광고 상태 관리 (빈도 제한, 쿨다운)
+│   │   └── useDeviceResolution.ts# 디바이스 해상도 감지
 │   │
 │   ├── lib/                      # 외부 서비스 연동
 │   │   └── supabase.ts           # Supabase 클라이언트 및 Storage API
@@ -72,8 +62,7 @@ AEC_BG/
 │       └── index.ts              # ImageInfo, ColorInfo, HistoryItem 등
 │
 ├── public/                       # 정적 에셋
-│   ├── vite.svg                  # 기본 Vite 아이콘
-│   └── ads.txt                   # Google AdSense 인증 파일
+│   └── vite.svg                  # 기본 Vite 아이콘
 │
 ├── dist/                         # 빌드 출력 디렉토리
 │
@@ -172,50 +161,8 @@ admin → 오버레이 표시 (showAdmin)
 - 개인정보처리방침 전체 페이지
 - 뒤로 가기 버튼으로 인트로 복귀
 - 스크롤 가능한 긴 문서 형식
-- COPPA 준수 내용 포함
-- Google AdSense 쿠키 안내
 
-#### ads/BannerAd.tsx
-- 결과 페이지 하단 배너 광고
-- 테스트 모드 플레이스홀더 지원
-- data-full-width-responsive 자동 크기 조절
-- AdSense 스크립트 동적 로드
-
-#### ads/InterstitialAd.tsx
-- 전면 광고 모달 컴포넌트
-- 5초 카운트다운 후 닫기 활성화
-- 반투명 오버레이 배경
-- 테스트 모드 플레이스홀더 지원
-- aria-modal 접근성 지원
-
-### 2.3 config/ 디렉토리
-
-#### adConfig.ts
-
-광고 설정 파일로 AdSense 연동 정보를 관리합니다.
-
-```typescript
-const AD_CONFIG = {
-  enabled: boolean;           // 광고 활성화 여부
-  testMode: boolean;          // 테스트 모드 (플레이스홀더 표시)
-  publisherId: string;        // AdSense Publisher ID
-  slots: {
-    banner: string;           // 배너 광고 슬롯 ID
-    interstitial: string;     // 전면 광고 슬롯 ID
-  };
-  interstitial: {
-    maxPerSession: number;    // 세션당 최대 횟수 (3)
-    cooldownSeconds: number;  // 광고 간 쿨다운 (60초)
-    countdownSeconds: number; // 닫기까지 카운트다운 (5초)
-  };
-  banner: {
-    mobile: { width, height };    // 모바일 배너 크기
-    desktop: { width, height };   // 데스크톱 배너 크기
-  };
-};
-```
-
-### 2.4 hooks/ 디렉토리
+### 2.3 hooks/ 디렉토리
 
 #### useColoring.ts
 
@@ -265,28 +212,7 @@ interface DeviceResolution {
 }
 ```
 
-#### useAds.ts
-
-광고 빈도 제한 및 상태를 관리하는 훅입니다.
-
-```typescript
-interface UseAdsReturn {
-  isEnabled: boolean;              // 광고 활성화 여부
-  isTestMode: boolean;             // 테스트 모드 여부
-  canShowInterstitial: () => boolean;  // 전면 광고 표시 가능 여부
-  recordInterstitialShown: () => void; // 전면 광고 표시 기록
-  getRemainingCooldown: () => number;  // 남은 쿨다운 시간 (초)
-  interstitialCount: number;       // 현재 세션 전면 광고 횟수
-  resetSession: () => void;        // 세션 초기화 (테스트용)
-}
-```
-
-- sessionStorage 기반 세션 추적
-- 세션당 최대 3회 전면 광고
-- 60초 쿨다운 적용
-- adConfig.ts 설정 연동
-
-### 2.5 lib/supabase.ts
+### 2.4 lib/supabase.ts
 
 Supabase 클라이언트 및 Storage API 래퍼입니다.
 
@@ -311,7 +237,7 @@ images/ (버킷)
     └── 1234567891_photo2.png
 ```
 
-### 2.6 utils/saveImage.ts
+### 2.5 utils/saveImage.ts
 
 이미지 저장 유틸리티 함수들입니다.
 
@@ -351,7 +277,7 @@ images/ (버킷)
 - 날씨 표시: 현재 날씨만 컬러, 나머지는 30% 투명도
 - Open-Meteo API 연동으로 실시간 서울 날씨 조회
 
-### 2.7 utils/weather.ts
+### 2.6 utils/weather.ts
 
 날씨 정보 유틸리티 (Open-Meteo API 연동)
 
@@ -374,7 +300,7 @@ interface WeatherInfo {
 - 좌표: 서울 (37.5665, 126.9780)
 - 에러 시 기본값: sunny (맑음)
 
-### 2.8 utils/colorAnalysis.ts
+### 2.7 utils/colorAnalysis.ts
 
 색상 심리 분석 유틸리티 함수들입니다.
 
@@ -607,3 +533,4 @@ export const COLORS: ColorInfo[] = [
 | 2.2.0 | 2026-02-05 | manager-docs | 페이지 전환 애니메이션 추가, LoadingIcon 컴포넌트 (보류) 문서화 |
 | 2.3.0 | 2026-02-05 | manager-docs | 그림일기 저장 (saveAsDiary), 날씨 유틸리티 (weather.ts) 문서화 |
 | 3.0.0 | 2026-02-05 | manager-docs | 광고 시스템 추가 (ads/, config/, useAds.ts, PrivacyPage.tsx, ads.txt) |
+| 4.0.0 | 2026-03-04 | manager-docs | 광고 시스템 완전 제거 (ads/, config/adConfig.ts, useAds.ts, ads.txt 삭제) |
